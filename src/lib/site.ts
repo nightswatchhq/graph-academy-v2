@@ -18,4 +18,5 @@ export const OUTBOUND = {
   lodestar: 'https://www.lodestar-dashboard.com',
   forum: 'https://forum.thegraph.com',
   gips: 'https://github.com/graphprotocol/graph-improvement-proposals',
+  nightswatch: 'https://thenightswatch.dev',
 } as const;
