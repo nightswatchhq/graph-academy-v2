@@ -1,0 +1,105 @@
+---
+// A grounded question box. Progressive enhancement: with JavaScript off it
+// renders as a link to the search page, which needs no model and no budget.
+---
+<section class="ask" id="ask">
+  <p class="kicker">Ask the library</p>
+  <h2 class="display-sm">A question, answered from these pages only.</h2>
+  <p class="section-lede" style="margin-top: 1.1rem;">
+    It reads the entries, the dispatches and the parameter registry, and answers from those.
+    It quotes numbers with the date somebody read the source, and it says so when the
+    sources disagree. When it does not know, it says that instead of inventing something.
+  </p>
+
+  <form class="ask-form" id="ask-form" action="/search/" method="get">
+    <label class="visually-hidden" for="ask-input">Your question</label>
+    <input
+      id="ask-input"
+      name="q"
+      type="text"
+      maxlength="500"
+      autocomplete="off"
+      placeholder="What does the thawing period actually cost me?"
+    />
+    <button class="btn btn-primary" type="submit" id="ask-send">Ask</button>
+  </form>
+  <p class="ask-note">
+    Funded by one person, so it is rate limited and has a daily budget. Nothing you type is
+    stored. Not financial advice.
+    <noscript> This needs JavaScript. The button above searches the site instead, which works without it.</noscript>
+  </p>
+
+  <div class="ask-thread" id="ask-thread" hidden></div>
+</section>
+
+<script>
+  const form = document.getElementById('ask-form') as HTMLFormElement | null;
+  const input = document.getElementById('ask-input') as HTMLInputElement | null;
+  const send = document.getElementById('ask-send') as HTMLButtonElement | null;
+  const thread = document.getElementById('ask-thread') as HTMLElement | null;
+  if (form && input && send && thread) {
+    // JavaScript is present, so take over from the search fallback.
+    form.removeAttribute('action');
+    const history: { role: 'user' | 'assistant'; content: string }[] = [];
+
+    const bubble = (who: string, cls: string, text: string) => {
+      const el = document.createElement('div');
+      el.className = `ask-turn ask-turn--${cls}`;
+      const label = document.createElement('span');
+      label.className = 'ask-who';
+      label.textContent = who;
+      const body = document.createElement('div');
+      body.className = 'ask-body';
+      body.textContent = text;
+      el.append(label, body);
+      thread.append(el);
+      thread.hidden = false;
+      return body;
+    };
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const q = input.value.trim();
+      if (!q) return;
+      input.value = '';
+      send.disabled = true;
+      input.disabled = true;
+      bubble('You', 'you', q);
+      const answer = bubble('The library', 'bot', 'Reading...');
+
+      try {
+        const res = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ message: q, history }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          answer.textContent = data.error ?? 'That did not work.';
+        } else {
+          answer.textContent = data.reply;
+          history.push({ role: 'user', content: q }, { role: 'assistant', content: data.reply });
+          if (Array.isArray(data.sources) && data.sources.length) {
+            const src = document.createElement('p');
+            src.className = 'ask-sources';
+            src.append(document.createTextNode('Read the pages this came from: '));
+            data.sources.forEach((s: { title: string; url: string }, i: number) => {
+              if (i > 0) src.append(document.createTextNode(' · '));
+              const a = document.createElement('a');
+              a.href = s.url;
+              a.textContent = s.title;
+              src.append(a);
+            });
+            answer.parentElement?.append(src);
+          }
+        }
+      } catch {
+        answer.textContent = 'Could not reach the assistant. The catalogue and search still work.';
+      } finally {
+        send.disabled = false;
+        input.disabled = false;
+        input.focus();
+      }
+    });
+  }
+</script>

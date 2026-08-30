@@ -631,6 +631,41 @@ a.entry-row:hover .rtitle { color: var(--rust); }
 }
 
 /* --------------------------------------------------------------------------
+   Ask: the grounded question box
+   -------------------------------------------------------------------------- */
+
+.ask-form { display: flex; gap: 12px; margin-top: 2rem; max-width: 44rem; flex-wrap: wrap; }
+.ask-form input {
+  flex: 1 1 20rem; font: inherit; font-size: 1rem;
+  background: var(--bg-elev); color: var(--text);
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+  padding: 12px 15px;
+}
+.ask-form input:focus { border-color: var(--accent); outline: none; }
+.ask-form input:disabled { opacity: 0.6; }
+.ask-note {
+  margin-top: 12px; max-width: 56ch;
+  font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--text-muted); line-height: 1.7;
+}
+.ask-thread { margin-top: 2.4rem; max-width: 44rem;
+              display: flex; flex-direction: column; gap: 20px; }
+.ask-turn { padding-left: 16px; border-left: 2px solid var(--border); }
+.ask-turn--you { border-left-color: var(--rust); }
+.ask-turn--bot { border-left-color: var(--accent); }
+.ask-who {
+  display: block; font-family: var(--mono); font-size: 0.64rem;
+  letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 7px;
+}
+.ask-turn--you .ask-who { color: var(--rust); }
+.ask-turn--bot .ask-who { color: var(--accent); }
+.ask-body { color: var(--text-muted); line-height: 1.65; white-space: pre-wrap; }
+.ask-sources {
+  margin-top: 10px; font-family: var(--mono); font-size: 0.66rem;
+  letter-spacing: 0.06em; color: var(--text-muted);
+}
+
+/* --------------------------------------------------------------------------
    Diagnostics: symptom to cause
    -------------------------------------------------------------------------- */
 

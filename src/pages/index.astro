@@ -1,6 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 import Terminal from '../components/Terminal.astro';
+import Ask from '../components/Ask.astro';
 import { COLLECTIONS, entriesInCollection, collectionReadingTime } from '../lib/paths';
 import { params, conflictedParams, PROTOCOL_VERSION } from '../lib/params';
 import { SITE, OUTBOUND } from '../lib/site';
@@ -273,6 +274,10 @@ const jsonLd = {
       anywhere, because nothing about you is collected in the first place.
     </p>
   </section>
+
+  <hr class="divider" />
+
+  <div class="wrap"><Ask /></div>
 
   <hr class="divider" />
 

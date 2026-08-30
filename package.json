@@ -6,7 +6,7 @@
   "description": "The Graph Academy: a community-owned learning site for The Graph protocol.",
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
+    "build": "node scripts/build-knowledge.mjs && astro build",
     "preview": "astro preview",
     "check": "astro check",
     "params": "node scripts/check-params.mjs",
@@ -15,9 +15,11 @@
     "contrast": "python3 tools/contrast.py",
     "og": "node scripts/make-og.mjs",
     "audit:style": "node scripts/style-audit.mjs",
-    "lighthouse": "node scripts/lighthouse-check.mjs"
+    "lighthouse": "node scripts/lighthouse-check.mjs",
+    "knowledge": "node scripts/build-knowledge.mjs"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.122.0",
     "@astrojs/mdx": "^4.3.6",
     "@astrojs/sitemap": "^3.6.0",
     "astro": "^5.14.1",
