@@ -13,6 +13,7 @@
     "staleness": "node scripts/staleness.mjs",
     "reconcile": "node scripts/reconcile-onchain.mjs",
     "contrast": "python3 tools/contrast.py",
+    "og": "node scripts/make-og.mjs",
     "audit:style": "node scripts/style-audit.mjs"
   },
   "dependencies": {

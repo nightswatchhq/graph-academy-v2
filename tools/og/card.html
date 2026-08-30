@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en" data-theme-note="the card is always dark: a share preview sits on someone else's timeline, not on our page">
+<head>
+<meta charset="utf-8">
+<!-- The palette comes from the mandated token file. No colour is defined here. -->
+<link rel="stylesheet" href="../../src/styles/tokens.css">
+<style>
+  @font-face {
+    font-family: 'Space Grotesk';
+    src: url('../../public/fonts/space-grotesk.woff2') format('woff2');
+    font-weight: 300 700; font-display: block;
+  }
+  @font-face {
+    font-family: 'JetBrains Mono';
+    src: url('../../public/fonts/jetbrains-mono.woff2') format('woff2');
+    font-weight: 400; font-display: block;
+  }
+  html, body { margin: 0; padding: 0; }
+  body { width: 1200px; height: 630px; background: var(--bg); overflow: hidden; }
+
+  .card {
+    position: absolute; inset: 20px;
+    border: 1px solid var(--border); border-radius: 18px;
+    padding: 54px 60px;
+    display: flex; flex-direction: column; justify-content: space-between;
+  }
+
+  .top { display: flex; align-items: center; justify-content: space-between; }
+  .brand { display: flex; align-items: center; gap: 16px; }
+  .brand svg { width: 42px; height: 42px; color: var(--accent); }
+  .brand span {
+    font-family: var(--display); font-weight: 700; font-size: 32px;
+    letter-spacing: -0.02em; color: var(--text);
+  }
+  .meta {
+    font-family: var(--mono); font-size: 15px; letter-spacing: 0.06em;
+    color: var(--text-muted);
+  }
+
+  h1 {
+    font-family: var(--display); font-weight: 600; font-size: 92px;
+    line-height: 1.02; letter-spacing: -0.035em; margin: 0;
+    color: var(--text);
+  }
+  h1 em { font-style: normal; color: var(--rust); }
+  .lede {
+    font-family: var(--sans); font-size: 24px; line-height: 1.45;
+    color: var(--text-muted); margin: 26px 0 0; max-width: 44ch;
+    letter-spacing: -0.01em;
+  }
+
+  .strip {
+    background: var(--bg-code); border: 1px solid var(--border);
+    border-radius: 12px; padding: 18px 22px;
+    display: flex; align-items: center; gap: 18px;
+    font-family: var(--mono); font-size: 19px;
+  }
+  .dots { display: inline-flex; gap: 7px; }
+  .dots i { width: 11px; height: 11px; border-radius: 50%; background: var(--border-hi); display: block; }
+  .dots i:first-child { background: color-mix(in srgb, var(--rust) 70%, transparent); }
+  .prompt { color: var(--accent); }
+  .cmd { color: var(--text); }
+  .out { color: var(--text-muted); }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="top">
+      <div class="brand">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round">
+          <circle cx="5.5" cy="17.5" r="2.6"/><circle cx="18.5" cy="17.5" r="2.6"/><circle cx="12" cy="5" r="2.6"/>
+          <path d="M10.7 7.3 6.8 15.2M13.3 7.3l3.9 7.9M8.1 17.5h7.8"/>
+        </svg>
+        <span>The Graph Academy</span>
+      </div>
+      <div class="meta">community owned &middot; CC BY 4.0</div>
+    </div>
+
+    <div>
+      <h1>Learn The Graph,<br><em>by role.</em></h1>
+      <p class="lede">
+        Not a docs clone. Not a dashboard. Every number on the page
+        carries the date somebody checked it.
+      </p>
+    </div>
+
+    <div class="strip">
+      <span class="dots"><i></i><i></i><i></i></span>
+      <span><span class="prompt">$</span> <span class="cmd">npm run staleness</span></span>
+      <span class="out">44 lessons &middot; 0 stale &middot; 3 contradictions recorded</span>
+    </div>
+  </div>
+</body>
+</html>
