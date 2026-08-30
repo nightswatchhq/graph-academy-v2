@@ -70,7 +70,7 @@ export const COLLECTIONS: CollectionMeta[] = [
       'Run the stack, provision stake against a data service, prove you did the work, and get paid without anyone having to trust you.',
     difficulty: 'advanced',
     modules: ['The job', 'The economics', 'Horizon mechanics', 'Operations', 'Practicum'],
-    live: { label: 'Indexing status on Lodestar', url: 'https://www.lodestar-dashboard.com/indexing-status' },
+    live: { label: 'Indexing on Lodestar', url: 'https://www.lodestar-dashboard.com/indexing' },
     docs: { label: 'Official indexing overview', url: 'https://thegraph.com/docs/en/indexing/overview/' },
   },
   {
@@ -83,7 +83,7 @@ export const COLLECTIONS: CollectionMeta[] = [
       'Author a subgraph, or decide you want Substreams or the Token API instead. Three lanes onto the same data, with different costs.',
     difficulty: 'intermediate',
     modules: ['Subgraphs', 'Practice', 'The other lanes', 'Choosing', 'Practicum'],
-    live: { label: 'Subgraph Dock on Lodestar', url: 'https://www.lodestar-dashboard.com/subgraph-dock' },
+    live: { label: 'Subgraph Dock on Lodestar', url: 'https://www.lodestar-dashboard.com/dock' },
     docs: { label: 'Official developer docs', url: 'https://thegraph.com/docs/en/subgraphs/developing/introduction/' },
   },
   {
@@ -120,7 +120,7 @@ export const COLLECTIONS: CollectionMeta[] = [
       'How a change to the protocol actually ships, who can stop it, and where the issuance goes. The part of the protocol that is people.',
     difficulty: 'intermediate',
     modules: ['How change ships', 'Decisions', 'Who decides', 'Disputes', 'The money', 'Practicum'],
-    live: { label: 'Protocol state on Lodestar', url: 'https://www.lodestar-dashboard.com/protocol' },
+    live: { label: 'Network state on Lodestar', url: 'https://www.lodestar-dashboard.com/network' },
     docs: { label: 'GIP repository', url: 'https://github.com/graphprotocol/graph-improvement-proposals' },
   },
 ];

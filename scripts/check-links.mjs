@@ -26,10 +26,17 @@ for (const f of pages) {
 
 const broken = [];
 const brokenAnchors = [];
+const external = new Set();
 let checked = 0;
 
 for (const f of pages) {
   const html = readFileSync(f, 'utf8');
+  for (const m of html.matchAll(/href="(https?:\/\/[^"]+)"/g)) {
+    const u = m[1].replace(/[.,]$/, '');
+    // our own 404 page returns 404 by design
+    if (u.endsWith('/404/')) continue;
+    external.add(u);
+  }
   for (const m of html.matchAll(/href="(\/[^"]*)"/g)) {
     const raw = m[1];
     if (raw.startsWith('//')) continue;
@@ -50,6 +57,41 @@ for (const f of pages) {
       brokenAnchors.push(`${rel(f)} -> ${raw}`);
     }
   }
+}
+
+// Outbound links are checked only when asked, because a network round trip per
+// link makes this slow and because a third party being briefly down is not a
+// defect in this repository. Nightly in CI; on demand locally.
+//
+// This check exists because six outbound links to Lodestar shipped broken: they
+// were routes assumed while writing rather than routes that existed, and an
+// internal-only checker cannot see that.
+if (process.argv.includes('--external')) {
+  const urls = [...external].sort();
+  console.log(`${c.dim}checking ${urls.length} outbound links${c.reset}`);
+  const bad = [];
+  const BATCH = 6;
+  for (let i = 0; i < urls.length; i += BATCH) {
+    await Promise.all(urls.slice(i, i + BATCH).map(async (u) => {
+      try {
+        const ctrl = new AbortController();
+        const t = setTimeout(() => ctrl.abort(), 20000);
+        let res = await fetch(u, { method: 'HEAD', redirect: 'follow', signal: ctrl.signal });
+        if (res.status === 405 || res.status === 501) {
+          res = await fetch(u, { method: 'GET', redirect: 'follow', signal: ctrl.signal });
+        }
+        clearTimeout(t);
+        // 403 and 429 are usually a bot wall rather than a dead page
+        if (res.status >= 400 && res.status !== 403 && res.status !== 429) {
+          bad.push(`${res.status} ${u}`);
+        }
+      } catch (e) {
+        bad.push(`unreachable ${u}`);
+      }
+    }));
+  }
+  for (const b of bad) console.log(`${c.yellow}outbound${c.reset} ${b}`);
+  console.log(`${bad.length === 0 ? c.green + 'ok' + c.reset : c.yellow + 'warn' + c.reset}    ${urls.length} outbound links, ${bad.length} not resolving`);
 }
 
 for (const b of [...new Set(broken)]) console.log(`${c.red}broken${c.reset}  ${b}`);

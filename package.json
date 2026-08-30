@@ -17,7 +17,9 @@
     "audit:style": "node scripts/style-audit.mjs",
     "lighthouse": "node scripts/lighthouse-check.mjs",
     "knowledge": "node scripts/build-knowledge.mjs",
-    "mobile": "node scripts/mobile-check.mjs"
+    "mobile": "node scripts/mobile-check.mjs",
+    "links": "node scripts/check-links.mjs",
+    "links:external": "node scripts/check-links.mjs --external"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.122.0",

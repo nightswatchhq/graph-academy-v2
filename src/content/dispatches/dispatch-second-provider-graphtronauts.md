@@ -38,7 +38,7 @@ Now it has something to work with.
 
 ### Concurrent dispatch kicks in
 
-For most JSON-RPC methods, the gateway uses [concurrent dispatch](https://www.lodestar-dashboard.com/dispatch#how-the-gateway-routes-requests): it selects `k` providers, fires requests at all of them simultaneously, and returns the first valid response. The first response wins; the rest are cancelled.
+For most JSON-RPC methods, the gateway uses [concurrent dispatch](https://www.lodestar-dashboard.com/data-services#how-the-gateway-routes-requests): it selects `k` providers, fires requests at all of them simultaneously, and returns the first valid response. The first response wins; the rest are cancelled.
 
 With one provider, `k=1` and concurrent dispatch is just a regular request. With two providers at `k=2`, the gateway is now actually racing them. Your `eth_blockNumber` goes to both lodestar-indexer.eth and graphadvocate.eth at the same time. Whoever responds first wins. The slower one gets that latency recorded against its QoS score and will receive proportionally less traffic over time.
 
@@ -66,7 +66,7 @@ Before today, pointing your app at the Dispatch gateway meant trusting that a si
 
 Two geographically distributed providers changes the risk profile. Not enough to call it production-ready (we're not going to pretend otherwise) but enough to make it genuinely usable for low-stakes applications, internal tooling, or development environments where Alchemy's rate limits are annoying and the exact 99.999% SLA doesn't matter.
 
-For anyone currently using the [Dispatch gateway endpoint](https://www.lodestar-dashboard.com/dispatch#add-to-wallet): you're now automatically benefiting from this. The gateway's QoS-weighted selection and concurrent dispatch are routing across both providers without any configuration change on your end.
+For anyone currently using the [Dispatch gateway endpoint](https://www.lodestar-dashboard.com/data-services#add-to-wallet): you're now automatically benefiting from this. The gateway's QoS-weighted selection and concurrent dispatch are routing across both providers without any configuration change on your end.
 
 ---
 
@@ -114,4 +114,4 @@ The progress from "one provider, experimental" to "two providers, experimental" 
 
 ---
 
-*Want to become a provider? Everything you need is at [github.com/cargopete/dispatch](https://github.com/cargopete/dispatch). Want to use Dispatch as a consumer? Head to [the Dispatch page](https://www.lodestar-dashboard.com/dispatch) and grab a gateway URL; it takes under two minutes.*
+*Want to become a provider? Everything you need is at [github.com/cargopete/dispatch](https://github.com/cargopete/dispatch). Want to use Dispatch as a consumer? Head to [the Dispatch page](https://www.lodestar-dashboard.com/data-services) and grab a gateway URL; it takes under two minutes.*

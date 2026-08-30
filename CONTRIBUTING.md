@@ -72,6 +72,16 @@ protocol parameter, opt out per literal, in the file, with a reason:
 {/* param-lint-allow: 10,000 GRT (illustrative reward, not the Fisherman deposit) */}
 ```
 
+## Dispatches are not maintained, on purpose
+
+A dispatch is dated writing moved here from the Lodestar Intel Feed and left as written. Do
+not update its facts, and **do not fix its outbound links when they rot**. Several already
+have. `npm run links:external` reports them and the nightly CI job surfaces them, and the
+correct response is to leave them alone: a 2026 post is a record of what was true and
+reachable in 2026, and silently repairing it makes the date on the page a lie.
+
+Entries are the opposite. They carry a re-verification date and are expected to be corrected.
+
 ## Adding or changing a parameter
 
 `data/parameters.toml`. Every entry needs `label`, `value`, `display`, `unit`,

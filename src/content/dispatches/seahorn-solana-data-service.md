@@ -345,7 +345,7 @@ The `fields` column is JSONB, so PostgREST's `->>` operator lets you filter on a
 
 ## What Lodestar surfaces on the dashboard
 
-The [Seahorn page on lodestar-dashboard.com](https://www.lodestar-dashboard.com/seahorn) displays live data from our own Seahorn node, routed through our own dispatch-gateway. Proper dogfooding, again.
+The [Seahorn page on lodestar-dashboard.com](https://www.lodestar-dashboard.com/data-services) displays live data from our own Seahorn node, routed through our own dispatch-gateway. Proper dogfooding, again.
 
 **Stats across the top:**
 - Total indexed swaps (approximated via max row ID)

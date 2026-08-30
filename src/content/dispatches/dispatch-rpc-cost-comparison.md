@@ -172,12 +172,12 @@ Listening: http://localhost:8545
 Consumer:  0xABCD...1234
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ⚠  New consumer key generated → ./consumer.key
-Fund escrow at:  https://lodestar-dashboard.com/dispatch
+Fund escrow at:  https://www.lodestar-dashboard.com/data-services
 Consumer address: 0xABCD...1234
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
-Fund the escrow at [lodestar-dashboard.com/dispatch](https://lodestar-dashboard.com/dispatch) using the displayed consumer address, then point your app at `localhost:8545`. The proxy prints running totals per request:
+Fund the escrow at [lodestar-dashboard.com/dispatch](https://www.lodestar-dashboard.com/data-services) using the displayed consumer address, then point your app at `localhost:8545`. The proxy prints running totals per request:
 
 ```
 [12:34:56] ✓ eth_blockNumber      42ms  0.000004 GRT   total: 0.000004 GRT

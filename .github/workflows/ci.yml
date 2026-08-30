@@ -71,6 +71,11 @@ jobs:
       - run: npm ci
       - name: Freshness report
         run: node scripts/staleness.mjs ${{ github.event_name == 'schedule' && '--strict' || '' }}
+      - name: Outbound links
+        if: github.event_name == 'schedule'
+        run: |
+          npm run build
+          node scripts/check-links.mjs --external
 
   reconcile:
     # Reads the network subgraph and reports parameters that have drifted from
