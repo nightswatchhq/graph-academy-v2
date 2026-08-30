@@ -1,0 +1,126 @@
+---
+title: "The proposal that would have abolished curation"
+role: governance
+path: "Governance"
+module: "Decisions"
+order: 2
+difficulty: intermediate
+time_minutes: 12
+summary: "GIP-0058 proposed replacing curation entirely with indexing fees. It was written, amended, argued over and withdrawn. Reading a rejected proposal tells you more than reading an accepted one."
+protocol_version_verified: "Graph Horizon (2025-12-11)"
+last_verified: 2026-08-30
+verify_before: 2026-11-30
+sources:
+  - name: "GIP-0058: Replacing Bonding Curves with Indexing Fees"
+    url: "https://github.com/graphprotocol/graph-improvement-proposals/blob/main/gips/0058-Replacing-Bonding-Curves-with-Indexing-Fees.md"
+  - name: "The Graph Docs: tokenomics"
+    url: "https://thegraph.com/docs/en/resources/tokenomics/"
+parameters_used: ["curation_tax_pct", "l2_curation_curve"]
+authors: ["@community"]
+license: "CC-BY-4.0"
+---
+
+[Curation](/curators/) is a real mechanism with real capital in it. It is also, on the
+evidence of the protocol's own proposal repository, a mechanism that core researchers tried
+to abolish.
+
+GIP-0058, "Replacing Bonding Curves with Indexing Fees", was created on 2023-08-08 by Justin
+Grana and Howard Heaton. It carries an amendment dated 2023-12-01. As read on 2026-08-30 its
+stage is **Withdrawn**.
+
+It is worth an entry precisely because it did not ship. An accepted proposal tells you what
+the protocol does. A withdrawn one tells you what its designers thought was broken, which is
+information you cannot get anywhere else.
+
+## The charge against curation
+
+The proposal does not hedge. Its executive summary opens: "The Graph's current curation
+mechanism is inefficient for several reasons", and lists three.
+
+**Indexers cannot predict their reward.** "Subgraphs cost varying amounts to index, making it
+difficult for Indexers to predict GRT rewards." An indexer commits real resources without
+knowing what the work will return, because the return is not a function of the work.
+
+**The payment is volatile for reasons the indexer does not control.** "Indexer payments are
+uncertain and volatile due to staking decisions in disparate parts of the network." Your
+reward on a subgraph depends on what other indexers stake on other subgraphs. This is the
+same complaint GIP-0051 made about [Cobb-Douglas rebates](/indexers/economics-rebates/), in a
+different part of the protocol.
+
+**Signal is a poor proxy for what it is meant to signal.** "There is a noisy relationship
+between curation signal and the quality of indexing service for a subgraph." Signal is
+supposed to route capacity toward data worth serving. The proposal says the correlation is
+weak.
+
+<Model>
+Curation asks a curator to forecast query demand, and then pays indexers out of issuance in
+rough proportion to that forecast. The proposal's objection is that this is two guesses
+stacked: a guess about future demand, converted by an indirect mechanism into a guess about
+what to index. Its alternative removes both.
+</Model>
+
+## What it proposed instead
+
+A market with prices in it.
+
+1. Indexers publicly post a price **per unit of subgraph gas**.
+2. A consumer, or an algorithm acting for them, selects indexers at the posted price.
+3. The selected indexers index, then submit a POI that "verifiably and deterministically
+   states how many units of work it took".
+4. The consumer pays price times units of work, secured by on-chain collateral.
+
+The claimed properties follow directly: compensation "depends directly on how resource
+intensive it is to index a subgraph", revenue per unit of work is "perfectly predictable and
+is not volatile", and the relationship between what a consumer pays and how many indexers
+they get becomes "perfectly predictable".
+
+And the deep change, stated plainly: "the incentive to index does not come from indexing
+rewards, but rather from a direct transfer of GRT from a consumer to an Indexer." Issuance
+would have moved to subsidising protocol security rather than incentivising indexing.
+
+That is a different protocol. The proposal calls it "a radical departure from curation" in
+its own words.
+
+## What actually happened
+
+Curation is still here. The deposit charge is <Param name="curation_tax_pct" />, and on
+Arbitrum the curve is <Param name="l2_curation_curve" />, which addressed the bonding-curve
+complaint without touching the mechanism.
+
+So one of the three objections was answered by a smaller change, and the other two, the
+unpredictability of reward and the noisiness of signal, were left standing.
+
+<Warn title="Do not read a withdrawal as a verdict">
+A GIP can be withdrawn because it was wrong, because it was right but unaffordable, because
+it was overtaken by another proposal, or because its authors moved on. The stage field records
+that it stopped, not why.
+
+This entry does not claim the proposal was rejected on its merits. It claims something
+narrower and checkable: that these three criticisms of curation were made, in detail, by
+researchers working on the protocol, and that curation continues broadly unchanged. Anyone
+signalling GRT today is participating in a mechanism its own designers documented the
+weaknesses of.
+</Warn>
+
+## Why this belongs in a library
+
+The protocol's marketing describes what works. Its proposal repository records what its
+authors thought did not, in their own words, with their names on it. There are 85 GIPs and
+several are withdrawn or stalled.
+
+If you want to know where the real problems are, read those.
+
+<Reveal question="Before reading on: does this mean curation is a bad mechanism?">
+No, and the entry deliberately does not say so.
+
+It means curation is a mechanism with documented weaknesses, which is different, and better
+than the alternative of a mechanism whose weaknesses nobody has written down. A protocol
+where researchers can publish a detailed argument that a live mechanism holding real capital
+should be abolished, and have it sit permanently in the public record, is behaving well.
+
+The practical reading for a curator is the one in
+[curation strategy](/curators/curation-strategy/): your return is contingent on a forecast,
+the relationship between signal and outcome is looser than it looks, and the mechanism is
+under active reconsideration by the people who built it. None of that says do not curate. All
+of it says know what you are participating in.
+</Reveal>

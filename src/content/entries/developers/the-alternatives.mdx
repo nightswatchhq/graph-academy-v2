@@ -1,0 +1,129 @@
+---
+title: "The alternatives, honestly"
+role: developer
+path: "Developer"
+module: "Choosing"
+order: 2
+difficulty: intermediate
+time_minutes: 13
+summary: "The Graph is one of several ways to get indexed chain data, and it is the right answer less often than a site like this usually admits. Here is what the others are for."
+protocol_version_verified: "Graph Horizon (2025-12-11)"
+last_verified: 2026-08-30
+verify_before: 2026-11-30
+sources:
+  - name: "Ponder"
+    url: "https://ponder.sh"
+  - name: "SQD"
+    url: "https://sqd.ai"
+  - name: "Envio"
+    url: "https://envio.dev"
+parameters_used: []
+authors: ["@community"]
+license: "CC-BY-4.0"
+---
+
+Every other entry here assumes you have decided to use The Graph. This one does not, because
+a library that only argues one side is a brochure.
+
+<Warn title="How to read this, and its shelf life">
+This compares **shapes of solution**, not feature checklists. Vendor features move monthly and
+any table of them written today is wrong by spring. The shapes move slowly, and they are what
+actually determines whether something fits.
+
+Positioning quoted below was read from each project's own site on 2026-08-30. Nothing here
+is a recommendation of a specific vendor, and none of them was consulted.
+</Warn>
+
+## Five shapes, not five products
+
+**A decentralised network with verifiable answers.** The Graph. Many independent operators,
+[proofs of indexing](/indexers/allocations-and-pois/), [disputes](/governance/arbitration-disputes/)
+and staked capital behind correctness.
+
+**Managed subgraph hosting.** You write the same subgraph artefact and one company runs it, with
+a contract and support. Goldsky and Alchemy's subgraph products sit here.
+
+**A self-hosted framework.** You run the indexer. [Ponder](https://ponder.sh) describes itself as
+"an open-source TypeScript framework for EVM data indexing";
+[nuthatch](/ecosystem/self-hosted-indexing/) is the single-binary version of the same idea.
+
+**A hosted data layer.** Somebody else has already indexed the chains and sells you access.
+[SQD](https://sqd.ai) positions as "the onchain data layer", covering "blockchain data across
+130+ networks". [Envio](https://envio.dev) calls itself "the data layer for blockchain apps".
+
+**An analytics warehouse.** Dune and its kin: SQL over pre-decoded chain data, aimed at
+exploration and dashboards rather than at serving an application.
+
+## The comparison
+
+Rows where The Graph loses come first, because a table you win outright is not a comparison.
+
+<div class="prose" style="overflow-x: auto;">
+
+| | The Graph | Managed hosting | Self-hosted | Hosted data layer | Analytics warehouse |
+|---|---|---|---|---|---|
+| Working within an hour | **no** | yes | partly | yes | yes |
+| One company to call when it breaks | **no** | yes | **no** | yes | yes |
+| Ad-hoc SQL exploration | **no** | **no** | yes | partly | yes |
+| No indexing step before you are served | **no** | yes | yes | yes | yes |
+| No third party in the request path | **no** | **no** | yes | **no** | **no** |
+| Answer verifiable by someone who does not trust the operator | yes | **no** | **no** | **no** | **no** |
+| Survives its vendor losing interest | yes | **no** | yes | **no** | **no** |
+| Someone else pays for the machines | yes | yes | **no** | yes | yes |
+
+</div>
+
+The Graph loses five of eight. That is the honest position, and the two rows it wins are not
+small: nothing else in the table can produce an answer a stranger can check, and nothing else
+except running it yourself outlives the company behind it.
+
+## Choosing, plainly
+
+**Use a managed host or a hosted data layer** when you need data this week, your users would not
+care if the provider changed, and losing the provider would be an inconvenience rather than an
+existential problem. Most applications are here, and pretending otherwise does nobody a service.
+
+**Use an analytics warehouse** when the question is exploratory. If you are writing SQL to find
+out something, rather than serving the same query ten thousand times a day, an application-serving
+index is the wrong tool and The Graph's whole machinery is overhead.
+
+**Self-host** when nothing may sit in the request path, when the subgraph you need
+[does not exist and nobody will index it](/ecosystem/self-hosted-indexing/), or when the data is
+for you and nobody else has to trust it.
+
+**Use The Graph** when at least one of these is true, and be honest that if none of them is, you
+are paying for properties you do not need:
+
+- **Somebody who does not trust you has to be able to check the answer.** This is the one nothing
+  else on the list can do at all.
+- **Your application must outlive any particular company**, including the one you would otherwise
+  buy from.
+- **You want redundancy across operators** rather than one provider's uptime.
+- **You are contributing to public infrastructure** and consider that worth something. Not an
+  engineering argument, and a legitimate reason.
+
+<Model>
+The question is not which is best. It is whether verifiability and vendor-independence are
+properties your application actually needs. They cost time to first query, operational simplicity
+and a support contract. For a dashboard nobody audits, that is a bad trade. For infrastructure
+other people build on, it is the whole point.
+</Model>
+
+## Where the comparison is unfair to The Graph
+
+Two rows deserve a caveat rather than a footnote.
+
+"Working within an hour" is measured against writing and publishing a subgraph. If your question
+is a token question, [the Token API](/developers/token-api/) answers it about as fast as anything
+else on the table, and that is The Graph too.
+
+"No indexing step before you are served" assumes a new subgraph. Querying one that already exists
+and is well served is immediate, and there are a great many of those.
+
+## Where it is unfair to the others
+
+The managed hosts run the same subgraph artefact. Building on a subgraph is not a lock-in decision
+in the way it usually would be: the same definition can move between a managed host and the
+network, which materially lowers the cost of starting on one and moving to the other.
+
+Anyone telling you that choice is irreversible has an interest in you thinking so.

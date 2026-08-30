@@ -119,7 +119,7 @@ export const COLLECTIONS: CollectionMeta[] = [
     lede:
       'How a change to the protocol actually ships, who can stop it, and where the issuance goes. The part of the protocol that is people.',
     difficulty: 'intermediate',
-    modules: ['How change ships', 'Who decides', 'Disputes', 'The money', 'Practicum'],
+    modules: ['How change ships', 'Decisions', 'Who decides', 'Disputes', 'The money', 'Practicum'],
     live: { label: 'Protocol state on Lodestar', url: 'https://www.lodestar-dashboard.com/protocol' },
     docs: { label: 'GIP repository', url: 'https://github.com/graphprotocol/graph-improvement-proposals' },
   },

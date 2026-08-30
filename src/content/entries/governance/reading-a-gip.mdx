@@ -1,0 +1,98 @@
+---
+title: "How to read a GIP"
+role: governance
+path: "Governance"
+module: "Decisions"
+order: 3
+difficulty: beginner
+time_minutes: 9
+summary: "There are 85 of them and they are the best documentation this protocol has. Four fields and one section tell you most of what you need before reading a word of the specification."
+protocol_version_verified: "Graph Horizon (2025-12-11)"
+last_verified: 2026-08-30
+verify_before: 2026-11-30
+sources:
+  - name: "GIP repository"
+    url: "https://github.com/graphprotocol/graph-improvement-proposals"
+  - name: "GIP-0001: the GIP process"
+    url: "https://github.com/graphprotocol/graph-improvement-proposals/blob/main/gips/0001-gip-process.md"
+parameters_used: []
+authors: ["@community"]
+license: "CC-BY-4.0"
+---
+
+85 proposals sit in the repository as of 2026-08-30. They are better than the documentation
+for one specific purpose: the documentation says what the protocol does, and a GIP says why
+somebody thought it should.
+
+Most people never open one because a specification looks like work. You can get most of the
+value from the header and one section.
+
+## The header, in order of what it tells you
+
+**Stage.** The single most important field and the one people skip. A GIP that is Draft,
+Approved, Withdrawn or stalled are four different things, and the document body reads
+identically in all four. Check this before you believe anything downstream of it.
+[GIP-0058](/governance/the-withdrawn-proposal/) is a complete, detailed, amended proposal to
+abolish curation, and it is Withdrawn. Nothing in the prose tells you that.
+
+**Created and Updated.** GIP-0066 was created 2024-05-03 and updated 2025-03-06 for something
+that shipped 2025-12-11. Nineteen months from proposal to production is the realistic clock
+speed here, and it is worth knowing before you plan around anything.
+
+**Depends-On.** Proposals are not independent. GIP-0066 depends on GIP-0068 and says the two
+"should be treated as a unit". Reading one without the other gives you half an argument.
+
+**Authors.** Not for authority but for pattern. The same names recur on related mechanisms,
+and knowing that the rebate proposal and the curation proposal came from the same research
+direction tells you something the documents do not.
+
+## The section that is actually worth reading
+
+**Motivation**, or **Abstract**, or in some proposals **Executive Summary**. Never
+Specification, unless you are implementing it.
+
+Motivation is where a GIP states the problem, and this repository has an unusual habit of
+stating problems bluntly about its own protocol:
+
+- GIP-0042: "subgraphs are not well-suited for a number of use cases"
+- GIP-0051: Cobb-Douglas "historically has burned over 50% of query fees"
+- GIP-0058: "The Graph's current curation mechanism is inefficient for several reasons"
+
+You will not find sentences like those anywhere else in the ecosystem's public writing. They
+are in the protocol's own governance record because a proposal that does not state a real
+problem cannot argue for a real change.
+
+<Model>
+Read a GIP's Motivation section as a bug report filed by the people who built the thing.
+That is what it is, and it is the reason this repository is worth more than any secondary
+source including this one.
+</Model>
+
+## Two things the merged document does not contain
+
+**The objections.** Every GIP has a `Discussions-To` link to its forum thread. The document
+records the argument that won; the thread records what was contested and by whom. If you only
+read one, read the document. If you want to know whether a decision was close, read the
+thread.
+
+**The honesty about gaming.** Actually, some of them do contain this, and it is the strongest
+signal of quality in the repository.
+[GIP-0051 records how its own mechanism can be gamed](/indexers/economics-rebates/): splitting
+vouchers across gateways raises the stake ratio and can guarantee a full rebate. That is the
+proposal telling you where it is weak, in the document arguing for it.
+
+Where you find that, trust the rest more. Where a proposal has no such passage, ask whether
+nobody looked or nobody wrote it down.
+
+## Where to start
+
+- **[GIP-0001](https://github.com/graphprotocol/graph-improvement-proposals/blob/main/gips/0001-gip-process.md)**
+  for the process itself, and GIP-0061 for the revision to it.
+- **GIP-0042** if you want the origin of everything Horizon became.
+- **GIP-0051** if you want a short, self-contained example of a mechanism replaced for a
+  measurable reason.
+- **GIP-0058** if you want to see a serious proposal fail.
+
+That is four documents and perhaps ninety minutes, and it will leave you better informed about
+why this protocol is shaped as it is than any amount of secondary reading, this library
+included.
