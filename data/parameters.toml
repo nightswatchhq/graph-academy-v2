@@ -326,3 +326,87 @@ source = "https://forum.thegraph.com/t/the-graph-council-has-approved-gip-0089-t
 quote = "The SubgraphService Rewards Manager receives 96.584 GRT per block, a reduction of 24.146 GRT per block from 120.73."
 note = "Was 120.73 GRT per block before 2026-08-31. The 24.146 GRT per block difference goes to the Foundation treasury through an existing DirectAllocation contract."
 verified = "2026-08-30"
+
+# ==========================================================================
+# Parameter history
+#
+# What a value IS is only half of what a reader needs. What it WAS, when it
+# changed, and what changed it, is the part no other source keeps: the docs
+# show current state, dashboards show live state, and neither remembers.
+#
+# Rules: a history entry needs a date, a from, a to, and a source that shows
+# the change. Where the exact date is not established, name the release rather
+# than inventing a day. `via` names the GIP or release that made the change.
+# ==========================================================================
+
+[[delegation_tax_pct.history]]
+date = "2025-12-11"
+from = "0.5%"
+to = "0%"
+via = "Graph Horizon"
+note = "Removed from the protocol entirely rather than set to zero. The tokenomics page had not caught up as of 2026-08-30."
+source = "https://thegraph.com/docs/en/graph-horizon/what-changes/"
+
+[[max_simultaneous_undelegations.history]]
+date = "2025-12-11"
+from = "1"
+to = "1,000 or 100, sources disagree"
+via = "Graph Horizon"
+note = "Before Horizon a delegator could have only one active undelegation, so exiting several positions meant serialising the thawing period. The new ceiling is the one the two official pages disagree about."
+source = "https://thegraph.com/docs/en/resources/roles/delegating/delegating/"
+
+[[allocation_lifetime.history]]
+date = "2025-12-11"
+from = "Capped, closed to collect rewards"
+to = "Indefinite in the protocol, still recycled by the shipped stack"
+via = "Graph Horizon"
+note = "The protocol capability and the shipped behaviour changed at different times, which is why this parameter is recorded as disputed."
+source = "https://thegraph.com/docs/en/graph-horizon/what-changes/"
+
+[[delegated_stake_slashable.history]]
+date = "2025-12-11"
+from = "Not possible"
+to = "Capability present, disabled for the Subgraph Service"
+via = "Graph Horizon"
+note = "A switch that exists and is off is a different thing from an impossibility, and enabling it is a governance decision rather than a rewrite."
+source = "https://thegraph.com/docs/en/resources/roles/delegating/delegating/"
+
+[[max_slash_pct.history]]
+date = "2025-12-11"
+from = "Fixed by the protocol"
+to = "Judged by arbitrators, capped at 10%"
+via = "Graph Horizon"
+note = "A fixed penalty had to deter deliberate misbehaviour, which made it disproportionate for an honest operator with a chain data fault."
+source = "https://thegraph.com/docs/en/graph-horizon/what-changes/"
+
+[[l2_curation_curve.history]]
+date = "2023"
+from = "Bonding curve"
+to = "Flat"
+via = "The move to Arbitrum One"
+note = "Removed the early-mover advantage and with it an entire genre of curation timing strategy. Exact activation date not established here; recorded as the L2 move."
+source = "https://thegraph.com/docs/en/arbitrum/l2-transfer-tools-guide/"
+
+[[cobb_douglas_burn_pct.history]]
+date = "2023"
+from = "Cobb-Douglas, over 50% of query fees burned"
+to = "Exponential rebates, under 7% projected"
+via = "GIP-0051"
+note = "The size of that gap is the argument the GIP makes for the change. Exact activation date not established here; recorded as the GIP that made it."
+source = "https://github.com/graphprotocol/graph-improvement-proposals/blob/main/gips/0051-exponential-rebates.md"
+
+[[innovation_allocation_pct.history]]
+date = "2026-08-31"
+from = "0%"
+to = "20%"
+via = "GIP-0089"
+note = "Approved by Council on 2026-08-26. Redirects a fifth of protocol issuance to the Foundation treasury."
+source = "https://forum.thegraph.com/t/the-graph-council-has-approved-gip-0089-the-innovation-allocation/7035"
+
+[[subgraph_service_issuance_per_block.history]]
+date = "2026-08-31"
+from = "120.73 GRT/block"
+to = "96.584 GRT/block"
+via = "GIP-0089"
+note = "A reduction of 24.146 GRT per block. Any indexing reward rate measured before this date is describing a larger pot."
+source = "https://forum.thegraph.com/t/the-graph-council-has-approved-gip-0089-the-innovation-allocation/7035"

@@ -2,7 +2,7 @@
 import Base from '../layouts/Base.astro';
 import { COLLECTIONS, entriesInCollection, collectionReadingTime, allEntries } from '../lib/paths';
 import { GLOSSARY } from '../lib/glossary';
-import { params } from '../lib/params';
+import { params, parameterChanges } from '../lib/params';
 import { getCollection } from 'astro:content';
 
 const shelves = await Promise.all(
@@ -13,6 +13,7 @@ const shelves = await Promise.all(
   })),
 );
 const total = (await allEntries()).length;
+const changes = parameterChanges();
 const dispatches = (await getCollection('dispatches')).sort(
   (a, b) => b.data.date.getTime() - a.data.date.getTime(),
 );

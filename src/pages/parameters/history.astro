@@ -1,0 +1,79 @@
+---
+import Base from '../../layouts/Base.astro';
+import { parameterChanges, params } from '../../lib/params';
+
+const changes = parameterChanges();
+const byVia = new Map<string, typeof changes>();
+for (const c of changes) {
+  if (!byVia.has(c.via)) byVia.set(c.via, []);
+  byVia.get(c.via)!.push(c);
+}
+const releases = [...byVia.entries()].sort((a, b) => b[1][0].date.localeCompare(a[1][0].date));
+---
+<Base
+  title="How the numbers moved"
+  description="Every recorded change to a protocol parameter: what it was, what it became, when, and which proposal made it."
+>
+  <section class="wrap" style="padding-block: clamp(3rem, 7vw, 5rem) 0;">
+    <p class="kicker">Parameter history</p>
+    <h1 class="display">How the numbers <em>moved</em>.</h1>
+    <p class="section-lede lede-lg">
+      The <a href="/parameters/">registry</a> records what each value is today. This records
+      what it was before, and what changed it. The official documentation shows current
+      state and dashboards show live state. Neither remembers.
+    </p>
+    <div class="entry-meta" style="margin-top: 1.8rem;">
+      <span class="m"><b>{changes.length}</b> recorded changes</span>
+      <span class="m">across <b>{releases.length}</b> releases and proposals</span>
+    </div>
+  </section>
+
+  <hr class="divider" style="margin-top: clamp(2.6rem, 5vw, 3.6rem);" />
+
+  <section class="wrap" style="padding-block: clamp(2.4rem, 5vw, 3.4rem) 0;">
+    <div class="shelves">
+      {releases.map(([via, items]) => (
+        <div class="shelf">
+          <div class="shelf-head">
+            <span class="shelf-num">{items[0].date}</span>
+            <h2>{via}</h2>
+            <span class="shelf-note">{items.length} parameter{items.length === 1 ? '' : 's'} moved</span>
+          </div>
+          <div style="max-width: 52rem;">
+            {items.map((c) => (
+              <div style="padding-block: 20px; border-bottom: 1px solid var(--border);">
+                <div style="display: flex; gap: 12px; align-items: baseline; flex-wrap: wrap;">
+                  <a href={`/parameters/#${c.key}`} style="font-family: var(--display); font-size: 1.06rem;">{c.label}</a>
+                  <span class={`pstatus pstatus--${params[c.key]?.status ?? 'current'}`}>now {params[c.key]?.display}</span>
+                </div>
+                <div class="flow" style="margin-top: 12px;">
+                  <span class="flow-step"><span class="chip">{c.from}</span></span>
+                  <span class="flow-step"><span class="arrow" aria-hidden="true">&#8594;</span><span class="chip chip--hot">{c.to}</span></span>
+                </div>
+                {c.note && <p style="color: var(--text-muted); font-size: 0.94rem; margin-top: 12px; max-width: 62ch;">{c.note}</p>}
+                <p style="margin-top: 10px; font-size: 0.84rem;">
+                  <a class="out" href={c.source} rel="external noopener">source</a>
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <section class="wrap">
+    <p class="kicker">What this is not</p>
+    <h2 class="display-sm">A partial record, and it says so.</h2>
+    <p class="section-lede" style="margin-top: 1.1rem;">
+      This holds only changes somebody has recorded here with a source. The protocol has
+      moved in ways this page does not yet cover, and two entries carry a year rather than a
+      date because the exact activation was never established. Inventing a day would have
+      made the page look more complete and be less true.
+    </p>
+    <div class="btn-row" style="margin-top: 1.8rem;">
+      <a class="btn btn-primary" href="/parameters/">The current registry</a>
+      <a class="btn btn-ghost" href="/contribute/">Add a change you know about</a>
+    </div>
+  </section>
+</Base>

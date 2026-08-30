@@ -506,6 +506,18 @@ details.reveal-block > summary:hover { color: var(--text); }
 }
 .ptable .pnote { margin-top: 10px; font-size: 0.88rem; color: var(--text-muted);
   border-left: 2px solid var(--warn); padding-left: 12px; }
+.phistory {
+  display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap;
+  margin-top: 10px; padding-left: 12px;
+  border-left: 2px solid var(--border-hi);
+  font-size: 0.88rem; color: var(--text-muted);
+}
+.phistory-date, .phistory-via {
+  font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--text-muted);
+}
+.phistory-arrow { color: var(--rust); }
+.phistory-to { color: var(--text); }
 .ptable .pquote { margin-top: 8px; font-size: 0.86rem; color: var(--text-muted);
   border-left: 2px solid var(--border-hi); padding-left: 12px; font-style: italic; }
 .pstatus { font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.1em;

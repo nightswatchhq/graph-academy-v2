@@ -4,6 +4,17 @@ import { fileURLToPath } from 'node:url';
 
 export type ParamStatus = 'current' | 'deprecated' | 'disputed';
 
+export interface ParamChange {
+  /** ISO date, or a year where only the release is established. */
+  date: string;
+  from: string;
+  to: string;
+  /** The GIP or release that made the change. */
+  via: string;
+  note?: string;
+  source: string;
+}
+
 export interface Param {
   key: string;
   label: string;
@@ -19,6 +30,7 @@ export interface Param {
   conflict?: boolean;
   onchain_ref?: string;
   verified: string;
+  history?: ParamChange[];
 }
 
 const registryPath = fileURLToPath(new URL('../../data/parameters.toml', import.meta.url));
@@ -103,3 +115,15 @@ export const paramGroups: { title: string; keys: string[] }[] = [
     keys: ['innovation_allocation_pct', 'subgraph_service_issuance_per_block'],
   },
 ];
+
+/**
+ * Every recorded parameter change, newest first. The registry knows what a value
+ * is; this is the part no other source keeps. The documentation shows current
+ * state and dashboards show live state, and neither remembers what the number
+ * used to be or what moved it.
+ */
+export function parameterChanges(): (ParamChange & { key: string; label: string })[] {
+  return Object.values(params)
+    .flatMap((p) => (p.history ?? []).map((h) => ({ ...h, key: p.key, label: p.label })))
+    .sort((a, b) => b.date.localeCompare(a.date));
+}

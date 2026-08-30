@@ -12,7 +12,9 @@ const notes = [];
 // --- 1. no colour outside tokens.css --------------------------------------
 const styleFiles = walk(join(ROOT, 'src'), '.css').filter((f) => !f.endsWith('tokens.css'));
 const astroFiles = [...walk(join(ROOT, 'src'), '.astro'), ...walk(join(ROOT, 'src'), '.mdx')];
-const HEX = /#[0-9a-fA-F]{3,8}\b/g;
+// The lookbehind excludes HTML numeric entities: &#8594; is a rightwards arrow,
+// not a colour, and matching it as one is how this check cried wolf.
+const HEX = /(?<!&)#[0-9a-fA-F]{3,8}\b/g;
 for (const f of [...styleFiles, ...astroFiles]) {
   // Comments are stripped first. A hex in a comment is documentation, usually
   // the record of a colour we deliberately stopped using, and flagging it makes

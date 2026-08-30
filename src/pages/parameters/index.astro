@@ -1,11 +1,12 @@
 ---
-import Base from '../layouts/Base.astro';
-import { params, paramGroups, PROTOCOL_VERSION, conflictedParams, staleParams } from '../lib/params';
+import Base from '../../layouts/Base.astro';
+import { params, paramGroups, PROTOCOL_VERSION, conflictedParams, staleParams, parameterChanges } from '../../lib/params';
 
 const disputed = conflictedParams();
 const stale = staleParams(90);
 const all = Object.values(params);
 const newest = all.map((p) => p.verified).sort().at(-1);
+const changes = parameterChanges();
 ---
 <Base
   title="Protocol parameters"
@@ -24,6 +25,7 @@ const newest = all.map((p) => p.verified).sort().at(-1);
       <span class="m">checked against <b>{PROTOCOL_VERSION}</b></span>
       <span class="m">newest reading <b>{newest}</b></span>
       <span class="m"><b>{disputed.length}</b> with recorded conflicts</span>
+      <span class="m"><b>{changes.length}</b> recorded changes</span>
     </div>
   </section>
 
@@ -120,6 +122,15 @@ const newest = all.map((p) => p.verified).sort().at(-1);
             <p style="font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--rust);">{p.label}</p>
             {p.quote && <p class="pquote">{p.quote}</p>}
             {p.note && <p class="pnote">{p.note}</p>}
+            {p.history && p.history.map((h) => (
+              <p class="phistory">
+                <span class="phistory-date">{h.date}</span>
+                <span>{h.from}</span>
+                <span class="phistory-arrow" aria-hidden="true">&#8594;</span>
+                <span class="phistory-to">{h.to}</span>
+                <span class="phistory-via">via {h.via}</span>
+              </p>
+            ))}
           </div>
         ) : null;
       })}
@@ -136,8 +147,9 @@ const newest = all.map((p) => p.verified).sort().at(-1);
       whole reason it works this way.
     </p>
     <div class="btn-row" style="margin-top: 1.8rem;">
-      <a class="btn btn-primary" href="/contribute/">How to contribute</a>
-      <a class="btn btn-ghost" href="/changelog/">What has changed</a>
+      <a class="btn btn-primary" href="/parameters/history/">How the numbers moved</a>
+      <a class="btn btn-ghost" href="/contribute/">How to contribute</a>
+      <a class="btn btn-ghost" href="/changelog/">Site changelog</a>
     </div>
   </section>
 </Base>
