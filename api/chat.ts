@@ -25,6 +25,7 @@ const PER_IP_PER_DAY = 20;
 const DAILY_GLOBAL = Number(process.env.CHAT_DAILY_CAP ?? 150);
 
 type Bucket = { window: number[]; day: number[] };
+type LimitResult = { ok: true } | { ok: false; reason: string; retryAfter: number };
 const ipBuckets = new Map<string, Bucket>();
 let globalDay: number[] = [];
 
@@ -34,7 +35,7 @@ const prune = (arr: number[], ms: number) => {
   return arr.filter((t) => t > cut);
 };
 
-function rateLimit(ip: string): { ok: true } | { ok: false; reason: string; retryAfter: number } {
+function rateLimit(ip: string): LimitResult {
   globalDay = prune(globalDay, DAY_MS);
   if (globalDay.length >= DAILY_GLOBAL) {
     return {
@@ -120,6 +121,7 @@ How to answer:
 - Distinguish entries from dispatches. An entry is maintained and carries a re-verification date. A dispatch is dated writing left as written, so say when it was written.
 - Be brief. Three short paragraphs at most, usually one. No bullet lists unless the answer is genuinely a list.
 - Never give financial or investment advice. Explain mechanisms and let the reader decide.
+- Write plain prose. No markdown: no asterisks for bold, no hashes for headings, no backticks. The answer is rendered as plain text and any markup shows up literally.
 - No em dashes. No exclamation marks. Plain declarative sentences.
 - If asked something not about The Graph, say that is not what this library holds.`;
 
@@ -166,8 +168,8 @@ export async function POST(req: Request): Promise<Response> {
     req.headers.get('x-real-ip') ??
     'unknown';
 
-  const limit = rateLimit(ip);
-  if (!limit.ok) {
+  const limit: LimitResult = rateLimit(ip);
+  if (limit.ok === false) {
     return json({ error: limit.reason }, 429, { 'retry-after': String(limit.retryAfter) });
   }
 
