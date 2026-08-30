@@ -500,6 +500,9 @@ details.reveal-block > summary:hover { color: var(--text); }
 .ptable td.pv { font-family: var(--mono); color: var(--text); white-space: nowrap; }
 .ptable td.pl { color: var(--text); }
 .ptable .pdate { font-family: var(--mono); font-size: 0.78rem; color: var(--text-muted); white-space: nowrap; }
+/* The source links under a disputed parameter sit on their own line, so the
+   WCAG inline exception does not cover them. */
+.adm--disputed a, .ptable td a { display: inline-flex; align-items: center; min-height: 24px; }
 @media (max-width: 620px) {
   .ptable { font-size: 0.86rem; }
   .ptable th, .ptable td { padding-right: 10px; }
@@ -629,6 +632,30 @@ a.entry-row:hover .rtitle { color: var(--rust); }
   a.entry-row { grid-template-columns: 1fr; grid-template-areas: 'title' 'summary' 'meta'; }
   .entry-row .rmeta { padding-top: 6px; }
 }
+
+/* --------------------------------------------------------------------------
+   Tap targets
+   WCAG 2.2 target size is 24x24. Links inline in a sentence are exempt; these
+   are the standalone ones, which were rendering between 16px and 22px high.
+   -------------------------------------------------------------------------- */
+
+.foot-links a,
+.shelf a.all-link,
+.crumbs a,
+.cause-more a,
+.gloss-more a,
+.see-also a,
+.stamp-sources a,
+.ptable a,
+.phistory a,
+.ask-sources a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+}
+.foot-links { gap: 14px 20px; }
+.crumbs { gap: 0.5rem 0.6rem; }
+.gloss-nav a { min-height: 26px; display: inline-flex; align-items: center; justify-content: center; }
 
 /* --------------------------------------------------------------------------
    Ask: the grounded question box
@@ -788,6 +815,10 @@ a.cta-card:hover { border-color: var(--border-hi); transform: translateY(-2px); 
 
 .hero { padding-block: clamp(3.2rem, 8vw, 5.4rem) clamp(2.4rem, 5vw, 3.6rem); }
 .hero-grid { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 52px; align-items: center; }
+/* Grid and flex children default to min-width:auto and will not shrink below
+   their content. The terminal body is `white-space: pre`, so without this the
+   hero forces the page wider than the viewport on a phone. */
+.hero-grid > *, .entry-grid > *, .bento > *, .shelves > *, .band-grid > * { min-width: 0; }
 .eyebrow {
   display: inline-block; font-family: var(--mono);
   font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase;
@@ -813,6 +844,17 @@ a.cta-card:hover { border-color: var(--border-hi); transform: translateY(-2px); 
   .matrix { font-size: 0.85rem; }
   .cta-row { grid-template-columns: 1fr; }
 }
+@media (max-width: 400px) {
+  /* The full wordmark plus both tool buttons does not fit a 320px viewport.
+     The mark alone still identifies the site and still goes home. */
+  .brand-name { font-size: 15px; }
+  .nav { gap: 12px; padding-inline: 16px; }
+  .nav-tools { gap: 6px; margin-left: auto; }
+}
+@media (max-width: 340px) {
+  .brand-name { display: none; }
+}
+
 @media (max-width: 620px) {
   .roles { grid-template-columns: 1fr; }
   .pager { grid-template-columns: 1fr; }

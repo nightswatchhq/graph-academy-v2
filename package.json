@@ -16,7 +16,8 @@
     "og": "node scripts/make-og.mjs",
     "audit:style": "node scripts/style-audit.mjs",
     "lighthouse": "node scripts/lighthouse-check.mjs",
-    "knowledge": "node scripts/build-knowledge.mjs"
+    "knowledge": "node scripts/build-knowledge.mjs",
+    "mobile": "node scripts/mobile-check.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.122.0",
@@ -31,6 +32,7 @@
     "chrome-launcher": "^1.2.1",
     "lighthouse": "^13.4.1",
     "typescript": "^5.9.3",
-    "wait-on": "^9.1.0"
+    "wait-on": "^9.1.0",
+    "ws": "^8.21.3"
   }
 }

@@ -75,7 +75,7 @@ const jsonLd = {
     <div class="wrap band-grid">
       <div class="stat">
         <div class="n">{totalEntries}<span> entries</span></div>
-        <div class="l">Across seven collections, cross-referenced by subject rather than ordered into a course.</div>
+        <div class="l">Across {rows.length} collections, cross-referenced by subject rather than ordered into a course.</div>
       </div>
       <div class="stat">
         <div class="n">{paramCount}<span> parameters</span></div>
@@ -90,7 +90,7 @@ const jsonLd = {
 
   <section class="wrap">
     <p class="kicker">The collections</p>
-    <h2 class="display-sm">Seven shelves. Start anywhere.</h2>
+    <h2 class="display-sm">{rows.length} shelves. Start anywhere.</h2>
     <p class="section-lede" style="margin-top: 1.1rem;">
       Read a collection through, or arrive at a single entry from a search and leave through a
       cross-reference. Nothing here tracks you, asks you to sign in, or tests you.

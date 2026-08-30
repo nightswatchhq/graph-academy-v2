@@ -112,6 +112,31 @@ in both themes: `--text-muted` measures 4.55 on it in light and 5.33 in dark.
 the validator, so either the style should avoid composing surfaces at use sites,
 or `contrast.py` should learn about the mixes the components actually use.
 
+## Mobile is measured, not assumed
+
+`npm run mobile` drives headless Chrome at 375, 393 and 320px across eight page
+shapes and measures two things the eye misses: horizontal overflow, and tap
+targets under WCAG 2.2's 24x24 minimum. It runs in CI beside Lighthouse.
+
+It found three real defects the first time it ran, one of which was a promise
+this file had already made and never checked:
+
+- **Grid children default to `min-width: auto`** and will not shrink below their
+  content. The terminal body is `white-space: pre`, so the hero forced the page
+  26px wider than a 375px viewport. Fixed with `min-width: 0` on grid children.
+- **At 320px the wordmark plus both tool buttons overflowed the nav.** The
+  wordmark now shrinks, and below 340px the mark carries the brand alone.
+- **Tap targets between 16px and 22px** on footer links, breadcrumbs, source
+  links and the glossary. WCAG 2.2 SC 2.5.8 exempts a target inline in a
+  sentence, and the checker applies that exemption, so what it reports is only
+  the standalone ones. Those are now 24px minimum.
+
+One methodology note worth keeping. A screenshot taken with Chrome's
+`--window-size` flag does **not** apply mobile viewport emulation, and it
+disagreed with these measurements, showing an overflowing hero that was not
+overflowing. Screenshot through `Emulation.setDeviceMetricsOverride` with
+`mobile: true`, the same path the measurements use, or the picture lies.
+
 ## The terminal on the home page
 
 The style forbids invented transcripts, and that rule is load-bearing rather than

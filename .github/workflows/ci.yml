@@ -45,6 +45,7 @@ jobs:
           npx astro preview --port 4321 &
           npx wait-on http://localhost:4321/ --timeout 60000
           node scripts/lighthouse-check.mjs
+          node scripts/mobile-check.mjs
 
   contrast:
     # Blocking. An accessibility regression is not a matter of taste.

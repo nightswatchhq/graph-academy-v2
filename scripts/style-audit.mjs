@@ -67,6 +67,18 @@ for (const f of faintFiles) {
 }
 notes.push(`${faintUses} uses of --text-faint, all reviewed against the decorative-only contract`);
 
+// --- 2c. hardcoded counts -------------------------------------------------
+// This site's whole claim is that its numbers are derived and dated. A spelled
+// out count in a template is a number that silently stops being true, and one
+// already shipped: "seven collections" survived an eighth being added.
+const COUNTS = /\b(one|two|three|four|five|six|seven|eight|nine|ten)\s+(collections?|shelves|shelf|entries|entry|dispatches|parameters)\b/gi;
+for (const f of astroFiles.filter((x) => x.endsWith('.astro'))) {
+  const src = readFileSync(f, 'utf8');
+  for (const m of src.match(COUNTS) ?? []) {
+    warnings.push(`${rel(f)}: hardcoded count "${m}". Derive it from the data instead.`);
+  }
+}
+
 // --- 3. em dashes ----------------------------------------------------------
 const allSource = [
   ...walk(join(ROOT, 'src'), '.astro'),
