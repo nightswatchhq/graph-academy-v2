@@ -99,6 +99,18 @@ export const COLLECTIONS: CollectionMeta[] = [
     docs: { label: 'Official querying guide', url: 'https://thegraph.com/docs/en/subgraphs/querying/introduction/' },
   },
   {
+    hub: 'ecosystem',
+    blurb: 'The software the network actually runs on, and who maintains which part.',
+    path: 'Ecosystem',
+    title: 'The ecosystem',
+    kicker: 'Collection H',
+    lede:
+      'Every layer of this protocol is somebody\'s repository. This collection maps them: what each piece does, which lane it belongs to, and who is on the hook when it breaks.',
+    difficulty: 'intermediate',
+    modules: ['The core stack', 'Indexing', 'Serving', 'Authoring', 'Data services', 'Operating', 'Practicum'],
+    docs: { label: 'The Graph on GitHub', url: 'https://github.com/graphprotocol' },
+  },
+  {
     hub: 'governance',
     blurb: 'GIPs, the Council, arbitration, and where the issuance actually goes.',
     path: 'Governance',

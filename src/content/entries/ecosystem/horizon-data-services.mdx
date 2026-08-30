@@ -1,0 +1,104 @@
+---
+title: "Data services being built on Horizon"
+role: developer
+path: "Ecosystem"
+module: "Data services"
+order: 1
+difficulty: advanced
+time_minutes: 13
+summary: "Horizon made the protocol a substrate for services other than subgraph serving. Here is what people are actually building on it, and the shared machinery underneath."
+protocol_version_verified: "Graph Horizon (2025-12-11)"
+last_verified: 2026-08-30
+verify_before: 2026-11-30
+sources:
+  - name: "horizon-core"
+    url: "https://github.com/nightswatchhq/horizon-core"
+  - name: "hello-data-service, the reference implementation"
+    url: "https://github.com/nightswatchhq/hello-data-service"
+  - name: "The Graph Docs: Graph Horizon"
+    url: "https://thegraph.com/docs/en/graph-horizon/"
+parameters_used: []
+authors: ["@community"]
+license: "CC-BY-4.0"
+---
+
+[Horizon made stake provisionable to named data services](/indexers/horizon-provisions/),
+each with its own rules, obligations and slashing. The Subgraph Service is the first and
+still dominant one.
+
+The interesting question is what else gets built, because a substrate with one application
+is not a substrate. This entry is a survey of what exists, and it is deliberately dated:
+this is the fastest-moving part of the ecosystem and several of these are reference
+implementations rather than live businesses.
+
+## The shared machinery
+
+Building a data service means implementing the same things every time: TAP v2 receipt
+validation, RAV aggregation, on-chain collection, persistence, and a payment gate in front
+of whatever you actually serve.
+
+[horizon-core](https://github.com/nightswatchhq/horizon-core) factors that out into
+reusable building blocks, including a generic TAP-gated reverse proxy. If you are building
+one, start there rather than reimplementing receipt handling, which is the part with the
+sharp edges.
+
+[hello-data-service](https://github.com/nightswatchhq/hello-data-service) is the minimal
+reference implementation, and
+[horizon-skills](https://github.com/nightswatchhq/horizon-skills) generates a complete
+service from a short specification. There is
+[a guide dispatch](/dispatches/how-to-build-a-horizon-data-service/) that walks the whole
+thing.
+
+<Flow steps={["consumer pays", "TAP receipt", "your service", "RAV redeemed on chain"]} hot={2} />
+
+## What is being built
+
+**Query and RPC services.**
+[Dispatch](https://github.com/nightswatchhq/dispatch) is a decentralised JSON-RPC service:
+the thing an application uses before it ever reaches indexed data.
+[compass](https://github.com/nightswatchhq/compass) turns every subgraph into a pay-per-call
+MCP tool, which is a bet that the consumer of chain data is increasingly an agent rather
+than a front end.
+
+**Alternative data shapes.**
+[seahorn](https://github.com/nightswatchhq/seahorn) indexes Solana program activity into
+typed, fork-correct entities over REST, which subgraphs do not cover.
+[SDSCE](https://github.com/nightswatchhq/SDSCE) brings Substreams onto Horizon as a paid
+service. [wsaas](https://github.com/nightswatchhq/wsaas) streams pre-parsed transfers and
+swaps over one WebSocket connection, gated by TAP.
+
+**Things that are not query serving at all.**
+[FHSCE](https://github.com/nightswatchhq/FHSCE) is trust-minimised chunked file sharing.
+[nutcracker](https://github.com/nightswatchhq/nutcracker) is end-to-end encrypted agent
+memory. [chain-integration-ds](https://github.com/nightswatchhq/chain-integration-ds)
+meters per-chain integration revenue and settles through RecurringCollector rather than
+per-query receipts.
+
+That last group is the point of Horizon. None of them serve a GraphQL query, and all of
+them use the protocol's staking, payment and slashing machinery. The substrate is doing
+what a substrate is for.
+
+<Warn title="Read these as a survey, not a shopping list">
+Several of the above are reference implementations, some are one person's project, and the
+protocol's own documentation notes that staking minimums for new services are set as those
+services are integrated. Provisioning stake to a data service means accepting that
+service's rules and its slashing, and a reference implementation is not a business.
+
+Check what is actually live, who is actually operating it, and what the terms actually are
+before committing anything. This entry tells you what exists, not what to trust.
+</Warn>
+
+## The economics nobody has solved
+
+[Indexers are paid by issuance](/start/the-value-loop/) to serve subgraphs. A new data
+service has to attract operators who could instead be earning on the Subgraph Service, and
+it has to do so from its own revenue, because issuance goes to the Subgraph Service.
+
+That is a hard start. The forum
+[dispatch on this](/dispatches/horizon-needs-indexers-to-run-data-services/) is blunt about
+it: the substrate works, and getting operators to run something new on it is the unsolved
+part.
+
+Worth reading alongside [GIP-0089](/governance/tokenomics/), which redirected a fifth of
+issuance to the Foundation treasury. Where issuance goes is exactly the lever that decides
+whether a second data service can ever recruit operators.

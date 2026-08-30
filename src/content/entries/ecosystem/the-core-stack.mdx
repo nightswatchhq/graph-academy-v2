@@ -1,0 +1,109 @@
+---
+title: "The core stack"
+role: developer
+path: "Ecosystem"
+module: "The core stack"
+order: 1
+difficulty: intermediate
+time_minutes: 12
+summary: "Five repositories carry the protocol: the indexing engine, the indexer components, the contracts, the developer tooling and the client library. Everything else sits on top of them."
+protocol_version_verified: "Graph Horizon (2025-12-11)"
+last_verified: 2026-08-30
+verify_before: 2026-11-30
+sources:
+  - name: "graphprotocol on GitHub"
+    url: "https://github.com/graphprotocol"
+  - name: "graph-node"
+    url: "https://github.com/graphprotocol/graph-node"
+  - name: "indexer"
+    url: "https://github.com/graphprotocol/indexer"
+parameters_used: []
+authors: ["@community"]
+license: "CC-BY-4.0"
+---
+
+The protocol is not one program. It is a handful of repositories with different jobs and
+different maintainers, and knowing which is which saves a great deal of time when
+something misbehaves.
+
+## graph-node
+
+[graph-node](https://github.com/graphprotocol/graph-node) is the indexing engine. It
+follows chains, executes subgraph mappings, writes entities to Postgres and answers
+GraphQL. Rust, and the largest and most consequential repository in the ecosystem by a
+wide margin.
+
+If a subgraph is failing, syncing slowly, or producing a Proof of Indexing that disagrees
+with everyone else's, this is where the behaviour lives. Its release notes are worth
+following even if you never open the source, because a version change can change what a
+subgraph produces, which is exactly the sort of thing that turns into a dispute.
+
+## indexer, and indexer-rs
+
+[indexer](https://github.com/graphprotocol/indexer) holds the components an operator runs
+alongside graph-node: the agent that decides what to allocate to, and the service that
+faces the network. TypeScript, historically.
+
+[indexer-rs](https://github.com/graphprotocol/indexer-rs) is the Rust rewrite of the
+service half, and it is where GraphTally payment handling lives. If you are running an
+indexer today, `indexer-service-rs` and `indexer-tap-agent` come from here. The
+[payments entry](/indexers/payments-graphtally/) covers what they actually do.
+
+## contracts
+
+[contracts](https://github.com/graphprotocol/contracts) is the protocol itself: staking,
+allocations, curation, disputes, and under Horizon the provisions and data service
+plumbing. Solidity.
+
+This repository is the final authority on every number the
+[registry](/parameters/) records. Where the documentation contradicts itself, and
+[in three places it currently does](/parameters/), the answer is here or in the deployed
+bytecode. That is why each disputed parameter names a contract rather than a page.
+
+## graph-tooling
+
+[graph-tooling](https://github.com/graphprotocol/graph-tooling) is the monorepo behind the
+CLI and the developer libraries. If you have run `graph init`, `graph codegen` or
+`graph deploy`, you have used it. It moves faster than the protocol does, which is exactly
+why [this site never prints CLI flags](/developers/build-a-subgraph/) and links to the
+docs instead.
+
+## graph-client
+
+[graph-client](https://github.com/graphprotocol/graph-client) is the client-side library
+for querying the network: cross-chain handling, fallbacks, retries. Useful if you are
+building a front end against subgraphs and do not want to write that plumbing yourself.
+
+<Model>
+graph-node executes. indexer operates. contracts settle. graph-tooling authors.
+graph-client consumes. Almost every question about "where does this behaviour come from"
+resolves to one of those five.
+</Model>
+
+## Who maintains what
+
+Worth knowing, because it tells you where to raise something.
+
+The repositories above sit in the **graphprotocol** organisation and are maintained by core
+developers. [edgeandnode](https://github.com/edgeandnode) holds Edge & Node's own
+services, including [the gateway](https://github.com/edgeandnode/gateway) and
+[graphix](https://github.com/edgeandnode/graphix), the indexer cross-checking software.
+
+Independent work lives elsewhere, most of it in
+[nightswatchhq](https://github.com/orgs/nightswatchhq/repositories), which the rest of this
+collection covers. The distinction matters: a bug in graph-node is a core-developer
+matter, and a bug in a community tool is a matter for whoever wrote it.
+
+<Reveal question="Before reading on: why is the contracts repository the tiebreaker when the documentation disagrees with itself?">
+Because it is the only one of the two that the network actually executes.
+
+Documentation describes intent. Contracts encode behaviour, and the deployed bytecode is
+what happens when you send a transaction, regardless of what any page says. When the
+delegating page and the Horizon changes page give different limits for simultaneous
+undelegations, neither is wrong about what somebody meant; only one can be right about
+what `HorizonStaking` will do.
+
+This is also why the [registry](/parameters/) records a contract reference for every
+disputed value rather than a page reference. A citation to a document settles an argument
+about wording. A citation to a contract settles an argument about the protocol.
+</Reveal>

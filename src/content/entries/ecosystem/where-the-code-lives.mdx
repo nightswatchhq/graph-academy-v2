@@ -1,0 +1,100 @@
+---
+title: "Where the code lives"
+role: developer
+path: "Ecosystem"
+module: "The core stack"
+order: 2
+difficulty: beginner
+time_minutes: 8
+summary: "Four organisations hold nearly everything, and which one a repository sits in tells you who is on the hook when it breaks."
+protocol_version_verified: "Graph Horizon (2025-12-11)"
+last_verified: 2026-08-30
+verify_before: 2026-11-30
+sources:
+  - name: "graphprotocol"
+    url: "https://github.com/graphprotocol"
+  - name: "edgeandnode"
+    url: "https://github.com/edgeandnode"
+  - name: "nightswatchhq"
+    url: "https://github.com/orgs/nightswatchhq/repositories"
+parameters_used: []
+authors: ["@community"]
+license: "CC-BY-4.0"
+---
+
+Almost everything in this ecosystem is public, and knowing which organisation a repository
+sits in tells you more than a star count does. It tells you who maintains it, what happens
+if they stop, and how much weight the thing can bear.
+
+## graphprotocol
+
+The protocol itself. [graph-node](https://github.com/graphprotocol/graph-node),
+[indexer](https://github.com/graphprotocol/indexer),
+[indexer-rs](https://github.com/graphprotocol/indexer-rs),
+[contracts](https://github.com/graphprotocol/contracts),
+[graph-tooling](https://github.com/graphprotocol/graph-tooling),
+[docs](https://github.com/graphprotocol/docs), and the
+[GIP repository](https://github.com/graphprotocol/graph-improvement-proposals).
+
+Maintained by core developers, changed through
+[the governance process](/governance/gips-and-ggps/). If something here breaks, it is
+somebody's job to fix it. This is the only tier of which that is true.
+
+The GIP repository is worth calling out separately. It is the best design documentation the
+protocol has, because the rationale sections explain *why* rather than what, and they are
+unusually honest about where a mechanism could be gamed.
+[GIP-0051](/indexers/economics-rebates/) records the flaw in its own multi-gateway
+handling, which is not the sort of thing a marketing page volunteers.
+
+## edgeandnode
+
+Edge & Node's own services. [gateway](https://github.com/edgeandnode/gateway), the one most
+traffic goes through. [graphix](https://github.com/edgeandnode/graphix), the indexer
+cross-checking software. [graph-disputes](https://github.com/edgeandnode/graph-disputes),
+tooling for dispute management. [local-network](https://github.com/edgeandnode/local-network),
+a local graph network for integration testing, which is the thing to reach for before you
+test anything against the real one.
+
+A company's repositories rather than the protocol's. Public, and their roadmap is theirs.
+
+## nightswatchhq
+
+Independent work: 89 repositories, of which 43 are
+[nuthatch nests](/ecosystem/self-hosted-indexing/) and the rest are tools, data services,
+gateways and indexing engines. [Most of this collection](/ecosystem/) is about what is in
+here.
+
+Community maintained, which means the honest description is: maintained while somebody
+cares. That is not a criticism, it is the terms. Read the code, check the last commit, and
+weight it accordingly for anything long-lived.
+
+## Everybody else
+
+Subgraphs live in the repositories of the protocols they index, and the good ones are
+usually maintained by that protocol's own team.
+[Graph Explorer](https://thegraph.com/explorer) will tell you who published a given
+subgraph, which is the check worth making before
+[building on one](/consumers/getting-data/).
+
+<Model>
+Three tiers of dependency, and they are genuinely different. Protocol repositories are
+governed, and somebody is accountable. Company repositories are maintained at that
+company's discretion. Community repositories are maintained while somebody cares. All three
+are legitimate to depend on, and only the first comes with anyone on the hook.
+</Model>
+
+## Reading a repository before you trust it
+
+Cheap checks, in order:
+
+- **When was the last commit**, and was it substantive or a dependency bump.
+- **Is there more than one contributor.** A single-author repository is a single point of
+  failure regardless of code quality.
+- **What is the licence.** Most of the above is MIT or Apache-2.0; some data services are
+  BUSL-1.1, which is a different proposition if you intend to run it commercially.
+- **Does the README say what it does not do.** The ones that do are, reliably, the better
+  maintained ones.
+- **Are the issues answered.** An issue tracker with unanswered questions from six months
+  ago is telling you the maintenance answer directly.
+
+None of that requires reading the source. All of it is more informative than a star count.

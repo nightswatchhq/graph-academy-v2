@@ -1,0 +1,109 @@
+---
+title: "Tools for running an indexer"
+role: indexer
+path: "Ecosystem"
+module: "Operating"
+order: 1
+difficulty: advanced
+time_minutes: 12
+summary: "The gap between the official stack and a well-run indexer is filled by community tooling: preflight checks, POI comparison, API guards and payment agreements."
+protocol_version_verified: "Graph Horizon (2025-12-11)"
+last_verified: 2026-08-30
+verify_before: 2026-11-30
+sources:
+  - name: "horizon-doctor"
+    url: "https://github.com/nightswatchhq/horizon-doctor"
+  - name: "swissindexingknife"
+    url: "https://github.com/nightswatchhq/swissindexingknife"
+  - name: "graphix, indexer cross-checking"
+    url: "https://github.com/edgeandnode/graphix"
+parameters_used: ["max_poi_staleness_days", "fisherman_dispute_deposit"]
+authors: ["@community"]
+license: "CC-BY-4.0"
+---
+
+The [indexing collection](/indexers/) covers what the job is and where the money is lost.
+This entry covers what other people have built to make it survivable.
+
+Nearly all of it exists because somebody hit the same problem twice and got annoyed, which
+is the most reliable indicator that a tool is worth having.
+
+## Before you start: preflight
+
+[horizon-doctor](https://github.com/nightswatchhq/horizon-doctor) is a read-only validation
+CLI for the indexer stack under Horizon. Its stated purpose is to turn a Horizon-era
+startup panic into a controlled, explained gate: rather than the stack falling over with a
+stack trace, you get told which precondition is not met.
+
+[reo-doctor](https://github.com/nightswatchhq/reo-doctor) does the same for the Rewards
+Eligibility Oracle under GIP-0088. If your rewards eligibility is not what you expected,
+this tells you why before you go reading contracts.
+
+Both are read-only, which is the right shape for something you run against production
+while worried.
+
+## Day to day: the API quirks
+
+[swissindexingknife](https://github.com/nightswatchhq/swissindexingknife) is a CLI wrapping
+indexer operations, written explicitly to encapsulate every known API quirk so nobody has
+to remember them. That is an unglamorous thing to build and a very good sign about whoever
+built it.
+
+[indexer-gateway-auth](https://github.com/nightswatchhq/indexer-gateway-auth) is an
+authenticating reverse proxy for the Indexer Management API. That API is powerful and was
+not designed to be exposed; this puts a door on it.
+
+## Not getting disputed
+
+The [disputes entry](/indexers/disputes-and-slashing/) says the cheapest habit available is
+comparing your POIs against other indexers before publishing rather than after somebody
+posts a <Param name="fisherman_dispute_deposit" /> deposit.
+
+[graphix](https://github.com/edgeandnode/graphix) is Edge & Node's cross-checking software
+and the tool for exactly that: it compares POIs across indexers on the same deployment and
+surfaces divergence.
+
+[foghorn](https://github.com/nightswatchhq/foghorn) approaches quality from the other end.
+It runs block-pinned GraphQL probes and hashes the responses, so an indexer that is fast,
+returns clean 200s and serves wrong data is visible as wrong. Counting status codes cannot
+see that by construction.
+
+[tattler](https://github.com/nightswatchhq/tattler) produces signed, replayable receipts
+for indexed data: an answer you can hand to somebody who has no reason to trust you,
+pinned to a block so they can reproduce it.
+
+<Model>
+Three different answers to "is this data right". graphix asks whether indexers agree.
+foghorn asks whether the answer matches a pinned re-derivation. tattler makes a single
+answer independently checkable. They are complementary, and none of them is the protocol's
+dispute mechanism, which only fires after the fact.
+</Model>
+
+## Payments
+
+[weaver](https://github.com/nightswatchhq/weaver) builds, signs and checks Direct Indexer
+Payment agreements, with the EIP-712 hashing verified against the deployed
+`RecurringCollector` rather than against a reading of the specification. That distinction
+is the entire value of the tool: a signature that matches the spec and not the contract is
+a signature that reverts.
+
+[tap-query](https://github.com/nightswatchhq/tap-query) queries indexers directly with TAP
+receipts and no gateway in the path, which is a useful thing to have when you are trying to
+work out whether a problem is yours or the gateway's.
+
+## What to monitor, restated
+
+The [running the stack entry](/indexers/running-the-stack/) has the full list. The two that
+tooling most often misses:
+
+- **POI age per allocation**, well before <Param name="max_poi_staleness_days" />. Nothing
+  alerts on this by default and the allocation simply stops earning.
+- **Unaggregated receipt value and unredeemed RAV age.** Queries continue to be served
+  while the money stops, and no query metric shows it.
+
+<Warn>
+Everything here except graphix is community software, maintained by whoever wrote it. Read
+the code before you point it at production, particularly anything holding a key. Read-only
+tools are read-only because somebody chose that; check the choice still holds in the
+version you are running.
+</Warn>

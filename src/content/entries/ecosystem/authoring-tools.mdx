@@ -1,0 +1,94 @@
+---
+title: "Authoring tools beyond AssemblyScript"
+role: developer
+path: "Ecosystem"
+module: "Authoring"
+order: 1
+difficulty: intermediate
+time_minutes: 10
+summary: "Subgraphs have been written in AssemblyScript since the beginning. Three projects argue that the language, and in one case the file format, was never the interesting part."
+protocol_version_verified: "Graph Horizon (2025-12-11)"
+last_verified: 2026-08-30
+verify_before: 2026-11-30
+sources:
+  - name: "graphite, a Rust SDK for subgraphs"
+    url: "https://github.com/nightswatchhq/graphite"
+  - name: "redstart"
+    url: "https://github.com/nightswatchhq/redstart"
+  - name: "liminal"
+    url: "https://github.com/nightswatchhq/liminal"
+parameters_used: []
+authors: ["@community"]
+license: "CC-BY-4.0"
+---
+
+A subgraph is [three files](/developers/what-is-a-subgraph/): a manifest, a schema and
+mappings. The mappings have conventionally been AssemblyScript, a TypeScript-like language
+compiled to WebAssembly.
+
+The protocol never required that. It requires deterministic WebAssembly. AssemblyScript is
+one way to produce it, and three projects take the constraint at its word.
+
+## graphite
+
+[graphite](https://github.com/nightswatchhq/graphite) is a Rust SDK for authoring
+subgraphs, producing WASM that is ABI-compatible with what graph-node already expects.
+No change to indexers, no change to the protocol: the output is a subgraph like any other.
+
+The argument is straightforwardly about tooling. Rust brings a type system that has
+opinions, a mature package ecosystem, and error handling that does not rely on the author
+remembering. Against that, your team has to write Rust, which is the same staffing cost
+[Substreams carries](/developers/substreams/).
+
+## redstart
+
+[redstart](https://github.com/nightswatchhq/redstart) goes further and questions the file
+layout rather than the language. One source file describes the schema, the manifest and
+the handlers together, and transpiles out to the three files graph-node wants.
+
+The observation behind it is that the three-file split is an implementation detail that
+leaked into the authoring experience. An entity, the event that produces it and the field
+it populates are one thought, and they currently live in three files that must be kept
+manually in agreement. Anyone who has renamed a field and then hunted the schema, the
+mapping and the codegen output for the other two mentions knows the shape of the problem.
+
+There is [a dispatch on the reasoning](/dispatches/redstart-stop-replacing-assemblyscript/),
+which is worth reading for the argument rather than the announcement.
+
+## liminal
+
+[liminal](https://github.com/nightswatchhq/liminal) is the most speculative of the three: a
+polyglot, capability-isolated WASIp2 component runtime for streaming indexing pipelines.
+
+The idea is that if the real requirement is deterministic WebAssembly components, then the
+runtime should accept components from any language that compiles to WASIp2, with
+capabilities granted explicitly rather than assumed. Determinism then comes from what the
+component is *allowed to do* rather than from which language it was written in.
+
+Read it as a research direction rather than something to build a product on this quarter.
+
+<Model>
+All three start from the same observation: the protocol constrains the artefact, a
+deterministic WASM module, and everything above that is convention. graphite changes the
+language, redstart changes the file layout, liminal changes the runtime contract. How much
+of the current authoring experience is essential is a genuinely open question.
+</Model>
+
+## What to actually use
+
+For most people, most of the time: **the official tooling**, in AssemblyScript, per
+[the developer collection](/developers/). It is what the documentation covers, what indexers
+expect, and what somebody else on your team will recognise.
+
+Reach for an alternative when you have a specific reason. Your team is a Rust shop and the
+subgraph is substantial: graphite. You are maintaining many subgraphs and the three-file
+drift is costing you real time: look at redstart. You are researching what indexing could
+look like: liminal.
+
+<Warn>
+These are independent projects rather than protocol features. They do not appear in the
+official documentation, their maintenance is somebody's spare capacity, and if one is
+abandoned your subgraph source becomes your problem. That is a real cost and it belongs in
+the decision, particularly for anything long-lived. The output being a standard subgraph is
+what limits the damage: an abandoned authoring tool leaves you with WASM that still runs.
+</Warn>

@@ -1,0 +1,93 @@
+---
+title: "The oracles the protocol runs on"
+role: governance
+path: "Ecosystem"
+module: "Operating"
+order: 2
+difficulty: advanced
+time_minutes: 10
+summary: "Several things the protocol treats as facts are produced by oracles rather than derived on chain. Knowing which is which tells you where the trust actually sits."
+protocol_version_verified: "Graph Horizon (2025-12-11)"
+last_verified: 2026-08-30
+verify_before: 2026-11-30
+sources:
+  - name: "The Graph Docs: indexing overview"
+    url: "https://thegraph.com/docs/en/indexing/overview/"
+  - name: "Rewards Eligibility Oracle nest"
+    url: "https://github.com/nightswatchhq/rewards-eligibility-oracle"
+  - name: "Subgraph Availability Oracle nest"
+    url: "https://github.com/nightswatchhq/subgraph-availability-oracle"
+parameters_used: []
+authors: ["@community"]
+license: "CC-BY-4.0"
+---
+
+The protocol settles on Arbitrum One, and several things it treats as facts are not
+derivable on chain. They are asserted by oracles.
+
+That is not a criticism. Some facts genuinely cannot be computed by a contract: whether a
+subgraph is available on IPFS, whether an indexer is actually serving queries well. But it
+does mean the trust model has components that are not "the chain says so", and it is worth
+knowing which.
+
+## The Subgraph Availability Oracle
+
+A contract cannot check whether a subgraph's files are retrievable from IPFS. The
+availability oracle asserts it, and the answer affects whether a subgraph accrues indexing
+rewards.
+
+If a subgraph is unexpectedly earning nothing for everyone allocated to it, this is one of
+the first things to check, and it is a different failure from
+[the signal problem](/indexers/allocations-and-pois/).
+
+## The Rewards Eligibility Oracle
+
+Introduced by GIP-0088, the REO asserts which indexers are eligible for indexing rewards.
+The intent is that rewards should follow indexers actually doing useful work, rather than
+being collectable by anyone who allocates and submits proofs.
+
+The argument for GIP-0089 cited 15.2% of indexing rewards going to underperforming indexers
+in 2025, which is the problem this class of oracle exists to address.
+[reo-doctor](https://github.com/nightswatchhq/reo-doctor) checks your own eligibility, and
+there is a [nest indexing its data](https://github.com/nightswatchhq/rewards-eligibility-oracle)
+if you want the history rather than the current answer.
+
+## The Epoch Block Oracle
+
+Epochs need a shared notion of which block started them, across chains. The epoch block
+oracle asserts it. Unglamorous, and everything time-based downstream depends on it being
+right.
+
+## Quality measurement
+
+Query performance is measured, and by whom is a live question.
+
+Gateway telemetry is the largest source, and it is measured by whoever runs the gateway:
+it can see routing and real user latency, and it cannot see whether the returned data was
+correct. [foghorn](https://github.com/nightswatchhq/foghorn) measures the other half, by
+probing with block-pinned queries and hashing responses, so an indexer serving confident
+wrong answers is visible.
+
+Neither measurement subsumes the other, and an indexer ranking built on one of them is
+answering a narrower question than it appears to.
+
+<Model>
+Ask of any figure about indexer quality: who measured it, with what instrument, and what
+can that instrument not see. Status codes cannot see wrong data. Response hashing cannot
+see routing. A ranking that does not say which it used is not telling you enough.
+</Model>
+
+## Why this matters for the trust model
+
+The protocol's headline guarantee is that a wrong answer is detectable and punishable. That
+guarantee covers what an indexer *claims*, through POIs and disputes.
+
+It does not cover oracle assertions. If an availability oracle wrongly marks a subgraph
+unavailable, indexers allocated to it lose rewards, and no dispute mechanism addresses
+that. Oracles are governed rather than adjudicated: they are appointed and overseen through
+[the governance process](/governance/gips-and-ggps/) rather than checked by arbitration.
+
+Knowing where a system's trust actually sits is more useful than believing it has none. For
+The Graph it sits in three places: staked capital for claims about indexed data,
+[human arbitrators](/governance/arbitration-disputes/) for judging disputes, and appointed
+oracles for facts that cannot be computed on chain.

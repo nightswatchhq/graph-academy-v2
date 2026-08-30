@@ -1,0 +1,102 @@
+---
+title: "Indexing it yourself"
+role: developer
+path: "Ecosystem"
+module: "Indexing"
+order: 1
+difficulty: intermediate
+time_minutes: 11
+summary: "A second lane has grown up beside graph-node: single-binary indexers you run yourself, with no gateway, no network and no third party in the path."
+protocol_version_verified: "Graph Horizon (2025-12-11)"
+last_verified: 2026-08-30
+verify_before: 2026-11-30
+sources:
+  - name: "nuthatch"
+    url: "https://github.com/nightswatchhq/nuthatch"
+  - name: "camp-node"
+    url: "https://github.com/nightswatchhq/camp-node"
+  - name: "nests, the prebuilt index"
+    url: "https://github.com/nightswatchhq/nests"
+parameters_used: []
+authors: ["@community"]
+license: "CC-BY-4.0"
+---
+
+The protocol exists so you do not have to run indexing infrastructure. That is a good
+trade for most people most of the time, and it is not the only arrangement available.
+
+A second lane has grown up: run the indexer yourself, on your own box, with no gateway,
+no network and nobody to ask. It is worth understanding because the trade-offs are almost
+exactly inverted from the ones in the [developer collection](/developers/).
+
+## nuthatch
+
+[nuthatch](https://github.com/nightswatchhq/nuthatch) is a single Rust binary that takes a
+contract address and gives you a live indexed API. No graph-node, no Postgres to operate
+separately, no subgraph to author, no signal to post, no indexer to wait for.
+
+The distinctive claim is the absence of a mandatory third-party data dependency: the thing
+you run is the thing that serves you. That removes the whole class of problem the
+[app builder collection](/consumers/) is about, and it removes the network's guarantees
+along with it. Nobody else is checking your Proof of Indexing, because there is no proof
+and no dispute process. You are trusting yourself.
+
+<Model>
+The network's proposition is: many operators, verifiable answers, somebody else's
+machines. The self-hosted proposition is: one operator, no verification needed because
+the operator is you, your machine. Neither is a better answer in general and each is
+clearly better for some jobs.
+</Model>
+
+## Nests
+
+A **nest** is a packaged indexing definition: the config, the ABIs, the decode registry
+and the schema for one protocol on one chain, bundled so it can be mounted rather than
+authored.
+
+There are 43 of them published, covering Uniswap V2 through V4, Aave, Lido, ENS, GMX,
+Seaport, EigenLayer, Velodrome, PancakeSwap and a good deal of The Graph's own on-chain
+activity. The [index of them](https://github.com/nightswatchhq/nests) is the place to look
+before writing anything yourself.
+
+Several exist for a specific and revealing reason: they were ported from subgraphs that
+had signal on them and no indexer serving them, or that had been stuck syncing for a day.
+Those cases are the honest argument for this lane. A subgraph nobody will index is not a
+data source, whatever its signal says.
+
+## camp
+
+[camp-node](https://github.com/nightswatchhq/camp-node) is a different shape again: a
+source-built ETL engine taking EVM RPC through DataFusion SQL to Parquet and out over
+Arrow Flight or JSONL. It powers [camp](https://github.com/nightswatchhq/camp), a free
+decoded Arbitrum API.
+
+Where nuthatch optimises for one command and one binary, camp optimises for arbitrary SQL
+over decoded protocol data. If your question is analytical rather than transactional, that
+is the shape you want.
+
+## When this lane is the right one
+
+- **The subgraph you need does not exist and nobody will index it.** The commonest case,
+  and the one the ported nests were built for.
+- **You cannot accept a third party in the path**, for latency, compliance or stubbornness.
+- **You want SQL**, not GraphQL over a model somebody else defined.
+- **The data is for you.** If nobody else has to trust the answer, the machinery that makes
+  answers trustworthy is overhead.
+
+## When it is not
+
+- **Somebody else has to trust the output.** Self-hosted means self-attested. There is no
+  POI to compare and no dispute to raise.
+- **You want somebody else on call.** The whole point of the network is that operating it
+  is not your problem. Self-hosting makes it your problem, permanently.
+- **The subgraph already exists and is well served.** Reindexing solved data is work with
+  no product in it.
+
+<Warn title="The honest position">
+This collection lives on a site about the protocol, and this entry is about not using it.
+Both things can be true. The network is the right answer when an answer needs to be
+verifiable by somebody who has no reason to trust you, and a self-hosted binary is the
+right answer when it does not. Anyone telling you one of those covers every case is
+selling something.
+</Warn>

@@ -1,0 +1,52 @@
+---
+title: "Reading the ecosystem yourself"
+role: developer
+path: "Ecosystem"
+module: "Practicum"
+order: 1
+difficulty: intermediate
+time_minutes: 10
+summary: "Nothing here is a test. Go and look at the repositories, and form your own view of what is maintained and what is somebody's weekend."
+protocol_version_verified: "Graph Horizon (2025-12-11)"
+last_verified: 2026-08-30
+verify_before: 2026-11-30
+sources:
+  - name: "graphprotocol"
+    url: "https://github.com/graphprotocol"
+  - name: "nightswatchhq"
+    url: "https://github.com/orgs/nightswatchhq/repositories"
+parameters_used: []
+authors: ["@community"]
+license: "CC-BY-4.0"
+---
+
+Everything above is description. This is where you go and look at the thing itself.
+
+### Read one repository properly
+
+- Open [graph-node](https://github.com/graphprotocol/graph-node) and find the most recent release notes. Note whether anything in them would change what a subgraph produces.
+- Open the [GIP repository](https://github.com/graphprotocol/graph-improvement-proposals) and read the rationale section of any GIP, not the specification. Note whether it admits a weakness.
+- Pick any tool from this collection and apply the five checks in [where the code lives](/ecosystem/where-the-code-lives/): last commit, contributor count, licence, whether the README says what it does not do, and whether issues get answered.
+- Write one sentence on whether you would depend on it in production, and why.
+
+### Find the gap you would fill
+
+- Open the [nests index](https://github.com/nightswatchhq/nests) and check whether the protocol you care about is already there.
+- If it is not, decide whether that is because nobody needs it or because nobody has done it. Those are different answers.
+- Look at [Graph Explorer](https://thegraph.com/explorer) for a subgraph with signal on it and no indexer allocated. That is a data source somebody is paying for and nobody is serving.
+
+### Check a claim in this collection
+
+- This collection says nightswatchhq has 89 repositories and 43 of them are nuthatch nests. Count them.
+- If the numbers have moved, they have moved, and this page carries the date it was written. [Tell us](/contribute/) and it gets fixed.
+
+## A closing note
+
+The most useful thing in this collection is not the list of projects, which will be out of
+date soon enough. It is the habit of asking who maintains a thing before depending on it,
+and the three tiers in [where the code lives](/ecosystem/where-the-code-lives/) are the
+short version of that habit.
+
+Everything here is public. The repositories are readable, the GIPs record their own
+weaknesses, and the people who wrote most of it are reachable in
+[the forum](https://forum.thegraph.com). That is unusual and worth using.

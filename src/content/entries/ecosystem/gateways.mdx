@@ -1,0 +1,108 @@
+---
+title: "Gateways, and why there is more than one"
+role: developer
+path: "Ecosystem"
+module: "Serving"
+order: 1
+difficulty: intermediate
+time_minutes: 11
+summary: "Every query reaches an indexer through a gateway, which picks who serves you and handles the payment. A protocol with one gateway has a single point of control it was designed to avoid."
+protocol_version_verified: "Graph Horizon (2025-12-11)"
+last_verified: 2026-08-30
+verify_before: 2026-11-30
+sources:
+  - name: "edgeandnode/gateway"
+    url: "https://github.com/edgeandnode/gateway"
+  - name: "gib, Gateway-in-a-Box"
+    url: "https://github.com/nightswatchhq/gib"
+  - name: "lodestar-gateway"
+    url: "https://github.com/nightswatchhq/gateway"
+parameters_used: []
+authors: ["@community"]
+license: "CC-BY-4.0"
+---
+
+A gateway sits between an application and the indexers. It chooses which indexer serves
+each query, attaches the signed payment receipt, and routes around operators that are
+slow or wrong. The [querying entry](/developers/query-from-an-app/) covers what that means
+for your application.
+
+What it means for the protocol is more interesting, and it is the reason there is now
+more than one.
+
+## The problem a single gateway creates
+
+Indexing is decentralised. Dozens of independent operators run the machines, and the
+protocol goes to considerable trouble to make their answers verifiable and their
+misbehaviour punishable.
+
+Then every query goes through one gateway.
+
+That gateway decides who gets traffic, and traffic is revenue. It sees every query anyone
+makes. If it is down, the network is down for practical purposes, however many indexers
+are healthy. None of that is an accusation against whoever operates it. It is a structural
+observation: a decentralised serving layer reached through a single door is decentralised
+in the part nobody was worried about.
+
+<Model>
+Decentralising the indexers and centralising the gateway moves the single point of failure
+rather than removing it. The interesting question is not whether the operator is
+trustworthy, it is whether the arrangement requires them to be.
+</Model>
+
+## The implementations
+
+[edgeandnode/gateway](https://github.com/edgeandnode/gateway) is the reference: the gateway
+most traffic goes through today, Rust, and the source of the indexer-selection logic
+everything else compares itself against.
+
+[gib](https://github.com/nightswatchhq/gib), Gateway-in-a-Box, is a self-hostable gateway
+for Horizon on Arbitrum One. The point of it is redistribution: a Docker Compose
+arrangement that lets somebody else stand one up without reconstructing the whole payment
+and selection stack from first principles. There is a
+[dispatch on it](/dispatches/gib-graph-gateway-in-a-box/).
+
+[lodestar-gateway](https://github.com/nightswatchhq/gateway) is a fork of Edge & Node's,
+run as an independent, self-funded gateway on Arbitrum One. Not a replacement, a second
+one, which is the entire argument.
+
+[candidate-selection](https://github.com/nightswatchhq/candidate-selection) is a fork of
+the selection library with runtime-configurable weights. Worth knowing about because it
+makes explicit something the reference implementation keeps implicit: *how* a gateway
+ranks indexers is a policy, and policies can differ.
+
+## What a second gateway actually buys
+
+- **Failure isolation.** One gateway having a bad afternoon stops being everybody's bad
+  afternoon.
+- **Selection competition.** If two gateways rank indexers differently, an indexer that
+  one undervalues has somewhere else to earn, and the ranking policies get compared rather
+  than assumed.
+- **A check on the numbers.** Query-fee and performance figures reported by a gateway are
+  measured by that gateway. A second measurement is the only way to know whether the first
+  was right.
+
+## What it does not buy
+
+Running one is real infrastructure with real cost, and the revenue does not obviously
+cover it. That is why there are so few, and it is a genuine open problem rather than a
+lack of will. An arrangement that depends on volunteers funding public infrastructure
+indefinitely is not a solved arrangement.
+
+<Reveal question="Before reading on: if the indexers are decentralised, why does it matter that the gateway is not?">
+Because the gateway holds the two things that actually determine outcomes: who gets paid,
+and what the consumer sees.
+
+An indexer can be perfectly honest, well staked and fast, and earn nothing, because the
+gateway did not route to it. Nothing in the protocol's verification machinery covers that,
+since no false claim was made and no dispute is available. Routing is not a correctness
+property, so slashing has no purchase on it.
+
+And from the consumer's side, the gateway is the thing that decides which answer you see.
+The protocol's guarantee is that a wrong answer can be detected and punished after the
+fact. It is not a guarantee that you were routed to the right indexer in the first place.
+
+So the honest description is that the protocol decentralises the production of answers and,
+today, largely centralises their distribution. Both halves matter, and only one of them has
+been solved.
+</Reveal>
