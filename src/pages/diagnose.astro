@@ -1,0 +1,95 @@
+---
+import Base from '../layouts/Base.astro';
+import { SYMPTOMS } from '../lib/diagnostics';
+import { COLLECTIONS } from '../lib/paths';
+
+const roles = ['consumer', 'developer', 'indexer', 'delegator', 'curator'] as const;
+const label: Record<string, string> = {
+  consumer: 'Reading data',
+  developer: 'Building a subgraph',
+  indexer: 'Running an indexer',
+  delegator: 'Delegating',
+  curator: 'Curating',
+};
+const grouped = roles
+  .map((r) => ({ role: r, items: SYMPTOMS.filter((s) => s.who === r) }))
+  .filter((g) => g.items.length > 0);
+const total = SYMPTOMS.length;
+const causes = SYMPTOMS.reduce((n, s) => n + s.causes.length, 0);
+---
+<Base
+  title="Something is wrong"
+  description="A symptom index. What you are seeing, what usually causes it, and how to tell which one it is."
+>
+  <section class="wrap" style="padding-block: clamp(3rem, 7vw, 5rem) 0;">
+    <p class="kicker">Diagnostics</p>
+    <h1 class="display">Something is <em>wrong</em>.</h1>
+    <p class="section-lede lede-lg">
+      {total} symptoms and {causes} causes, indexed by what you are actually seeing rather
+      than by which part of the protocol it belongs to. Nearly all of these fail silently,
+      which is why they persist.
+    </p>
+    <div class="adm adm--warning" style="max-width: 46rem; margin-top: 2rem;">
+      <span class="adm-label">The pattern worth internalising</span>
+      <div class="adm-body">
+        <p>
+          Almost nothing here raises an error. An unindexed subgraph returns an empty array,
+          a stale allocation stops paying, a stopped payment agent keeps serving queries, an
+          overpriced cost model looks exactly like an absence of demand.
+        </p>
+        <p>
+          If you are waiting for something to go red before investigating, these are the
+          failures that will wait with you.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider" style="margin-top: clamp(2.6rem, 5vw, 3.6rem);" />
+
+  <section class="wrap" style="padding-block: clamp(2.4rem, 5vw, 3.4rem) 0;">
+    <div class="shelves">
+      {grouped.map((g) => (
+        <div class="shelf">
+          <div class="shelf-head">
+            <span class="shelf-num">{g.items.length}</span>
+            <h2>{label[g.role]}</h2>
+          </div>
+          <div>
+            {g.items.map((s) => (
+              <div class="symptom" id={s.id}>
+                <h3 class="symptom-title">{s.symptom}</h3>
+                <ol class="causes">
+                  {s.causes.map((c, i) => (
+                    <li>
+                      <span class="cause-num">{i + 1}</span>
+                      <div>
+                        <p class="cause-what">{c.cause}</p>
+                        <p class="cause-check">{c.check}</p>
+                        {c.more && <p class="cause-more"><a href={c.more}>Read the mechanism</a></p>}
+                      </div>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <section class="wrap">
+    <p class="kicker">Not here</p>
+    <h2 class="display-sm">If your symptom is missing, that is a gap worth reporting.</h2>
+    <p class="section-lede" style="margin-top: 1.1rem;">
+      This index only holds failures somebody has written up. It is deliberately about the
+      quiet ones: a process that crashes gets restarted by something you already have, and a
+      subgraph that silently stopped three months ago does not.
+    </p>
+    <div class="btn-row" style="margin-top: 1.8rem;">
+      <a class="btn btn-primary" href="/contribute/">Report a missing symptom</a>
+      <a class="btn btn-ghost" href="/catalogue/">Browse the catalogue</a>
+    </div>
+  </section>
+</Base>
