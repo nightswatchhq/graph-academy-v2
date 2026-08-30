@@ -1,0 +1,87 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getCollection, render } from 'astro:content';
+import { SITE } from '../../lib/site';
+
+export async function getStaticPaths() {
+  const all = await getCollection('dispatches');
+  return all.map((d) => ({ params: { slug: d.id }, props: { post: d } }));
+}
+
+const { post } = Astro.props;
+const { Content, headings } = await render(post);
+const d = post.data;
+const iso = d.date.toISOString().slice(0, 10);
+const toc = headings.filter((h) => h.depth === 2 || h.depth === 3);
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BlogPosting',
+  headline: d.title,
+  description: d.excerpt,
+  datePublished: iso,
+  author: { '@type': 'Person', name: d.author },
+  publisher: { '@type': 'Organization', name: SITE.name, url: SITE.url },
+  keywords: d.tags.join(', '),
+  inLanguage: 'en',
+};
+---
+<Base title={d.title} description={d.excerpt} jsonLd={jsonLd}>
+  <div class="wrap entry-head">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="/dispatches/">Dispatches</a>
+      <span class="sep">/</span>
+      <span>{d.category}</span>
+    </nav>
+    <h1 class="display-entry">{d.title}</h1>
+    <p class="entry-lede">{d.excerpt}</p>
+    <div class="entry-meta" style="margin-top: 1.5rem;">
+      <span class="m"><b>{iso}</b></span>
+      <span class="m">{d.author}</span>
+      <span class="m">{d.category}</span>
+    </div>
+    <div class="stamp" style="margin-top: 1.8rem;">
+      <p class="stamp-line">
+        <span class="stamp-key">Written</span>
+        <span class="stamp-val">{iso}</span>
+        <span class="stamp-key" style="margin-left: 10px;">Status</span>
+        <span class="stamp-val">A dated snapshot, left as written</span>
+      </p>
+      <div class="stamp-sources">
+        This is a dispatch, not an <a href="/catalogue/">entry</a>. It records what was
+        true and what its author thought on the day above, and it is not revised as the
+        protocol moves. For facts that are kept current, with the date somebody last
+        checked them, use the <a href="/parameters/">registry</a> and the entries.
+        {d.originally && (
+          <p style="margin-top: 8px;">
+            Originally published on the Lodestar Intel Feed and moved here unchanged.
+          </p>
+        )}
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap" style="padding-top: 2.6rem; padding-bottom: 1rem;">
+    <div class="entry-grid">
+      <article class="prose"><Content /></article>
+      {toc.length > 2 && (
+        <aside class="toc-col">
+          <nav class="toc" aria-label="On this page">
+            <p class="toc-label">On this page</p>
+            <ul>
+              {toc.map((h) => (
+                <li class={h.depth === 3 ? 'd3' : 'd2'}><a href={`#${h.slug}`}>{h.text}</a></li>
+              ))}
+            </ul>
+          </nav>
+        </aside>
+      )}
+    </div>
+
+    {d.tags.length > 0 && (
+      <div style="max-width: 44rem; margin-top: 2.4rem; display: flex; gap: 8px; flex-wrap: wrap;">
+        {d.tags.map((t) => <span class="tag tag--plain">{t}</span>)}
+      </div>
+    )}
+  </div>
+</Base>

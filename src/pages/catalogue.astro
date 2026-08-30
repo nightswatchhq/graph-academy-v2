@@ -3,6 +3,7 @@ import Base from '../layouts/Base.astro';
 import { COLLECTIONS, entriesInCollection, collectionReadingTime, allEntries } from '../lib/paths';
 import { GLOSSARY } from '../lib/glossary';
 import { params } from '../lib/params';
+import { getCollection } from 'astro:content';
 
 const shelves = await Promise.all(
   COLLECTIONS.map(async (c) => ({
@@ -12,6 +13,9 @@ const shelves = await Promise.all(
   })),
 );
 const total = (await allEntries()).length;
+const dispatches = (await getCollection('dispatches')).sort(
+  (a, b) => b.data.date.getTime() - a.data.date.getTime(),
+);
 const minutes = shelves.reduce((n, s) => n + s.minutes, 0);
 ---
 <Base
@@ -22,7 +26,7 @@ const minutes = shelves.reduce((n, s) => n + s.minutes, 0);
     <p class="kicker">The catalogue</p>
     <h1 class="display">Everything held <em>here</em>.</h1>
     <p class="section-lede lede-lg">
-      {total} entries across {shelves.length} collections, {Math.round(minutes / 60)} hours end to
+      {total} entries across {shelves.length} collections, {dispatches.length} dated dispatches, {Math.round(minutes / 60)} hours end to
       end, plus {GLOSSARY.length} glossary terms and {Object.keys(params).length} sourced protocol
       parameters. Read a collection through, or arrive at one entry from a search and leave through a
       cross-reference. Both are intended.
@@ -53,6 +57,32 @@ const minutes = shelves.reduce((n, s) => n + s.minutes, 0);
           </ol>
         </div>
       ))}
+    </div>
+  </section>
+
+  <section class="wrap" style="padding-top: 0;">
+    <div class="shelf">
+      <div class="shelf-head">
+        <span class="shelf-num">{dispatches.length} dispatches</span>
+        <h2><a href="/dispatches/" class="shelf-link">Dispatches</a></h2>
+        <span class="shelf-note">
+          Dated writing, left as written. Not maintained the way an entry is.
+        </span>
+      </div>
+      <ol class="entry-list">
+        {dispatches.slice(0, 6).map((d) => (
+          <li>
+            <a class="entry-row" href={`/dispatches/${d.id}/`}>
+              <span class="rtitle">{d.data.title}</span>
+              <span class="rsummary">{d.data.excerpt}</span>
+              <span class="rmeta"><b>{d.data.date.toISOString().slice(0, 10)}</b></span>
+            </a>
+          </li>
+        ))}
+      </ol>
+      <p style="margin-top: 16px;">
+        <a href="/dispatches/">All {dispatches.length} dispatches</a>
+      </p>
     </div>
   </section>
 

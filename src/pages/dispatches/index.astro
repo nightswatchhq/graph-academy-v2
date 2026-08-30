@@ -1,0 +1,75 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getCollection } from 'astro:content';
+
+const all = (await getCollection('dispatches')).sort(
+  (a, b) => b.data.date.getTime() - a.data.date.getTime(),
+);
+const byYear = new Map<number, typeof all>();
+for (const d of all) {
+  const y = d.data.date.getFullYear();
+  if (!byYear.has(y)) byYear.set(y, []);
+  byYear.get(y)!.push(d);
+}
+const years = [...byYear.entries()].sort((a, b) => b[0] - a[0]);
+const categories = [...new Set(all.map((d) => d.data.category))].sort();
+const words = all.length;
+const iso = (d: Date) => d.toISOString().slice(0, 10);
+---
+<Base
+  title="Dispatches"
+  description="Dated writing on The Graph: guides, analysis and field notes, moved here from the Lodestar Intel Feed."
+>
+  <section class="wrap" style="padding-block: clamp(3rem, 7vw, 5rem) 0;">
+    <p class="kicker">Dispatches</p>
+    <h1 class="display">Written on a <em>date</em>, and left that way.</h1>
+    <p class="section-lede lede-lg">
+      {words} pieces of dated writing, moved here from the Lodestar Intel Feed. Guides,
+      analysis, and notes from actually running this infrastructure.
+    </p>
+    <div class="adm adm--note" style="max-width: 46rem; margin-top: 2rem;">
+      <span class="adm-label">How a dispatch differs from an entry</span>
+      <div class="adm-body">
+        <p>
+          An <a href="/catalogue/">entry</a> is a maintained fact. It carries a
+          re-verification date, and when it goes past that date the page says so.
+        </p>
+        <p>
+          A dispatch is a snapshot: what was true, and what somebody thought about it, on
+          the day it was written. It is not maintained and it does not expire, because
+          revising it would destroy the thing it is for. Read the date at the top and
+          judge accordingly.
+        </p>
+      </div>
+    </div>
+    <div class="entry-meta" style="margin-top: 1.8rem;">
+      {categories.map((c) => <span class="m">{c}</span>)}
+    </div>
+  </section>
+
+  <hr class="divider" style="margin-top: clamp(2.6rem, 5vw, 3.6rem);" />
+
+  <section class="wrap" style="padding-block: clamp(2.4rem, 5vw, 3.4rem) 0;">
+    <div class="shelves">
+      {years.map(([year, posts]) => (
+        <div class="shelf">
+          <div class="shelf-head">
+            <span class="shelf-num">{posts.length} dispatches</span>
+            <h2>{year}</h2>
+          </div>
+          <ol class="entry-list">
+            {posts.map((d) => (
+              <li>
+                <a class="entry-row" href={`/dispatches/${d.id}/`}>
+                  <span class="rtitle">{d.data.title}</span>
+                  <span class="rsummary">{d.data.excerpt}</span>
+                  <span class="rmeta"><b>{iso(d.data.date)}</b><br />{d.data.category}</span>
+                </a>
+              </li>
+            ))}
+          </ol>
+        </div>
+      ))}
+    </div>
+  </section>
+</Base>
