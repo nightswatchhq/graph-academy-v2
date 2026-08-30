@@ -1,0 +1,44 @@
+---
+interface Props {
+  /** Stable id. The ticks live in localStorage under it, so do not rename casually. */
+  id: string;
+  items: string[];
+  title?: string;
+}
+const { id, items, title = 'Practical task' } = Astro.props;
+---
+<section class="adm adm--checkpoint" data-checklist={id}>
+  <span class="adm-label">{title}</span>
+  <ul class="checklist" style="margin-top: 14px;">
+    {items.map((item, i) => (
+      <li>
+        <button class="check-item" type="button" aria-pressed="false" data-ci={i}>
+          <span class="tick" aria-hidden="true"></span>
+          <span>{item}</span>
+        </button>
+      </li>
+    ))}
+  </ul>
+  <p style="font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-faint); margin-top: 14px;">
+    Ticks are stored in this browser only. No account, no server, nothing sent anywhere.
+  </p>
+</section>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-checklist]').forEach((list) => {
+    const key = `academy-check-${list.dataset.checklist}`;
+    let done: number[] = [];
+    try { done = JSON.parse(localStorage.getItem(key) ?? '[]'); } catch { done = []; }
+
+    list.querySelectorAll<HTMLButtonElement>('.check-item').forEach((btn) => {
+      const i = Number(btn.dataset.ci);
+      if (done.includes(i)) btn.setAttribute('aria-pressed', 'true');
+      btn.addEventListener('click', () => {
+        const now = btn.getAttribute('aria-pressed') !== 'true';
+        btn.setAttribute('aria-pressed', String(now));
+        done = now ? [...new Set([...done, i])] : done.filter((x) => x !== i);
+        try { localStorage.setItem(key, JSON.stringify(done)); } catch { /* storage blocked */ }
+      });
+    });
+  });
+</script>

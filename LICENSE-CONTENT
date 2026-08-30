@@ -1,0 +1,23 @@
+The educational content of this repository, meaning everything under
+src/content/, the glossary in src/lib/glossary.ts, and the prose in the pages
+under src/pages/, is licensed under the Creative Commons Attribution 4.0
+International Licence (CC BY 4.0).
+
+    https://creativecommons.org/licenses/by/4.0/
+
+Attribute to "The Graph Academy community" with a link to the source
+repository. You may translate it, teach from it, quote it and build on it,
+including commercially.
+
+The site code is MIT licensed. See LICENSE.
+
+Third-party components carry their own licences:
+
+  src/styles/tokens.css   cargopete-style, MIT
+  tools/contrast.py       cargopete-style, MIT
+  public/fonts/space-grotesk.woff2   Space Grotesk, SIL Open Font Licence 1.1
+  public/fonts/jetbrains-mono.woff2  JetBrains Mono, SIL Open Font Licence 1.1
+
+Both font files are subsets, which the OFL treats as modified versions. They
+are redistributed under the OFL, are not sold on their own, and do not use the
+Reserved Font Names of the originals in their filenames.

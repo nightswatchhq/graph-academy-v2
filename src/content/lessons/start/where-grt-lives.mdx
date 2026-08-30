@@ -1,0 +1,125 @@
+---
+title: "Where GRT lives now"
+role: newcomer
+path: "Foundations"
+module: "The services"
+order: 2
+difficulty: beginner
+time_minutes: 8
+summary: "The protocol runs on Arbitrum One. A great deal of writing about The Graph still assumes it runs on Ethereum mainnet, and that writing will cost you money."
+protocol_version_verified: "Graph Horizon (2025-12-11)"
+last_verified: 2026-08-30
+verify_before: 2026-11-30
+sources:
+  - name: "The Graph Docs: Arbitrum FAQ"
+    url: "https://thegraph.com/docs/en/archived/arbitrum/arbitrum-faq/"
+  - name: "The Graph Docs: L2 Transfer Tools guide"
+    url: "https://thegraph.com/docs/en/arbitrum/l2-transfer-tools-guide/"
+parameters_used: ["settlement_layer", "l2_curation_curve"]
+authors: ["@community"]
+license: "CC-BY-4.0"
+---
+
+The protocol contracts and the GRT you stake, delegate or signal with operate on
+<Param name="settlement_layer" />. Not Ethereum mainnet. This single fact
+invalidates a surprising proportion of the material written about The Graph
+between 2020 and 2023, including material published by this Academy's earlier
+incarnation.
+
+## Why the protocol moved.
+
+The protocol is not a token contract with a website. It is a contract system that
+processes a constant stream of small, frequent operations: opening and closing
+allocations, submitting proofs, redeeming payment vouchers, adjusting signal,
+changing delegation.
+
+On Ethereum mainnet each of those is a transaction at mainnet gas prices. That
+does not merely make things expensive, it changes behaviour. If closing an
+allocation costs meaningful money, indexers close fewer of them. If adjusting
+signal costs meaningful money, curators leave signal where it is. The protocol
+ends up with participants economising on the very actions it needs them to take
+freely.
+
+Moving to an L2 changes the arithmetic rather than the design. Operations that
+were once carefully rationed become routine.
+
+## What actually changed for each role.
+
+**Curators** got the largest structural change. On L1, curation used a bonding
+curve: early signal on a subgraph was cheaper than later signal, and unsignalling
+moved back down the curve. On Arbitrum the curve is
+<Param name="l2_curation_curve" />. Signal and unsignal cost the same regardless of
+who arrived first. The early-mover advantage is gone, and with it a whole genre of
+strategy advice that is now simply wrong.
+
+**Indexers and delegators** kept the same mechanics with a different cost floor.
+The interesting consequence is behavioural: cheap transactions make frequent
+allocation management viable, and make the difference between an attentive
+operator and an inattentive one show up in the returns.
+
+**Developers and consumers** deal with an Arbitrum One deployment, Arbitrum
+addresses, and an Arbitrum block explorer. GRT bridged from mainnet is the same
+token in the sense that matters, but it is a different contract address on a
+different chain, and pasting a mainnet address into an Arbitrum interface will not
+end well.
+
+<Warn title="The most common expensive mistake">
+Sending GRT to a protocol address on the wrong network. Mainnet and Arbitrum One
+addresses look identical in shape and are not interchangeable. Before any
+transaction involving protocol contracts, confirm which network your wallet is
+actually on. This is the single most frequent way newcomers lose money here, and
+it has nothing to do with the protocol being complicated.
+</Warn>
+
+## How to date the material you are reading.
+
+Since a great deal of stale writing is still in circulation, and much of it is
+well written and confident, it helps to have quick tells. Any of these means the
+page is describing a protocol that no longer exists:
+
+- It tells you to deploy to the **Hosted Service**.
+- It describes **Cobb-Douglas** rebate pools, or tells indexers to think about
+  what other indexers will stake.
+- It describes curation **bonding curves** as something to time your entry
+  against.
+- It mentions a **delegation tax** you will pay on deposit.
+- It says allocations **must** be closed within a fixed number of epochs to
+  collect rewards.
+
+Each of those was true once. None of them is now, and the delegator, curator and
+indexer paths each deal with the current version.
+
+<Model>
+Ask of any page about The Graph: what is the newest thing it knows about? If it
+does not mention Arbitrum, it predates the move. If it does not mention Horizon,
+it predates December 2025. That is usually enough to decide whether to keep
+reading.
+</Model>
+
+<Quiz
+  id="start-grt"
+  questions={[
+    {
+      q: "Curation on Arbitrum One uses which pricing model?",
+      options: [
+        "A bonding curve, so early signal is cheaper",
+        "A flat curve, so signal and unsignal cost the same regardless of order",
+        "An auction settled each epoch",
+        "Free, with costs recovered from query fees"
+      ],
+      answer: 1,
+      explain: "The flat curve is the substantive L2 change for curators. It removes the early-mover advantage, and with it the strategy of racing to signal first. Advice about timing your entry on the curve is describing L1."
+    },
+    {
+      q: "Which of these tells you a guide predates the current protocol?",
+      options: [
+        "It mentions Proofs of Indexing",
+        "It tells you to deploy to the Hosted Service",
+        "It mentions delegation",
+        "It mentions Arbitrum One"
+      ],
+      answer: 1,
+      explain: "The Hosted Service is gone. Cobb-Douglas rebates, bonding-curve timing, a delegation tax on deposit, and a hard epoch cap on allocations are the other reliable tells."
+    }
+  ]}
+/>

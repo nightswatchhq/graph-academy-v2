@@ -1,0 +1,164 @@
+---
+title: "What an indexer actually does"
+role: indexer
+path: "Indexer"
+module: "The job"
+order: 1
+difficulty: advanced
+time_minutes: 13
+summary: "Four services, one obligation, and a set of decisions the software will not make for you. The job is not running a node."
+protocol_version_verified: "Graph Horizon (2025-12-11)"
+last_verified: 2026-08-30
+verify_before: 2026-11-30
+sources:
+  - name: "The Graph Docs: indexing overview"
+    url: "https://thegraph.com/docs/en/indexing/overview/"
+  - name: "The Graph Docs: what changes with Graph Horizon"
+    url: "https://thegraph.com/docs/en/graph-horizon/what-changes/"
+parameters_used: ["min_indexer_self_stake", "max_delegation_ratio", "max_poi_staleness_days"]
+authors: ["@community"]
+license: "CC-BY-4.0"
+---
+
+An indexer runs the machines that turn chain data into something queryable, serves
+queries against it, and periodically proves the work was done. That description is
+accurate and it undersells the job considerably, because none of the hard parts are
+in it.
+
+## The obligation, stated plainly.
+
+You stake at least <Param name="min_indexer_self_stake" /> of your own GRT, may
+accept up to <Param name="max_delegation_ratio" /> that amount in delegated stake,
+and you allocate that stake to subgraphs you undertake to index and serve.
+
+While allocated, you periodically publish a Proof of Indexing: a hash committing to
+the data you derived. If you go longer than
+<Param name="max_poi_staleness_days" /> without one, your allocation is stale and
+stops earning. If a POI you publish disagrees with what other honest indexers
+produced, somebody can dispute it and you can be slashed.
+
+That is the whole contract. Everything else is your choice, and the choices are
+where the money is.
+
+## The four processes.
+
+**graph-node.** Executes subgraphs. Follows chains, runs mappings, writes entities
+to Postgres, and answers GraphQL. This is the component doing the indexing, and it
+is the one whose resource appetite will surprise you.
+
+**indexer-agent.** The decision-making component. Watches the network, opens and
+closes allocations according to your indexing rules, manages deployments, and
+submits transactions including RAV redemptions. If you have views about what to
+index, this is where they are expressed.
+
+**indexer-service-rs.** The query front door. Takes queries, validates the payment
+receipt attached to each one, forwards to graph-node, and stores receipts. It is
+stateless and it is what the network actually talks to.
+
+**indexer-tap-agent.** Aggregates stored receipts into vouchers that can be redeemed
+on chain. Runs as a single instance. Covered properly in
+[the payments lesson](/indexers/payments-graphtally/).
+
+Around those sit Postgres, the chain endpoints for every network you index, and
+whatever monitoring you are willing to be woken up by.
+
+<Flow steps={["chain data", "graph-node", "indexer-service-rs", "queries served"]} hot={1} />
+
+## What the software will not decide for you.
+
+This is the part that separates indexers who earn from indexers who merely operate.
+
+**Which subgraphs to index.** Thousands exist. Your capacity does not stretch to
+them. Signal indicates where the protocol thinks value is, and following signal
+blindly puts you in competition with everyone else doing the same.
+
+**How to price queries.** You publish a cost model. Price too high and the gateway
+routes around you. Price too low and you serve expensive queries at a loss. This is
+a real pricing problem and the defaults are a starting point rather than an answer.
+
+**How much stake to allocate where.** Allocation determines your indexing rewards
+and, through the rebate mechanism, how much of your query fees you keep.
+
+**Which chains to support.** Every additional chain is another node to run, another
+sync to babysit, another thing that breaks at the weekend.
+
+<Model>
+The software is not the moat. Anyone can run these four processes. The differences
+in outcome come from allocation strategy, cost models, and whether the operator
+notices problems before the network does. It is an operations business with a
+research component, not a deployment exercise.
+</Model>
+
+## The costs nobody quotes.
+
+- **Archive nodes.** Indexing history means reading history. Either you run archive
+  nodes or you pay someone for them, and on a busy chain neither is cheap.
+- **Storage that only grows.** Every subgraph you index is a Postgres database that
+  gets larger indefinitely.
+- **Attention.** Chains fork, subgraphs fail on contract upgrades, syncs fall
+  behind. Stake sitting behind a broken deployment earns nothing while looking
+  exactly like stake that is working.
+- **Capital opportunity cost.** Your self-stake is committed. Compare against what
+  it would earn delegated to somebody else, which is the honest baseline and is the
+  subject of [the next lesson](/indexers/index-or-delegate/).
+
+## What Horizon changed at the top level.
+
+Three things, each covered properly later in this path:
+
+- Stake is **provisioned** against a specific data service rather than pooled
+  generally. You register with the Subgraph Service and provision to it.
+- Allocations can in principle remain **open indefinitely**, with periodic POIs
+  replacing the close-to-collect cycle. In practice the shipped stack still recycles
+  them, and [that gap has its own lesson](/indexers/allocations-and-pois/).
+- Slashing is **flexible**, judged by arbitrators within a cap rather than fixed.
+
+<Reveal question="Before reading on: two indexers run identical hardware and identical software, both fully allocated. Why might one earn twice what the other does?">
+Allocation choices and cost models, in that order.
+
+Indexing rewards depend on which subgraphs you allocate to and how much signal
+those subgraphs carry. Allocating capacity to subgraphs with little signal earns
+little, regardless of how well the machine runs.
+
+Query fees depend on being chosen by the gateway, which depends on your cost model
+and your measured performance. An indexer priced above the field serves fewer
+queries; one priced below it serves expensive queries at a loss.
+
+Neither difference is visible in a system metrics dashboard. Both compound, and
+both are decisions rather than capabilities, which is why this path spends more time
+on economics than on installation.
+</Reveal>
+
+<Quiz
+  id="indexer-overview"
+  questions={[
+    {
+      q: "Which component decides when to open and close allocations?",
+      options: ["graph-node", "indexer-agent", "indexer-service-rs", "indexer-tap-agent"],
+      answer: 1,
+      explain: "indexer-agent is the decision-making component. graph-node does the indexing, indexer-service-rs is the query front door, and indexer-tap-agent aggregates payment receipts."
+    },
+    {
+      q: "What happens if you stop publishing POIs for an allocation?",
+      options: [
+        "It closes automatically and pays out",
+        "It goes stale past the staleness limit and stops earning",
+        "You are slashed immediately",
+        "Nothing, POIs are optional under Horizon"
+      ],
+      answer: 1,
+      explain: "Staleness stops the earning rather than triggering a penalty. Being slashed requires a dispute over a POI that disagrees with what honest indexers produced, which is a different failure entirely."
+    },
+    {
+      q: "The largest differences in earnings between technically competent indexers come from:",
+      options: [
+        "Hardware specification",
+        "Geographic location",
+        "Allocation strategy and cost models",
+        "The number of chains supported"
+      ],
+      answer: 2,
+      explain: "Anyone can run the four processes. What varies is which subgraphs the stake is pointed at and how queries are priced, and neither shows up on a systems dashboard."
+    }
+  ]}
+/>

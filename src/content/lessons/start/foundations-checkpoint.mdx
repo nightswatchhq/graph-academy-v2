@@ -1,0 +1,108 @@
+---
+title: "Foundations checkpoint"
+role: newcomer
+path: "Foundations"
+module: "Checkpoint"
+order: 1
+difficulty: beginner
+time_minutes: 10
+summary: "Prove to yourself that the shape of the protocol has stuck, then pick the role you actually came here for."
+protocol_version_verified: "Graph Horizon (2025-12-11)"
+last_verified: 2026-08-30
+verify_before: 2026-11-30
+sources:
+  - name: "Graph Explorer"
+    url: "https://thegraph.com/explorer"
+  - name: "The Graph Docs: tokenomics"
+    url: "https://thegraph.com/docs/en/resources/tokenomics/"
+parameters_used: []
+authors: ["@community"]
+license: "CC-BY-4.0"
+---
+
+Two parts. A quiz you can be wrong on with no consequences, and a practical task
+that puts you in front of the real network.
+
+## Recall
+
+<Quiz
+  id="start-checkpoint"
+  title="Foundations checkpoint"
+  questions={[
+    {
+      q: "Which role is the only one that operates infrastructure and can be slashed for provable misbehaviour?",
+      options: ["Curator", "Delegator", "Indexer", "Subgraph developer"],
+      answer: 2,
+      explain: "Indexers run the machines and put their own stake at risk. Curators and delegators put capital at risk in other ways, but neither operates a service and neither is slashed for the Subgraph Service today."
+    },
+    {
+      q: "Signal from curators exists mainly to:",
+      options: [
+        "Pay indexers directly for each query served",
+        "Tell indexers which subgraphs are worth indexing before queries arrive",
+        "Vote on protocol upgrades",
+        "Bond a subgraph against being deleted"
+      ],
+      answer: 1,
+      explain: "Signal is a forward-looking bet on demand. Its job is to route indexing capacity towards data that will be wanted, which is exactly the information nobody has yet at the moment a new subgraph is published."
+    },
+    {
+      q: "Which statement about issuance is correct?",
+      options: [
+        "Issuance is paid only when queries are served",
+        "Issuance funds indexing capacity whether or not a subgraph has query demand",
+        "Issuance is paid to delegators directly by the protocol",
+        "Issuance was removed under Horizon"
+      ],
+      answer: 1,
+      explain: "That property is the point. It pays for an index to exist ahead of demand, which is the deadlock query fees alone cannot break. Delegators are paid out of what their indexer earns, not directly by the protocol."
+    },
+    {
+      q: "You find a 2022 tutorial telling you to deploy your subgraph to the Hosted Service. You should:",
+      options: [
+        "Follow it, the Hosted Service is still the recommended path",
+        "Follow it but skip the payment steps",
+        "Stop, it predates the current protocol entirely",
+        "Follow it and migrate later"
+      ],
+      answer: 2,
+      explain: "The Hosted Service is gone. A page recommending it does not know about Arbitrum One or Horizon either, which means everything economic in it is also wrong. Date the material before trusting it."
+    },
+    {
+      q: "The protocol contracts and stakeable GRT live on:",
+      options: ["Ethereum mainnet", "Arbitrum One", "Polygon", "A dedicated app chain"],
+      answer: 1,
+      explain: "Arbitrum One. Frequent small operations, allocations, proofs, signal changes and voucher redemptions, are only sensible at L2 costs. Sending GRT to a protocol address on the wrong network is the most common expensive newcomer mistake."
+    }
+  ]}
+/>
+
+## Practical task
+
+Nothing here costs money or requires a wallet connection. The aim is to see that
+the things you have been reading about are real, named, and countable.
+
+<Checklist
+  id="start-checkpoint"
+  title="Go and look at the real network"
+  items={[
+    "Open Graph Explorer and find the list of indexers. Note how many there are.",
+    "Pick any indexer and find its self-stake, its delegated stake, and its indexing reward cut. Those three numbers are the whole delegator decision in miniature.",
+    "Find a published subgraph and look at its signalled GRT. That number is curators betting on future query demand for it.",
+    "Open the Academy parameters page and find one number where two official sources disagree.",
+    "Decide which role you came here for, and open that path."
+  ]}
+/>
+
+## Pick your path
+
+You have the shape of it. Where you go next depends on what you actually want to
+do:
+
+- You have GRT and want it working: **[Delegators](/delegators/)**.
+- You want to back specific data rather than specific operators:
+  **[Curators](/curators/)**.
+- You want to run the infrastructure: **[Indexers](/indexers/)**.
+- You want to publish data for others to query: **[Developers](/developers/)**.
+- You want to consume data in an application: **[App builders](/consumers/)**.
+- You want to understand how the rules get changed: **[Governance](/governance/)**.

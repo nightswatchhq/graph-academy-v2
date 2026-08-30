@@ -1,0 +1,29 @@
+{
+  "name": "graph-academy-v2",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "The Graph Academy: a community-owned learning site for The Graph protocol.",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "astro check",
+    "params": "node scripts/check-params.mjs",
+    "staleness": "node scripts/staleness.mjs",
+    "reconcile": "node scripts/reconcile-onchain.mjs",
+    "contrast": "python3 tools/contrast.py",
+    "audit:style": "node scripts/style-audit.mjs"
+  },
+  "dependencies": {
+    "@astrojs/mdx": "^4.3.6",
+    "@astrojs/sitemap": "^3.6.0",
+    "astro": "^5.14.1",
+    "astro-pagefind": "^1.8.3",
+    "smol-toml": "^1.4.2"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.4",
+    "typescript": "^5.9.3"
+  }
+}

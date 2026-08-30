@@ -1,0 +1,275 @@
+/* ==========================================================================
+   cargopete style - canonical tokens
+   Two dialects, one language. Copy the block you need; do not mix them.
+
+     FLAT         the nuthatch dialect, the default. No gradients, no shadows.
+     ATMOSPHERIC  the yatr dialect. Ambient glow, grain, gradients, serif.
+
+   Contrast ratios in the comments are measured, not estimated. Reproduce with
+   `python3 tools/contrast.py`.
+   ========================================================================== */
+
+
+/* ==========================================================================
+   FLAT - dark, the canonical form
+   ========================================================================== */
+
+:root {
+  /* --- surfaces: four tiers, warm, brown-shifted, never cool grey -------- */
+  --bg:          #171614;   /* page canvas - unlit wood */
+  --bg-elev:     #201f1c;   /* cards, panels, anything lifted */
+  --bg-code:     #1b1a17;   /* terminal + code block bodies */
+  --bg-inset:    #262420;   /* inline code, kbd, chips - pressed in, not lifted */
+
+  /* --- borders: the entire vocabulary of separation ---------------------- */
+  --border:      rgba(255, 255, 255, 0.09);   /* at rest */
+  --border-hi:   rgba(255, 255, 255, 0.16);   /* interactive, focused, kbd */
+
+  /* --- ink: three tiers ------------------------------------------------- */
+  --text:        #ece9e3;   /* 14.92 on --bg. warm off-white, never #fff */
+  --text-muted:  #9c978c;   /*  6.22 on --bg. AA everywhere. secondary copy */
+  --text-faint:  #6e6a61;   /*  3.36 on --bg. DECORATIVE ONLY - see note */
+
+  /* --- accents: taken off the bird, not off a swatch chart -------------- */
+  --accent:      #8bb8dc;   /*  8.60 on --bg. nuthatch back, slate blue */
+  --accent-ink:  #cfe3f2;   /* 13.71 on --bg. accent text on an accent wash */
+  --rust:        #cd8560;   /*  6.13 on --bg. nuthatch underside, terracotta */
+
+  /* --- status: washed, never saturated. no red in the resting palette --- */
+  --ok:          #86b592;   /*  7.78 on --bg */
+  --warn:        #cdb06a;   /*  8.62 on --bg */
+
+  /* --- accent washes: 12% of the hue, for tags and tinted table cells ---- */
+  --pale-blue-bg:  rgba(139, 184, 220, 0.12);
+  --pale-rust-bg:  rgba(205, 133, 96, 0.12);
+  --pale-green-bg: rgba(134, 181, 146, 0.12);
+
+  /* --- geometry --------------------------------------------------------- */
+  --maxw:       68rem;
+  --radius:     10px;   /* cards, terminals */
+  --radius-sm:   6px;   /* buttons, chips, kbd */
+  --ease:       cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* --- type ------------------------------------------------------------- */
+  --display: 'Space Grotesk', ui-sans-serif, system-ui, 'Helvetica Neue', sans-serif;
+  --sans:    'Space Grotesk', ui-sans-serif, system-ui, 'Helvetica Neue', sans-serif;
+  --mono:    'JetBrains Mono', ui-monospace, 'SF Mono', 'Menlo', monospace;
+
+  color-scheme: dark;
+}
+
+/* --text-faint fails AA on every surface (3.36 / 3.06 / 2.87) and that is
+   deliberate: it is for section kickers, window titles, timestamps and the copy
+   hint - things a reader can lose without losing meaning. It never carries body
+   copy, never carries a link, and never carries the only instance of a fact.
+   This is the first rule a careless retrofit breaks. */
+
+
+/* ==========================================================================
+   FLAT - light. A faithful inversion, never a second design.
+   Driven by [data-theme='light'] on <html>, set by an inline script from
+   localStorage BEFORE first paint so the choice survives a reload without a flash.
+   ========================================================================== */
+
+:root[data-theme='light'] {
+  --bg:          #fbfbfa;
+  --bg-elev:     #ffffff;
+  --bg-code:     #f7f6f3;
+  --bg-inset:    #f2f1ec;
+
+  --border:      #eaeaea;
+  --border-hi:   rgba(0, 0, 0, 0.14);
+
+  --text:        #2f3437;   /* 12.16 on --bg */
+  --text-muted:  #706d69;   /*  4.97 on --bg, 4.55 on --bg-inset. clears AA.
+                               NOT #787774 - upstream's value measures 4.32
+                               and misses. */
+  --text-faint:  #9a968e;   /*  2.85. decorative only, same contract as dark */
+
+  --accent:      #1f6c9f;   /*  5.48 on --bg */
+  --accent-ink:  #1a5680;   /*  7.55 on --bg */
+  --rust:        #9d5433;   /*  5.41 on --bg, 4.95 on --bg-inset. NOT #a85a38 -
+                               that measures 4.44 on --bg-inset and misses AA. */
+
+  --ok:          #346538;   /*  6.62 on --bg */
+  --warn:        #8a6400;   /*  5.20 on --bg */
+
+  --pale-blue-bg:  #e1f3fe;
+  --pale-rust-bg:  #f7ebe4;
+  --pale-green-bg: #edf3ec;
+
+  color-scheme: light;
+}
+
+
+/* ==========================================================================
+   ATMOSPHERIC texture - the yatr setting, rendered in the MANDATED palette.
+   This block defines NO hues of its own. It is texture only: ambient glow,
+   grain, gradients, one shadow, and the serif display face. If you find
+   yourself adding a colour here, stop - see SKILL.md section 0.
+   Dark only. The ambient layer has no honest light inversion.
+   ========================================================================== */
+
+:root[data-texture='atmospheric'] {
+  --radius:    16px;   /* rounder than flat: 16 cells, 14 terminal, 11 install */
+  --radius-sm: 11px;
+
+  /* the one permitted substitution: an editorial serif with an italic cut */
+  --display: 'Fraunces', 'Iowan Old Style', Georgia, serif;
+
+  /* the one permitted shadow in the entire style, for a hero terminal only */
+  --shadow-hero: 0 40px 90px -40px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(0, 0, 0, 0.3);
+}
+
+/* Ambient layer: two fixed, non-interactive, non-animated pseudo-elements on
+   <body>. Rust leads and accent supports, so the ground stays warm - a large
+   slate-blue glow over #171614 reads cold and breaks the doctrine. */
+
+[data-texture='atmospheric'] body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(900px 520px at 78% -8%, rgba(205, 133,  96, 0.14), transparent 60%),
+    radial-gradient(700px 500px at  8%  4%, rgba(139, 184, 220, 0.09), transparent 55%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* SVG turbulence grain. Inline data URI, no request, no image asset. */
+[data-texture='atmospheric'] body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.4'/%3E%3C/svg%3E");
+  opacity: 0.035;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  z-index: 0;
+}
+
+[data-texture='atmospheric'] main,
+[data-texture='atmospheric'] header,
+[data-texture='atmospheric'] footer { position: relative; z-index: 1; }
+
+/* Cells gain a 180deg gradient between two existing surface tiers. Still no
+   new colour: the gradient interpolates tokens. */
+[data-texture='atmospheric'] .cell {
+  background: linear-gradient(180deg, var(--bg-elev), var(--bg));
+}
+
+[data-texture='atmospheric'] .term--hero { box-shadow: var(--shadow-hero); }
+
+/* Hairlines warm up: tinted with the rust accent rather than with white. */
+[data-texture='atmospheric'] {
+  --border:    rgba(205, 133, 96, 0.14);
+  --border-hi: rgba(205, 133, 96, 0.24);
+}
+
+
+/* ==========================================================================
+   Shared base. Applies to both dialects.
+   ========================================================================== */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 17px;
+  line-height: 1.6;
+  letter-spacing: -0.01em;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+  transition: background-color 0.3s var(--ease), color 0.3s var(--ease);
+}
+
+h1, h2, h3 {
+  font-family: var(--display);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  margin: 0;
+}
+h1 { font-size: clamp(2.4rem, 6vw, 3.9rem); }
+h2 { font-size: clamp(1.6rem, 3.4vw, 2.3rem); }
+h3 { font-size: 1.15rem; letter-spacing: -0.02em; }
+
+/* the serif dialect runs its display face at 400 with a 500 italic accent cut */
+[data-texture='atmospheric'] h1,
+[data-texture='atmospheric'] h2 { font-weight: 400; letter-spacing: -0.022em; }
+[data-texture='atmospheric'] h1 { line-height: 1.02; }
+[data-texture='atmospheric'] h1 em,
+[data-texture='atmospheric'] h2 em { font-style: italic; font-weight: 500; color: var(--accent); }
+
+p { margin: 0; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; text-underline-offset: 3px; }
+strong { font-weight: 600; color: var(--text); }
+::selection { background: var(--pale-blue-bg); color: var(--text); }
+
+code, kbd, pre, .mono {
+  font-family: var(--mono);
+  font-feature-settings: 'calt' 1;
+}
+
+/* --- the mono instrument label: the tier that identifies the style ------- */
+.kicker, .section-label, .tag, .eyebrow {
+  font-family: var(--mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.kicker, .section-label {
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  color: var(--text-faint);
+  margin-bottom: 1.1rem;
+}
+
+/* --- layout primitives -------------------------------------------------- */
+.wrap    { width: 100%; max-width: var(--maxw); margin-inline: auto; padding-inline: 1.5rem; }
+.narrow  { max-width: 44rem; }
+section  { padding-block: clamp(4rem, 9vw, 7rem); }
+.divider { border: 0; border-top: 1px solid var(--border); margin: 0; }
+
+/* --- focus and skip: non-negotiable ------------------------------------- */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+.skip {
+  position: absolute; left: -999px; top: 0;
+  background: var(--text); color: var(--bg);
+  padding: 0.6rem 1rem;
+  border-radius: 0 0 var(--radius-sm) 0;
+  z-index: 100;
+}
+.skip:focus { left: 0; }
+
+/* --- the whole motion budget, and its off switch ------------------------ */
+@keyframes rise {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: none; }
+}
+.rise   { animation: rise 0.7s var(--ease) both; }
+.rise-1 { animation-delay: 0.05s; }
+.rise-2 { animation-delay: 0.12s; }
+.rise-3 { animation-delay: 0.19s; }
+
+.reveal { opacity: 0; transform: translateY(22px); transition: opacity 0.7s var(--ease), transform 0.7s var(--ease); }
+.reveal.in { opacity: 1; transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *    { transition: none !important; animation: none !important; }
+  .reveal { opacity: 1; transform: none; }
+}

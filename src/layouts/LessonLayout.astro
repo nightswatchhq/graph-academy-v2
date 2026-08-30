@@ -1,0 +1,133 @@
+---
+import Base from './Base.astro';
+import VerifyStamp from '../components/VerifyStamp.astro';
+import MarkDone from '../components/MarkDone.astro';
+import type { MarkdownHeading } from 'astro';
+import type { Lesson, PathMeta } from '../lib/paths';
+import { SITE } from '../lib/site';
+
+interface Props {
+  lesson: Lesson;
+  meta: PathMeta;
+  headings: MarkdownHeading[];
+  prev?: Lesson;
+  next?: Lesson;
+  index: number;
+  total: number;
+}
+const { lesson, meta, headings, prev, next, index, total } = Astro.props;
+const d = lesson.data;
+const toc = headings.filter((h) => h.depth === 2 || h.depth === 3);
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'LearningResource',
+  name: d.title,
+  description: d.summary,
+  educationalLevel: d.difficulty,
+  timeRequired: `PT${d.time_minutes}M`,
+  learningResourceType: 'Lesson',
+  isPartOf: { '@type': 'Course', name: `${meta.path} path`, url: `${SITE.url}/${meta.hub}/` },
+  inLanguage: 'en',
+  license: 'https://creativecommons.org/licenses/by/4.0/',
+  dateModified: d.last_verified.toISOString().slice(0, 10),
+  citation: d.sources.map((s) => ({ '@type': 'CreativeWork', name: s.name, url: s.url })),
+};
+---
+<Base title={d.title} description={d.summary} jsonLd={jsonLd}>
+  <div class="wrap lesson-head">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="/paths/">Paths</a>
+      <span class="sep">/</span>
+      <a href={`/${meta.hub}/`}>{meta.path}</a>
+      <span class="sep">/</span>
+      <span>{d.module}</span>
+    </nav>
+    <h1>{d.title}</h1>
+    <p class="lesson-lede">{d.summary}</p>
+    <div class="lesson-meta">
+      <span class="m"><b>{index + 1}</b> of {total} in the {meta.path} path</span>
+      <span class="m">{d.difficulty}</span>
+      <span class="m"><b>{d.time_minutes}</b> min</span>
+    </div>
+    <VerifyStamp
+      protocolVersion={d.protocol_version_verified}
+      lastVerified={d.last_verified}
+      verifyBefore={d.verify_before}
+      sources={d.sources}
+      reviewers={d.reviewers}
+    />
+  </div>
+
+  <div class="wrap" style="padding-top: 2.6rem; padding-bottom: 1rem;">
+    <div class="lesson-grid">
+      <article class="prose">
+        <slot />
+        <MarkDone id={lesson.id} />
+      </article>
+      {toc.length > 2 && (
+        <aside class="toc-col">
+          <nav class="toc" aria-label="On this page">
+            <p class="toc-label">On this page</p>
+            <ul>
+              {toc.map((h) => (
+                <li class={h.depth === 3 ? 'd3' : 'd2'}><a href={`#${h.slug}`}>{h.text}</a></li>
+              ))}
+            </ul>
+          </nav>
+        </aside>
+      )}
+    </div>
+
+    <div class="cta-row" style="max-width: 44rem;">
+      <a class="cta-card out" href={meta.docs.url} rel="external noopener">
+        <span class="cta-label">The procedure</span>
+        <span>{meta.docs.label}</span>
+        <span class="cta-text">
+          This site explains why. The official documentation carries the exact steps,
+          flags and config, and it is maintained by the people who ship the code.
+        </span>
+      </a>
+      {meta.live ? (
+        <a class="cta-card out" href={meta.live.url} rel="external noopener">
+          <span class="cta-label">The live numbers</span>
+          <span>{meta.live.label}</span>
+          <span class="cta-text">
+            Nothing on this page is live. For current stake, signal, indexer performance
+            and fees, go where the data actually is.
+          </span>
+        </a>
+      ) : (
+        <a class="cta-card" href="/parameters/">
+          <span class="cta-label">The numbers</span>
+          <span>Every parameter on one page</span>
+          <span class="cta-text">
+            With the date somebody last read the source, and a note wherever two official
+            pages disagree.
+          </span>
+        </a>
+      )}
+    </div>
+
+    <nav class="pager" style="max-width: 44rem;" aria-label="Lesson navigation">
+      {prev && (
+        <a class="pager-card prev" href={`/${prev.id}/`}>
+          <span class="dir">Previous</span>
+          <span class="t">{prev.data.title}</span>
+        </a>
+      )}
+      {next && (
+        <a class={prev ? 'pager-card next' : 'pager-card next only'} href={`/${next.id}/`}>
+          <span class="dir">Next</span>
+          <span class="t">{next.data.title}</span>
+        </a>
+      )}
+      {!next && (
+        <a class={prev ? 'pager-card next' : 'pager-card next only'} href={`/${meta.hub}/`}>
+          <span class="dir">Back to the path</span>
+          <span class="t">{meta.title}</span>
+        </a>
+      )}
+    </nav>
+  </div>
+</Base>

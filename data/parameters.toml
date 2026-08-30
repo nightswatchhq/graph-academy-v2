@@ -1,0 +1,328 @@
+# The Graph Academy - protocol parameter registry
+#
+# Single source of truth for every number that appears on the site. Prose never
+# hard-codes a value; it calls the registry. This is the mechanism that stops the
+# site rotting the way the 2022 version did, when Cobb-Douglas rebates and L1
+# bonding curves were baked into paragraphs nobody could find again.
+#
+# Every entry carries a source URL and the date somebody read that URL. Where two
+# official pages disagree, the entry carries a `note` and the disagreement is
+# taught rather than hidden.
+#
+# Rules for editors:
+#   - `verified` is the date a human opened `source` and read the value there.
+#     Do not copy it forward from another entry.
+#   - `status = "disputed"` means official sources conflict. Resolve against the
+#     deployed contract, then downgrade to "current" and record what you found.
+#   - `status = "deprecated"` means the value is retained for teaching only.
+
+schema_version = 1
+protocol_version = "Graph Horizon (2025-12-11)"
+
+# --------------------------------------------------------------------------
+# Indexing
+# --------------------------------------------------------------------------
+
+[min_indexer_self_stake]
+label = "Minimum Indexer self-stake"
+value = 100000
+unit = "GRT"
+display = "100,000 GRT"
+status = "current"
+source = "https://thegraph.com/docs/en/indexing/overview/"
+quote = "The minimum stake for an Indexer is currently set to 100K GRT."
+onchain_ref = "HorizonStaking.minimumIndexerStake"
+verified = "2026-08-30"
+
+[max_delegation_ratio]
+label = "Maximum delegation ratio"
+value = 16
+unit = "x self-stake"
+display = "16x"
+status = "current"
+source = "https://thegraph.com/docs/en/resources/roles/delegating/delegating/"
+quote = "The Graph Network includes a delegation ratio of 16, meaning an Indexer can accept up to 16 times their Self-Stake in delegated GRT."
+verified = "2026-08-30"
+
+[max_poi_staleness_days]
+label = "Maximum POI staleness"
+value = 28
+unit = "days"
+display = "28 days"
+status = "current"
+source = "https://thegraph.com/docs/en/indexing/overview/"
+quote = "The maxPOIStaleness parameter is currently set to 28 days."
+onchain_ref = "SubgraphService.maxPOIStaleness"
+verified = "2026-08-30"
+
+[allocation_lifetime]
+conflict = true
+label = "Allocation lifetime"
+value = "indefinite"
+unit = ""
+display = "Indefinite"
+status = "disputed"
+source = "https://thegraph.com/docs/en/indexing/overview/"
+quote = "Under Graph Horizon, allocations can remain open indefinitely. There is no requirement to close an allocation to collect rewards."
+note = """
+The protocol permits indefinite allocations. The shipped indexer stack does not yet \
+use them. The Horizon changes page states: "At Horizon launch the indexer stack will \
+continue to operate using the current 'short lived' allocation lifecycle for an easier \
+transition. This means that allocations will be recycled typically every 28 days." \
+Teach the protocol capability and the operational reality as two separate facts, \
+because an indexer planning capacity needs both.\
+"""
+note_source = "https://thegraph.com/docs/en/graph-horizon/what-changes/"
+verified = "2026-08-30"
+
+[max_slash_pct]
+label = "Maximum slashable percentage"
+value = 10
+unit = "% of stake"
+display = "10%"
+status = "current"
+source = "https://thegraph.com/docs/en/graph-horizon/what-changes/"
+quote = "Arbitrators now have the flexibility to determine appropriate slash amounts based on the severity and context of infractions, up to a cap of 10% of the indexer's stake."
+verified = "2026-08-30"
+
+[recommended_slash_pct]
+label = "Recommended slash amount"
+value = 2.5
+unit = "% of stake"
+display = "2.5%"
+status = "current"
+source = "https://thegraph.com/docs/en/graph-horizon/what-changes/"
+quote = "The recommended value is 2.5% of the indexer's stake."
+verified = "2026-08-30"
+
+[fisherman_dispute_deposit]
+label = "Fisherman dispute deposit"
+value = 10000
+unit = "GRT"
+display = "10,000 GRT"
+status = "current"
+source = "https://thegraph.com/docs/en/indexing/overview/"
+quote = "A deposit of a minimum of 10,000 GRT is required by the Fishermen."
+verified = "2026-08-30"
+
+# --------------------------------------------------------------------------
+# Delegation
+# --------------------------------------------------------------------------
+
+[undelegation_period_days]
+label = "Undelegation (thawing) period"
+value = 28
+unit = "days"
+display = "28 days"
+status = "current"
+source = "https://thegraph.com/docs/en/resources/roles/delegating/delegating/"
+quote = "When a Delegator chooses to undelegate, their tokens are subject to a 28-day undelegation period."
+verified = "2026-08-30"
+
+[delegation_tax_pct]
+conflict = true
+label = "Delegation tax"
+value = 0
+unit = "%"
+display = "0%"
+status = "deprecated"
+source = "https://thegraph.com/docs/en/graph-horizon/what-changes/"
+quote = "The 0.5% delegation tax has been completely removed."
+note = """
+Removed by Graph Horizon. The tokenomics page has not caught up: as read on \
+2026-08-30 it still states "There is a 0.5% delegation tax which is burned whenever a \
+Delegator delegates GRT on the network." Two official pages, two answers. The Horizon \
+pages are the current ones. A delegator who budgets for a 0.5% haircut on deposit is \
+working from stale documentation.\
+"""
+note_source = "https://thegraph.com/docs/en/resources/tokenomics/"
+verified = "2026-08-30"
+
+[max_simultaneous_undelegations]
+conflict = true
+label = "Simultaneous undelegation requests"
+value = 1000
+unit = "requests"
+display = "1,000"
+status = "disputed"
+source = "https://thegraph.com/docs/en/resources/roles/delegating/delegating/"
+quote = "Horizon supports up to 1,000 simultaneous undelegation requests, removing the previous restriction to a single active undelegation at a time."
+note = """
+The two official pages disagree, and both were read on 2026-08-30. The Delegating page \
+says 1,000. The Horizon changes page says "Delegators can now have multiple undelegation \
+requests processing simultaneously (up to 100)." Unresolved. The practical guidance does \
+not turn on which is right, because both are far above what any delegator queues in \
+practice, but the registry records the conflict rather than picking a winner. Resolution \
+requires reading MAX_THAW_REQUESTS on the deployed HorizonStaking contract.\
+"""
+note_source = "https://thegraph.com/docs/en/graph-horizon/what-changes/"
+onchain_ref = "HorizonStaking.MAX_THAW_REQUESTS"
+verified = "2026-08-30"
+
+[delegated_stake_slashable]
+label = "Delegated stake slashable"
+value = false
+unit = ""
+display = "Not currently"
+status = "current"
+source = "https://thegraph.com/docs/en/resources/roles/delegating/delegating/"
+quote = "Horizon introduces the technical capability for delegated stake to be slashed in the future. This capability is not currently enabled for SubgraphService."
+note = "A capability that exists and is switched off. Teach it as a future risk, never as current behaviour, and never omit it."
+verified = "2026-08-30"
+
+# --------------------------------------------------------------------------
+# Curation
+# --------------------------------------------------------------------------
+
+[curation_tax_pct]
+label = "Curation tax"
+value = 1
+unit = "% (burned)"
+display = "1%"
+status = "current"
+source = "https://thegraph.com/docs/en/resources/tokenomics/"
+quote = "Curators pay a 1% curation tax when they curate a new Subgraph. This curation tax is burned, decreasing the supply of GRT."
+verified = "2026-08-30"
+
+[l2_curation_curve]
+label = "L2 curation bonding curve"
+value = "flat"
+unit = ""
+display = "Flat"
+status = "current"
+source = "https://thegraph.com/docs/en/arbitrum/l2-transfer-tools-guide/"
+quote = "The curation bonding curves on L2 are flat, which makes it easier for other Curators to curate on subgraphs, increasing the rewards for Indexers."
+note = "Signal and unsignal cost the same regardless of who signalled first. The L1 early-mover advantage is gone."
+verified = "2026-08-30"
+
+[recommended_dev_signal]
+label = "Suggested self-curation signal"
+value = 3000
+unit = "GRT"
+display = "3,000 GRT"
+status = "current"
+source = "https://thegraph.com/docs/en/resources/tokenomics/"
+quote = "Subgraph developers are encouraged to curate their Subgraph with at least 3,000 GRT. However, this number may be impacted by network activity and community participation."
+verified = "2026-08-30"
+
+# --------------------------------------------------------------------------
+# Tokenomics
+# --------------------------------------------------------------------------
+
+[annual_issuance_pct]
+label = "Annual GRT issuance"
+value = 3
+unit = "% target"
+display = "3%"
+status = "current"
+source = "https://thegraph.com/docs/en/resources/tokenomics/"
+quote = "The total supply of GRT tokens will increase by 3% each year as new tokens are issued to Indexers for their contribution to the network."
+verified = "2026-08-30"
+
+[initial_supply]
+label = "Initial GRT supply"
+value = 10000000000
+unit = "GRT"
+display = "10 billion GRT"
+status = "current"
+source = "https://thegraph.com/docs/en/resources/tokenomics/"
+quote = "The initial token supply is 10 billion GRT, with a target of 3% new issuance annually to reward Indexers for allocating stake on Subgraphs."
+verified = "2026-08-30"
+
+[query_fee_burn_pct]
+label = "Query fee burn"
+value = 1
+unit = "% of query fees"
+display = "1%"
+status = "current"
+source = "https://thegraph.com/docs/en/resources/tokenomics/"
+quote = "1% of the query fees paid to the network are burned."
+verified = "2026-08-30"
+
+[settlement_layer]
+label = "Protocol settlement layer"
+value = "Arbitrum One"
+unit = ""
+display = "Arbitrum One"
+status = "current"
+source = "https://thegraph.com/docs/en/archived/arbitrum/arbitrum-faq/"
+quote = "The Graph protocol contracts and GRT operate on Arbitrum One."
+verified = "2026-08-30"
+
+# --------------------------------------------------------------------------
+# Query fee rebates (GIP-0051)
+# --------------------------------------------------------------------------
+
+[rebate_lambda]
+label = "Rebate function lambda"
+value = 0.6
+unit = ""
+display = "0.6"
+status = "current"
+source = "https://github.com/graphprotocol/graph-improvement-proposals/blob/main/gips/0051-exponential-rebates.md"
+quote = "We believe setting lambda=0.6 and alpha=1 ensures there will be enough stake to secure the network without putting too much of a staking burden on indexers."
+note = """
+The value proposed in GIP-0051. The deployed value lives in contract storage as \
+lambdaNumerator / lambdaDenominator and can be changed by governance without a new \
+GIP number. The GIP's own worked figures reproduce exactly at lambda 0.6 and alpha 1: \
+a stake ratio of 4 returns 90.9% of fees, 6 returns 97.3%, 8 returns 99.2%. Anyone \
+sizing real stake should read the contract rather than this page.\
+"""
+onchain_ref = "HorizonStaking.lambdaNumerator / lambdaDenominator"
+verified = "2026-08-30"
+
+[rebate_alpha]
+label = "Rebate function alpha"
+value = 1
+unit = ""
+display = "1"
+status = "current"
+source = "https://github.com/graphprotocol/graph-improvement-proposals/blob/main/gips/0051-exponential-rebates.md"
+quote = "Where 0 <= alpha <= 1 and lambda > 0 are protocol parameters."
+onchain_ref = "HorizonStaking.alphaNumerator / alphaDenominator"
+verified = "2026-08-30"
+
+[cobb_douglas_burn_pct]
+label = "Query fees burned under Cobb-Douglas"
+value = 50
+unit = "% historically"
+display = "over 50%"
+status = "deprecated"
+source = "https://github.com/graphprotocol/graph-improvement-proposals/blob/main/gips/0051-exponential-rebates.md"
+quote = "Query fee burn would be less than 7%, which is in stark contrast to the current mechanism which historically has burned over 50% of query fees."
+note = "The mechanism this replaced. Retained because the size of the improvement is the argument for the change, and because pre-2023 material still teaches Cobb-Douglas as current."
+verified = "2026-08-30"
+
+# --------------------------------------------------------------------------
+# Issuance routing (GIP-0089, the Innovation Allocation)
+# --------------------------------------------------------------------------
+
+[innovation_allocation_pct]
+label = "Issuance redirected to the Innovation Allocation"
+value = 20
+unit = "% of protocol issuance"
+display = "20%"
+status = "current"
+source = "https://forum.thegraph.com/t/the-graph-council-has-approved-gip-0089-the-innovation-allocation/7035"
+quote = "The Graph Council has approved GIP-0089, directing 20% of protocol issuance to the Innovation Allocation."
+note = """
+Approved by Council on 2026-08-26 and effective 2026-08-31. This is a live change, not \
+a proposal. It reduces the issuance reaching indexers and therefore the issuance reaching \
+delegators, by 20% at the source. Any indexing APR quoted from data collected before \
+2026-08-31 is measuring a larger pie. The forum post gives the effective date as Monday \
+2026-08-31 in one place and 2026-09-01 in another. Read the Issuance Allocator contract \
+if the exact block matters to you.\
+"""
+note_source = "https://thegraph.com/ecosystem/governance/"
+verified = "2026-08-30"
+
+[subgraph_service_issuance_per_block]
+label = "SubgraphService issuance after the redirect"
+value = 96.584
+unit = "GRT per block"
+display = "96.584 GRT/block"
+status = "current"
+source = "https://forum.thegraph.com/t/the-graph-council-has-approved-gip-0089-the-innovation-allocation/7035"
+quote = "The SubgraphService Rewards Manager receives 96.584 GRT per block, a reduction of 24.146 GRT per block from 120.73."
+note = "Was 120.73 GRT per block before 2026-08-31. The 24.146 GRT per block difference goes to the Foundation treasury through an existing DirectAllocation contract."
+verified = "2026-08-30"

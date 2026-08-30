@@ -1,0 +1,159 @@
+---
+title: "Strategy, and the risk nobody names"
+role: curator
+path: "Curator"
+module: "Strategy and risk"
+order: 1
+difficulty: intermediate
+time_minutes: 13
+summary: "Curation cannot be slashed, which leads people to describe it as low risk. Losing capital slowly to a forecast that was wrong is still losing capital."
+protocol_version_verified: "Graph Horizon (2025-12-11)"
+last_verified: 2026-08-30
+verify_before: 2026-11-30
+sources:
+  - name: "The Graph Docs: curating"
+    url: "https://thegraph.com/docs/en/resources/roles/curating/"
+  - name: "The Graph Docs: tokenomics"
+    url: "https://thegraph.com/docs/en/resources/tokenomics/"
+parameters_used: ["curation_tax_pct", "recommended_dev_signal"]
+authors: ["@community"]
+license: "CC-BY-4.0"
+---
+
+Curators cannot be slashed. There is no curator misbehaviour for the protocol to
+punish, because a curator does not operate anything or make any promise that could
+be broken.
+
+That fact gets repeated until it turns into "curation is low risk", which does not
+follow at all.
+
+## The four ways a curator loses.
+
+**The forecast is wrong.** You signalled on data nobody queries. Your capital sits
+there earning nothing while it could have been doing something else. No alarm goes
+off, no position gets liquidated, and it can continue for a very long time before
+you notice. This is by far the most common outcome and it is the one nobody plans
+for.
+
+**Nobody serves it.** The subgraph attracted queries but no indexer allocated to it,
+so no fees were generated. Signal is necessary for a subgraph to be served, and it
+is not sufficient.
+
+**The subgraph is superseded.** The developer publishes a new version, or the
+application moves to a different data source, and the queries follow. Your shares
+are attached to the thing that used to be queried.
+
+**The entry charge, always.** <Param name="curation_tax_pct" /> is burned on the way
+in whatever happens next. You have to be right by more than that before you are
+level.
+
+<Model>
+The risk in curation is not a sudden loss. It is a slow one, denominated in
+opportunity, and invisible unless you go and look. Positions that quietly earn
+nothing for a year do not announce themselves.
+</Model>
+
+## What actually informs a good forecast.
+
+You are predicting query demand. That means looking at applications rather than at
+signal charts.
+
+- **Is there a live application depending on this subgraph?** An application with
+  users generates queries continuously. A subgraph published in hope generates
+  none.
+- **Is the underlying protocol active?** Query volume tracks usage of the thing being
+  indexed. A subgraph over a dormant contract has a ceiling regardless of quality.
+- **Is the subgraph actually being served?** Check allocations. Signal on something
+  nothing is allocated to is a position that cannot pay, and you can see this before
+  you commit.
+- **Is it maintained?** A subgraph that fails on a contract upgrade stops being
+  queried, and the developer's engagement is a reasonable proxy for whether it will
+  keep working.
+- **How much signal is already there?** Not because of any curve effect, which is
+  gone, but because your share of the fees is your share of the pool. A subgraph with
+  modest fees and heavy signal spreads those fees thinly.
+
+That last point is the one that replaces bonding-curve thinking. The question is no
+longer "am I early", it is "is this pool crowded relative to the revenue it will
+generate". Those sound similar and are not.
+
+## Signalling on your own subgraph.
+
+If you are a developer, this is not really a curation decision. It is a cost of
+getting your subgraph served at all.
+
+The documentation gives <Param name="recommended_dev_signal" /> as a starting figure
+and is explicit that the right number moves with network activity and community
+participation. Treat it as a floor to think about rather than an answer.
+
+The reasoning is different from a curator's. You are not forecasting demand, you
+know your own demand. You are buying indexing capacity for your own application, and
+the return you care about is your subgraph being served reliably, not the fee share.
+
+## A sane posture.
+
+- **Fewer positions, better understood.** Since the entry charge is per entry and
+  timing no longer pays, breadth costs you and buys little.
+- **Review on a schedule, not on impulse.** Once a quarter, check each position for
+  whether it is still being served and still being queried. That is enough.
+- **Be willing to exit a wrong forecast.** The sunk deposit charge is sunk. Leaving a
+  position that earns nothing is not admitting defeat, it is stopping paying for it.
+- **Do not treat signal as a yield product.** The return is contingent on a forecast
+  you made. If you cannot say in one sentence why this data will be queried, you do
+  not have a position, you have a hope.
+
+<Reveal question="Before reading on: a subgraph has very heavy signal and modest query fees. Is that a good or bad position to join?">
+Bad, and it is the situation flat curves make easiest to walk into.
+
+Your return is your share of the pool's fee income. Heavy signal against modest fees
+means the income is divided many ways, so the return per unit of capital is poor
+however good the underlying data is.
+
+Under a bonding curve this had a partial self-correction, since heavy signal made
+entry expensive and put people off. Flat pricing removes that brake. The same
+capital now buys the same share regardless of how crowded the pool is, so nothing
+stops you joining a crowded position at full price.
+
+The discipline the curve used to impose clumsily now has to be yours: compare the
+signal already present against the fees actually being generated, and do it before
+you commit rather than after.
+</Reveal>
+
+<Quiz
+  id="curator-strategy"
+  questions={[
+    {
+      q: "Why is 'curators cannot be slashed, so curation is low risk' misleading?",
+      options: [
+        "Curators can in fact be slashed under Horizon",
+        "The real risk is opportunity cost from a wrong forecast, which is slow and silent rather than sudden",
+        "Curators are exposed to indexer downtime penalties",
+        "The deposit charge is refundable, so risk is deferred"
+      ],
+      answer: 1,
+      explain: "There is no slashing because there is nothing to punish. The loss mode is capital sitting in a position that earns nothing while the entry charge is already burned, and nothing announces it."
+    },
+    {
+      q: "You are comparing two subgraphs with identical query fees. One has far more signal. Which is the better position to join?",
+      options: [
+        "The one with more signal, it indicates quality",
+        "The one with less signal, since the same fees are divided fewer ways",
+        "They are equivalent under flat curves",
+        "The one with more signal, since it will attract more indexers"
+      ],
+      answer: 1,
+      explain: "Your return is your share of the pool's fee income. Heavy signal against the same fees means a thinner return per unit of capital. Flat pricing removed the brake that used to make crowded pools expensive to join, so the discipline has to be yours."
+    },
+    {
+      q: "You are a developer signalling on your own subgraph. What are you actually buying?",
+      options: [
+        "A share of your own query fees",
+        "Governance rights over the subgraph",
+        "Indexing capacity, so your subgraph is served at all",
+        "Protection against the subgraph being deprecated"
+      ],
+      answer: 2,
+      explain: "It is a cost of getting served rather than a forecast. You already know your own demand. The return you care about is reliable service for your application, not the fee share."
+    }
+  ]}
+/>

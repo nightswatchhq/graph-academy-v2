@@ -1,0 +1,123 @@
+---
+title: "Governance checkpoint"
+role: governance
+path: "Governance"
+module: "Checkpoint"
+order: 1
+difficulty: intermediate
+time_minutes: 12
+summary: "Follow one real proposal from written argument to deployed behaviour, and form your own view on it."
+protocol_version_verified: "Graph Horizon (2025-12-11)"
+last_verified: 2026-08-30
+verify_before: 2026-11-30
+sources:
+  - name: "GIP repository"
+    url: "https://github.com/graphprotocol/graph-improvement-proposals"
+  - name: "The Graph forum"
+    url: "https://forum.thegraph.com"
+parameters_used: []
+authors: ["@community"]
+license: "CC-BY-4.0"
+---
+
+## Recall
+
+<Quiz
+  id="governance-checkpoint"
+  title="Governance checkpoint"
+  questions={[
+    {
+      q: "A GIP is in 'under discussion'. What does that tell you?",
+      options: [
+        "It will ship in the next release",
+        "It has been approved but not deployed",
+        "Somebody has written an argument, and nothing has been decided",
+        "It has been rejected"
+      ],
+      answer: 2,
+      explain: "Anyone can write a GIP, so its existence means somebody wrote it down. Reading a proposal as a decision is the single most common way to misread this ecosystem."
+    },
+    {
+      q: "The Council is a six-of-ten multisig. What follows for a GGP vote?",
+      options: [
+        "Six positive votes accept it",
+        "Ten votes are required",
+        "A simple majority of GRT holders decides",
+        "Any three members can veto"
+      ],
+      answer: 0,
+      explain: "The threshold is the multisig itself rather than a separate rule layered on top of it."
+    },
+    {
+      q: "Why can the protocol not verify indexers' work on chain?",
+      options: [
+        "Privacy constraints",
+        "Verification means re-derivation, which costs more than the work being checked",
+        "Arbitrum block limits",
+        "Indexers would not consent"
+      ],
+      answer: 1,
+      explain: "So claims are made comparable rather than verified, and disagreement triggers a human process. Arbitration is where the protocol genuinely depends on people rather than incentives."
+    },
+    {
+      q: "Which is NOT grounds for a dispute?",
+      options: [
+        "A POI disagreeing with honest indexing",
+        "A query response not matching indexed data",
+        "An indexer being offline for days",
+        "All three are grounds"
+      ],
+      answer: 2,
+      explain: "Downtime costs revenue, which is the network's way of handling it. Disputes are for false claims, and keeping bad service and false claims in separate categories is deliberate."
+    },
+    {
+      q: "Burns exist mainly to:",
+      options: [
+        "Increase the token price",
+        "Attach a cost to actions that would otherwise be free to repeat, with no beneficiary to lobby for more",
+        "Fund the Foundation",
+        "Offset issuance exactly"
+      ],
+      answer: 1,
+      explain: "Curation entry and query sending are both actions that could be spammed. Burning rather than redistributing means no constituency benefits from encouraging them, which is a weaker benefit and a much more robust one."
+    }
+  ]}
+/>
+
+## Practical task
+
+Follow one proposal all the way through. GIP-0089 is the best specimen available
+because it completed recently and changed numbers you have seen elsewhere in this site.
+
+<Checklist
+  id="governance-checkpoint"
+  title="Follow one proposal end to end"
+  items={[
+    "Open the GIP repository and find a GIP that is currently under discussion.",
+    "Read its motivation and rationale sections. Write down what problem it claims to solve.",
+    "Find its forum thread and read the objections, not just the proposal.",
+    "Now read the GIP-0089 forum thread: the argument, the figures, and the vote.",
+    "Write down what GIP-0089 changed, in one sentence, without using the word 'issuance' vaguely.",
+    "Check the Academy parameters page and confirm the figures there match what the thread says.",
+    "Find one number in this site's registry where two official sources disagree, and decide which you would trust.",
+    "Write one sentence on whether you think redirecting a share of issuance to a funded body was a good decision, with a reason."
+  ]}
+/>
+
+## A closing thought
+
+That last item is the point of this path. Governance is not a spectator activity here:
+proposals are public, discussion is open, and the people writing GIPs are reachable.
+
+The realistic contribution most people can make is not writing a proposal. It is
+reading one carefully and saying, publicly, where it is wrong. Somebody running
+infrastructure who spots a mechanism flaw during discussion is worth a great deal more
+to this protocol than any amount of commentary afterwards.
+
+## Where next
+
+- The mechanisms these decisions govern:
+  **[indexers](/indexers/)**, **[curators](/curators/)**, **[delegators](/delegators/)**.
+- Every number on this site, with its source and the date it was read:
+  **[parameters](/parameters/)**.
+- What changed recently and when we noticed: **[changelog](/changelog/)**.

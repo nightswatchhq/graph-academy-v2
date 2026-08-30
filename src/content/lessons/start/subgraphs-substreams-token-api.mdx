@@ -1,0 +1,141 @@
+---
+title: "Subgraphs, Substreams, Firehose and the Token API"
+role: newcomer
+path: "Foundations"
+module: "The services"
+order: 1
+difficulty: beginner
+time_minutes: 12
+summary: "Four names people use interchangeably and should not. Two are data services you consume, one is the extraction layer underneath, and one is a hosted convenience."
+protocol_version_verified: "Graph Horizon (2025-12-11)"
+last_verified: 2026-08-30
+verify_before: 2026-11-30
+sources:
+  - name: "The Graph Docs: Substreams"
+    url: "https://thegraph.com/docs/en/substreams/introduction/"
+  - name: "The Graph Docs: Token API"
+    url: "https://thegraph.com/docs/en/token-api/quick-start/"
+  - name: "The Graph Docs: Graph Horizon"
+    url: "https://thegraph.com/docs/en/graph-horizon/"
+parameters_used: []
+authors: ["@community"]
+license: "CC-BY-4.0"
+---
+
+Before Horizon, "The Graph" and "subgraphs" were close enough to synonyms that
+nobody minded. That stopped being true. The protocol now supports several data
+services, and getting the vocabulary straight saves a great deal of confusion
+later.
+
+## Firehose is the floor, not a product you query.
+
+Firehose is the extraction layer. It instruments a chain node to emit a complete,
+ordered stream of block data as flat files, rather than making you ask for it
+block by block over RPC.
+
+You do not query Firehose from an application. It exists so that everything above
+it can read chain history sequentially, at file-read speed, instead of at
+request-response speed. When people say a pipeline is "Firehose-based", that is
+what they mean: the slow part was replaced.
+
+<Flow steps={["chain node", "Firehose", "Substreams", "subgraph or sink"]} hot={1} />
+
+## Substreams is the parallel transform layer.
+
+Substreams reads the Firehose stream and runs modules over it. The modules are
+compiled to WebAssembly, usually written in Rust, and they compose: one module's
+output is another's input.
+
+Two properties matter, and they follow from the design rather than from marketing:
+
+- Because modules are deterministic functions over a fixed input stream, their
+  outputs are cacheable. Re-running a pipeline with one changed module does not
+  mean re-reading the chain from genesis.
+- Because the work decomposes by block range, it parallelises across machines in a
+  way a sequential handler loop does not.
+
+That is why Substreams is fast at backfilling. Be careful with specific speed
+multiples you see quoted, including in older Academy material: they depend
+entirely on the chain, the workload and what you are comparing against.
+
+## A subgraph is a definition, and also a thing you query.
+
+A subgraph is three files working together: a schema saying what entities exist, a
+manifest saying which contracts and events to watch, and mappings saying how to
+turn an event into a row. Deploy it, and indexers build it and serve GraphQL
+against it.
+
+This is the original service and still the most common one. It suits the case
+where you want a typed, queryable model of a particular protocol's state, and you
+are willing to define that model yourself.
+
+Substreams and subgraphs are not rivals. A subgraph can be powered by Substreams,
+taking its entity changes from a Substreams module instead of from event handlers.
+
+## The Token API is the one you use when you did not want any of this.
+
+Common token questions have the same shape for everybody. What does this address
+hold. What moved, when. What is it worth. Which NFTs does it own.
+
+Writing a subgraph for that, per chain, is repeated work with no product in it.
+The Token API answers those questions over a plain REST interface across several
+chains, built on Substreams underneath. You get an endpoint and a key, and you
+skip the authoring step entirely.
+
+The trade is the usual one. You get speed of adoption and lose the ability to
+model anything the API does not already model.
+
+<Model>
+Firehose is how data leaves the chain. Substreams is how it gets transformed.
+A subgraph is a model you defined. The Token API is a model somebody already
+defined for you. Pick the highest layer that answers your question, and drop a
+layer only when it does not.
+</Model>
+
+## How to choose, briefly.
+
+The developer path has a full decision matrix. The short version:
+
+- The question is about token balances, transfers, prices or NFTs, and you want to
+  ship this week: **Token API**.
+- You need a typed model of one protocol's own state, queried by an app:
+  **subgraph**.
+- You are moving very large history, or feeding a warehouse or a stream rather
+  than a GraphQL endpoint, or your backfill time is the problem: **Substreams**.
+- You are operating infrastructure and want the raw stream: **Firehose**.
+
+<Warn>
+Watch out for material written before 2023. It will describe subgraphs as the only
+option and the Hosted Service as where they run. The Hosted Service is gone, the
+network is on Arbitrum One, and subgraphs are one service among several. If a
+tutorial tells you to deploy to the Hosted Service, stop reading it.
+</Warn>
+
+<Quiz
+  id="start-services"
+  questions={[
+    {
+      q: "Which of these do you not query directly from an application?",
+      options: ["A subgraph", "The Token API", "Firehose", "A Substreams-powered subgraph"],
+      answer: 2,
+      explain: "Firehose is the extraction layer. It exists so the layers above it can read chain history sequentially at file speed rather than over request-response RPC. Applications consume what sits on top of it."
+    },
+    {
+      q: "Why does Substreams backfill quickly?",
+      options: [
+        "It skips validation of chain data",
+        "Its modules are deterministic over a fixed stream, so outputs cache, and the work splits by block range across machines",
+        "It queries an off-chain mirror maintained by the Foundation",
+        "It compresses the chain before reading it"
+      ],
+      answer: 1,
+      explain: "Both properties fall out of the design. Deterministic modules over a fixed input mean a changed module does not force a re-read from genesis, and range-decomposable work parallelises in a way a sequential handler loop cannot."
+    },
+    {
+      q: "You need token balances and transfers for one address across several chains, and you want it working this week. Best first choice?",
+      options: ["Write a subgraph per chain", "The Token API", "Run your own Firehose", "A Substreams module writing to Postgres"],
+      answer: 1,
+      explain: "That question has the same shape for everybody, which is exactly the case the Token API exists for. Authoring a subgraph per chain to answer a solved question is repeated work with no product in it. Drop a layer only when the hosted model does not answer your question."
+    }
+  ]}
+/>

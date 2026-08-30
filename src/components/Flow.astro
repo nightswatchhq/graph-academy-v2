@@ -1,0 +1,17 @@
+---
+interface Props {
+  /** Steps in order. The last one may be marked hot to show where value lands. */
+  steps: string[];
+  hot?: number;
+  sep?: string;
+}
+const { steps, hot = -1, sep = '→' } = Astro.props;
+---
+<div class="flow" style="margin-top: 1.4rem;">
+  {steps.map((s, i) => (
+    <>
+      {i > 0 && <span class="arrow" aria-hidden="true">{sep}</span>}
+      <span class={i === hot ? 'chip chip--hot' : 'chip'}>{s}</span>
+    </>
+  ))}
+</div>

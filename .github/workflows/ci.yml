@@ -1,0 +1,73 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    # nightly freshness sweep
+    - cron: '17 5 * * *'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Registry integrity and parameter usage
+        run: npm run params
+      - name: Build
+        run: npm run build
+      - name: Internal links
+        run: node scripts/check-links.mjs
+      - name: Design system audit
+        run: npm run audit:style
+
+  contrast:
+    # Blocking. An accessibility regression is not a matter of taste.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python3 tools/contrast.py
+
+  staleness:
+    # Non-blocking on a pull request, so a contributor is not punished for
+    # somebody else's page going stale. Strict on the nightly schedule, where
+    # going red is the entire point.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Freshness report
+        run: node scripts/staleness.mjs ${{ github.event_name == 'schedule' && '--strict' || '' }}
+
+  reconcile:
+    # Reads the network subgraph and reports parameters that have drifted from
+    # chain. Skips with a clear message when no gateway key is configured.
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Reconcile against chain
+        env:
+          GRAPH_API_KEY: ${{ secrets.GRAPH_API_KEY }}
+          NETWORK_SUBGRAPH_URL: ${{ secrets.NETWORK_SUBGRAPH_URL }}
+          NETWORK_SUBGRAPH_QUERY: ${{ secrets.NETWORK_SUBGRAPH_QUERY }}
+        run: node scripts/reconcile-onchain.mjs

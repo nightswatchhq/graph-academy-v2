@@ -1,0 +1,68 @@
+---
+// Exponential query fee rebates, GIP-0051.
+//   R(q, s) = (1 - alpha * e^(-lambda * s/q)) * q
+// The GIP's own worked figures reproduce at lambda 0.6, alpha 1: a stake ratio
+// of 4 returns 90.9% of fees, 6 returns 97.3%, 8 returns 99.2%.
+import { param } from '../lib/params';
+const lambda = Number(param('rebate_lambda').value);
+const alpha = Number(param('rebate_alpha').value);
+---
+<section class="calc" data-rebate data-lambda={lambda} data-alpha={alpha}>
+  <span class="calc-label">Exponential rebate, worked</span>
+  <div class="calc-fields">
+    <div class="calc-field">
+      <label for="rc-fees">Query fees collected (GRT)</label>
+      <input id="rc-fees" type="number" min="0" step="1" value="1000" inputmode="decimal" />
+    </div>
+    <div class="calc-field">
+      <label for="rc-stake">Stake on that subgraph (GRT)</label>
+      <input id="rc-stake" type="number" min="0" step="100" value="4000" inputmode="decimal" />
+    </div>
+  </div>
+  <div class="calc-out">
+    <div><div class="n" data-out="ratio">4.00<span>x</span></div><div class="l">Stake ratio s/q</div></div>
+    <div><div class="n" data-out="pct">90.9<span>%</span></div><div class="l">Fees rebated</div></div>
+    <div><div class="n" data-out="rebate">909<span> GRT</span></div><div class="l">To the indexer</div></div>
+    <div><div class="n" data-out="burn">91<span> GRT</span></div><div class="l">Burned</div></div>
+  </div>
+  <p class="calc-note">
+    Lambda and alpha are the values proposed in GIP-0051. The deployed values sit in
+    contract storage and governance can move them, so read the contract before sizing
+    real stake. Note what the curve does past a ratio of 8: almost nothing. In 2022 the
+    average ratio was well over 1000, which is why in practice indexers keep effectively
+    all of their query fees.
+  </p>
+</section>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-rebate]').forEach((el) => {
+    const lambda = Number(el.dataset.lambda);
+    const alpha = Number(el.dataset.alpha);
+    const fees = el.querySelector<HTMLInputElement>('#rc-fees')!;
+    const stake = el.querySelector<HTMLInputElement>('#rc-stake')!;
+    const out = (k: string) => el.querySelector<HTMLElement>(`[data-out="${k}"]`)!;
+    const grt = (n: number) => n.toLocaleString('en-GB', { maximumFractionDigits: 0 });
+
+    function render() {
+      const q = Math.max(0, Number(fees.value) || 0);
+      const s = Math.max(0, Number(stake.value) || 0);
+      if (q === 0) {
+        out('ratio').innerHTML = '0<span>x</span>';
+        out('pct').innerHTML = '0<span>%</span>';
+        out('rebate').innerHTML = '0<span> GRT</span>';
+        out('burn').innerHTML = '0<span> GRT</span>';
+        return;
+      }
+      const ratio = s / q;
+      const share = 1 - alpha * Math.exp(-lambda * ratio);
+      const rebate = share * q;
+      out('ratio').innerHTML = `${ratio.toFixed(2)}<span>x</span>`;
+      out('pct').innerHTML = `${(share * 100).toFixed(1)}<span>%</span>`;
+      out('rebate').innerHTML = `${grt(rebate)}<span> GRT</span>`;
+      out('burn').innerHTML = `${grt(q - rebate)}<span> GRT</span>`;
+    }
+    fees.addEventListener('input', render);
+    stake.addEventListener('input', render);
+    render();
+  });
+</script>

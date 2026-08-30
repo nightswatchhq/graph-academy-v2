@@ -1,0 +1,73 @@
+---
+export interface Question {
+  q: string;
+  options: string[];
+  /** Zero-based index of the right answer. */
+  answer: number;
+  /** Shown after the reader picks. Explains why, not just which. */
+  explain: string;
+}
+interface Props {
+  id: string;
+  questions: Question[];
+  title?: string;
+}
+const { id, questions, title = 'Check yourself' } = Astro.props;
+const letters = ['a', 'b', 'c', 'd', 'e'];
+---
+<section class="quiz" data-quiz={id} data-total={questions.length}>
+  <span class="quiz-label">{title}</span>
+  {questions.map((question, qi) => (
+    <div class="quiz-item" data-answer={question.answer} data-qi={qi}
+         style={qi > 0 ? 'margin-top: 26px; padding-top: 22px; border-top: 1px solid var(--border);' : ''}>
+      <p class="quiz-q">{question.q}</p>
+      <div class="quiz-opts" role="group" aria-label={question.q}>
+        {question.options.map((opt, oi) => (
+          <button class="quiz-opt" type="button" data-oi={oi}>
+            <span class="mark" aria-hidden="true">{letters[oi]}</span>
+            <span>{opt}</span>
+          </button>
+        ))}
+      </div>
+      <p class="quiz-explain" hidden>{question.explain}</p>
+    </div>
+  ))}
+  <p class="quiz-score" aria-live="polite" hidden><b>0</b> of {questions.length} answered</p>
+</section>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-quiz]').forEach((quiz) => {
+    const total = Number(quiz.dataset.total ?? 0);
+    const score = quiz.querySelector<HTMLElement>('.quiz-score');
+    const scoreNum = score?.querySelector('b');
+    let answered = 0;
+    let right = 0;
+
+    quiz.querySelectorAll<HTMLElement>('.quiz-item').forEach((item) => {
+      const correct = Number(item.dataset.answer);
+      const explain = item.querySelector<HTMLElement>('.quiz-explain');
+      const opts = Array.from(item.querySelectorAll<HTMLButtonElement>('.quiz-opt'));
+
+      opts.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          if (item.dataset.locked === '1') return;
+          item.dataset.locked = '1';
+          const picked = Number(btn.dataset.oi);
+          answered += 1;
+          if (picked === correct) right += 1;
+          opts.forEach((o, i) => {
+            o.disabled = true;
+            if (i === correct) o.dataset.state = 'right';
+            else if (i === picked) o.dataset.state = 'wrong';
+          });
+          if (explain) explain.hidden = false;
+          if (score && scoreNum) {
+            score.hidden = false;
+            scoreNum.textContent = String(right);
+            score.lastChild!.textContent = ` right of ${answered} answered, ${total} in total`;
+          }
+        });
+      });
+    });
+  });
+</script>

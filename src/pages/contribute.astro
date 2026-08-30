@@ -1,0 +1,140 @@
+---
+// style-audit-allow: banned-vocab
+// This page lists the banned vocabulary in order to ban it. The audit skips it.
+import Base from '../layouts/Base.astro';
+import { SITE } from '../lib/site';
+---
+<Base
+  title="Contribute"
+  description="How to write a lesson, fix a parameter, or settle one of the contradictions this site has recorded."
+>
+  <section class="wrap" style="padding-block: clamp(2.8rem, 6vw, 4.4rem) 0;">
+    <p class="kicker">Contribute</p>
+    <h1 style="max-width: 16ch;">The most useful thing you can do is check a number.</h1>
+    <p class="section-lede" style="margin-top: 1.2rem; font-size: 1.05rem;">
+      This site's failure mode is going quietly stale. Anything that catches that is
+      worth more than new material.
+    </p>
+  </section>
+
+  <section class="wrap" style="padding-top: 2rem;">
+    <div class="prose">
+      <h2>The four things worth doing, in order.</h2>
+      <ol>
+        <li>
+          <strong>Settle a recorded contradiction.</strong> The
+          <a href="/parameters/">parameters page</a> lists cases where two official
+          sources disagree, each with the contract reference that would settle it. Read
+          the contract, tell us what it says, and we will update the registry and credit
+          you. This is the highest-value contribution available.
+        </li>
+        <li>
+          <strong>Re-verify a stale parameter.</strong> Open the source, read the value,
+          update <code>verified</code> and the quote. Takes minutes and keeps the whole
+          site honest.
+        </li>
+        <li>
+          <strong>Fix something wrong.</strong> If a lesson misdescribes a mechanism,
+          say so with a source. Being corrected is the point.
+        </li>
+        <li>
+          <strong>Write a lesson.</strong> Useful, and the least urgent of the four.
+        </li>
+      </ol>
+
+      <h2>The house rules.</h2>
+      <ul>
+        <li>
+          <strong>Never hard-code a protocol number.</strong> Add it to
+          <code>data/parameters.toml</code> with a source, a verbatim quote and the date
+          you read it, then render it with <code>{'<Param name="..." />'}</code>. The
+          build fails on an unknown key and warns on a hard-coded literal.
+        </li>
+        <li>
+          <strong>Cite inline.</strong> Every protocol claim names its source in the
+          frontmatter, and the page renders those sources under the title.
+        </li>
+        <li>
+          <strong>Explain why, link for how.</strong> If you find yourself writing CLI
+          flags or configuration keys, stop and link to the docs instead. That material
+          is maintained elsewhere and a copy of it here will rot.
+        </li>
+        <li>
+          <strong>Record disagreements, do not resolve them silently.</strong> If two
+          official pages conflict, add a <code>note</code> to the registry entry, set the
+          status to <code>disputed</code>, and teach the conflict.
+        </li>
+        <li>
+          <strong>Mark roadmap as roadmap.</strong> Announced is not shipped, and a
+          capability that exists but is switched off is neither impossible nor current.
+        </li>
+        <li>
+          <strong>No em dashes.</strong> A house rule from the design system, and it is
+          absolute. Use a full stop, a colon, or recast the sentence.
+        </li>
+        <li>
+          <strong>No hype vocabulary.</strong> No seamless, powerful, robust, unleash,
+          revolutionary, effortless, game-changer, next-gen, blazing, or leverage as a
+          verb. No exclamation marks. Numbers instead of adjectives, and every number
+          must be true today.
+        </li>
+        <li>
+          <strong>No placeholder names.</strong> Real contracts, real repositories, real
+          addresses. If you need an example, use a real one.
+        </li>
+      </ul>
+
+      <h2>Writing a lesson.</h2>
+      <p>
+        Lessons are MDX in <code>src/content/lessons/&lt;hub&gt;/</code>. The frontmatter
+        schema is enforced by Zod at build time, so a missing field is a build failure
+        rather than a broken page. Copy an existing lesson and change it.
+      </p>
+      <p>Every lesson needs, at minimum:</p>
+      <ul>
+        <li>A <code>summary</code> that says what the reader will be able to do.</li>
+        <li>At least one entry in <code>sources</code>, being a page you actually read.</li>
+        <li><code>last_verified</code> as the date you read those sources, and
+          <code>verify_before</code> as when somebody should look again. Ninety days is
+          the usual choice.</li>
+        <li>A <code>Quiz</code> or a <code>Checklist</code>, because a lesson without a
+          way to check yourself is an article.</li>
+      </ul>
+      <p>
+        Available components need no import: <code>Param</code>, <code>Note</code>,
+        <code>Tip</code>, <code>Warn</code>, <code>Model</code>, <code>Disputed</code>,
+        <code>Reveal</code>, <code>Quiz</code>, <code>Checklist</code>,
+        <code>Terminal</code>, <code>Flow</code>, and the two calculators.
+      </p>
+
+      <h2>One thing the tooling cannot check.</h2>
+      <p>
+        Quiz questions and checklist items are JavaScript strings, so a component cannot
+        go inside them and the parameter linter skips those blocks. It says so in its
+        output. Numbers written inside a quiz are checked by a human reviewer or not at
+        all, so if you put one there, be sure.
+      </p>
+
+      <h2>Before you open a pull request.</h2>
+      <pre><code>npm run params      # registry integrity and parameter usage
+npm run staleness   # pages and parameters past their date
+npm run audit:style # design system compliance
+npm run contrast    # colour contrast, blocking
+npm run build       # the site itself</code></pre>
+      <p>
+        All five run in CI. The contrast check blocks a merge, because an accessibility
+        regression is not a matter of taste.
+      </p>
+
+      <h2>Where.</h2>
+      <p>
+        The repository is at
+        <a href={SITE.repo} rel="external noopener">{SITE.repo.replace('https://github.com/', '')}</a>.
+        Discussion about the protocol itself belongs on
+        <a href="https://forum.thegraph.com" rel="external noopener">the community forum</a>,
+        which is also the best place to find somebody who can settle a contested
+        parameter.
+      </p>
+    </div>
+  </section>
+</Base>

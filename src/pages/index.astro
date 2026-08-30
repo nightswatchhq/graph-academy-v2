@@ -1,0 +1,293 @@
+---
+import Base from '../layouts/Base.astro';
+import Terminal from '../components/Terminal.astro';
+import { PATHS, lessonsForHub, pathDuration } from '../lib/paths';
+import { params, conflictedParams, PROTOCOL_VERSION } from '../lib/params';
+import { SITE, OUTBOUND } from '../lib/site';
+import { GLOSSARY } from '../lib/glossary';
+
+const rows = await Promise.all(
+  PATHS.map(async (p) => ({
+    meta: p,
+    count: (await lessonsForHub(p.hub)).length,
+    minutes: await pathDuration(p.hub),
+  })),
+);
+const totalLessons = rows.reduce((n, r) => n + r.count, 0);
+const paramCount = Object.keys(params).length;
+const conflicts = conflictedParams().length;
+
+// The transcript below is the real output of `npm run staleness` in this
+// repository on 2026-08-30. If the numbers here stop matching the numbers the
+// script prints, this panel is a lie and must be regenerated.
+const transcript = [
+  { kind: 'cmd' as const, text: 'npm run staleness' },
+  { kind: 'out' as const, text: 'freshness report  2026-08-30' },
+  { kind: 'out' as const, text: `${totalLessons} lessons, ${paramCount} parameters` },
+  { kind: 'ok' as const, text: '0 lessons past their re-verification date' },
+  { kind: 'ok' as const, text: '0 parameters older than 90 days' },
+  { kind: 'warn' as const, text: `${conflicts} parameters where official sources contradict` },
+  { kind: 'out' as const, text: '     allocation_lifetime' },
+  { kind: 'out' as const, text: '     delegation_tax_pct' },
+  { kind: 'out' as const, text: '     max_simultaneous_undelegations' },
+];
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'EducationalOrganization',
+  name: SITE.name,
+  url: SITE.url,
+  description: SITE.description,
+  inLanguage: 'en',
+};
+---
+<Base title={SITE.name} description={SITE.description} jsonLd={jsonLd}>
+  <section class="wrap hero">
+    <div class="hero-grid">
+      <div>
+        <span class="eyebrow rise rise-1">Community owned</span>
+        <h1 class="rise rise-2">Learn The Graph, by role, from first principles.</h1>
+        <p class="hero-lede rise rise-3">
+          Not a documentation clone and not a dashboard. Narrative explanations, worked
+          economic examples and exercises, with the date somebody last checked every
+          number on the page.
+        </p>
+        <div class="btn-row rise rise-3">
+          <a class="btn btn-primary" href="/start/">Start with Foundations</a>
+          <a class="btn btn-ghost" href="/paths/">See all {rows.length} paths</a>
+        </div>
+      </div>
+      <div class="rise rise-3">
+        <Terminal
+          title="graph-academy - zsh - 74x11"
+          label="The site's own freshness check, run on 30 August 2026: 44 lessons and 23 parameters, none past their re-verification date, and three parameters where official sources contradict each other."
+          lines={transcript}
+        />
+        <p style="font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-faint); margin-top: 12px;">
+          Real output of this site's nightly check, not an illustration
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="wrap band-grid">
+      <div class="stat">
+        <div class="n">{totalLessons}<span> lessons</span></div>
+        <div class="l">Across seven role-based paths, each ending in a checkpoint you can fail for free.</div>
+      </div>
+      <div class="stat">
+        <div class="n">{paramCount}<span> parameters</span></div>
+        <div class="l">Every protocol number, with its source, a quote from it, and the date somebody read it.</div>
+      </div>
+      <div class="stat">
+        <div class="n">{conflicts}<span> contradictions</span></div>
+        <div class="l">Places where two official pages disagree. Recorded and taught, rather than quietly resolved.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap">
+    <p class="kicker">Choose your role</p>
+    <h2 style="max-width: 17ch;">Seven paths. Start with the one you came for.</h2>
+    <p class="section-lede" style="margin-top: 1.1rem;">
+      If you are new to the protocol, Foundations takes an hour and everything else
+      assumes it. Progress is remembered in your browser, with no account and nothing
+      sent anywhere.
+    </p>
+    <div class="roles" style="margin-top: 2.4rem;">
+      {rows.map((r) => (
+        <a class="role-card" href={`/${r.meta.hub}/`}>
+          <span class="tag tag--rust">{r.meta.kicker}</span>
+          <span class="role-name">{r.meta.title}</span>
+          <p>{r.meta.blurb}</p>
+          <span class="role-meta">{r.count} lessons · {r.minutes} min</span>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <hr class="divider" />
+
+  <section class="wrap">
+    <p class="kicker">How it works</p>
+    <h2 style="max-width: 18ch;">Every number has a receipt and an expiry date.</h2>
+    <p class="section-lede" style="margin-top: 1.1rem;">
+      The previous Graph Academy taught Cobb-Douglas rebates, L1 bonding curves and the
+      Hosted Service until it was retired. All three were true once. Nothing in the site
+      could tell you they had stopped being true.
+    </p>
+
+    <div class="bento" style="margin-top: 2.6rem;">
+      <div class="cell c-feature">
+        <div>
+          <span class="tag">One registry</span>
+          <h3>No lesson hard-codes a number</h3>
+          <p>
+            Every protocol value lives in one file with its source URL, a verbatim quote
+            from that source, and the date a human read it. Lessons call the registry.
+            Change a value once and every page that mentions it updates. A lesson
+            referencing a parameter that does not exist fails the build outright.
+          </p>
+        </div>
+        <div class="flow">
+          <span class="chip">parameters.toml</span><span class="arrow">→</span>
+          <span class="chip">lesson</span><span class="arrow">→</span>
+          <span class="chip chip--hot">rendered with its date</span>
+        </div>
+      </div>
+      <div class="cell c-third">
+        <span class="tag tag--rust">Stamped</span>
+        <h3>Checked against, and by when</h3>
+        <p>
+          Each lesson shows what it was verified against, the date, and when it is due
+          another look. Past that date the page says so in a banner at the top.
+        </p>
+      </div>
+      <div class="cell c-mid">
+        <span class="tag tag--rust">Loud</span>
+        <h3>The build goes red</h3>
+        <p>
+          A nightly job lists pages past their date and parameters nobody has read in
+          ninety days. Silence is the failure mode this site is built against.
+        </p>
+      </div>
+      <div class="cell c-mid">
+        <span class="tag">Honest</span>
+        <h3>Contradictions are published, not resolved</h3>
+        <p>
+          Reading the sources on 2026-08-30 turned up three places where official pages
+          disagree with each other or with the shipped software. Picking a winner quietly
+          would be more comfortable and less useful, so the site marks the parameter,
+          teaches the conflict, and names the contract that would settle it.
+        </p>
+      </div>
+      <div class="cell c-full">
+        <span class="tag">Current</span>
+        <h3>Checked against {PROTOCOL_VERSION}</h3>
+        <p>
+          Including GIP-0089, which redirected a fifth of protocol issuance on
+          2026-08-31 and quietly made every reward rate measured before that date
+          describe a larger pot.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap">
+    <p class="kicker">The honest comparison</p>
+    <h2 style="max-width: 20ch;">Three sites. This one is not the important one.</h2>
+    <p class="section-lede" style="margin-top: 1.1rem;">
+      The Academy is useless on its own. It explains why the protocol is shaped as it is,
+      and hands you to the documentation for how, and to a dashboard for what is true
+      right now.
+    </p>
+    <div style="overflow-x: auto; margin-top: 2.4rem;">
+      <table class="matrix">
+        <thead>
+          <tr class="head-divider">
+            <th></th>
+            <th>Official docs</th>
+            <th class="us">Academy</th>
+            <th>Dashboards</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Authoritative for procedures and configuration</td>
+            <td class="yes">✓</td><td class="col-us no">&ndash;</td><td class="no">&ndash;</td>
+          </tr>
+          <tr>
+            <td>Live network data</td>
+            <td class="no">&ndash;</td><td class="col-us no">&ndash;</td><td class="yes">✓</td>
+          </tr>
+          <tr>
+            <td>Maintained by the people shipping the code</td>
+            <td class="yes">✓</td><td class="col-us no">&ndash;</td><td class="no">&ndash;</td>
+          </tr>
+          <tr>
+            <td>Explains why the protocol is designed this way</td>
+            <td class="part">partly</td><td class="col-us yes">✓</td><td class="no">&ndash;</td>
+          </tr>
+          <tr>
+            <td>Worked economic examples and exercises</td>
+            <td class="no">&ndash;</td><td class="col-us yes">✓</td><td class="part">partly</td>
+          </tr>
+          <tr>
+            <td>Records where official sources contradict each other</td>
+            <td class="no">&ndash;</td><td class="col-us yes">✓</td><td class="no">&ndash;</td>
+          </tr>
+          <tr>
+            <td>Every page dated and due for re-verification</td>
+            <td class="no">&ndash;</td><td class="col-us yes">✓</td><td class="part">n/a</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="section-lede" style="margin-top: 1.8rem;">
+      Three of those seven rows go against this site, and the first three are the ones
+      that matter most if you are about to do something. Read them as instructions:
+      when you need a procedure, go to
+      <a class="out" href={OUTBOUND.docs} rel="external noopener">the docs</a>; when you
+      need a number that is true this minute, go to
+      <a class="out" href={OUTBOUND.lodestar} rel="external noopener">a dashboard</a>.
+    </p>
+  </section>
+
+  <section class="wrap">
+    <p class="kicker">Use it well</p>
+    <h2 style="max-width: 20ch;">What it does, and what it doesn't.</h2>
+    <p class="section-lede" style="margin-top: 1.1rem;">
+      A community learning site with a narrow job. The boundaries are deliberate, and
+      knowing them saves you looking here for something that was never going to be here.
+    </p>
+    <div class="scope" style="margin-top: 2.4rem;">
+      <div class="scope-col">
+        <p class="scope-label scope-label--in">In scope</p>
+        <ul>
+          <li>Why the protocol is designed the way it is</li>
+          <li>Mental models you can reason with afterwards</li>
+          <li>Worked economic examples with the arithmetic shown</li>
+          <li>Exercises, quizzes and checkpoints, graded in your browser</li>
+          <li>Decision guides: index or delegate, which data service, which indexer</li>
+          <li>A glossary that keeps the obsolete terms and labels them</li>
+          <li>Every protocol number, sourced, quoted and dated</li>
+        </ul>
+      </div>
+      <div class="scope-col">
+        <p class="scope-label scope-label--out">Out of scope</p>
+        <ul>
+          <li>CLI reference, flags and configuration keys</li>
+          <li>Live data of any kind, including indexer tables and rates</li>
+          <li>Installation and deployment instructions</li>
+          <li>Financial or investment advice, in any form</li>
+          <li>Anything requiring an account, a wallet connection or a sign-in</li>
+          <li>Recommending specific indexers or subgraphs to put money behind</li>
+          <li>Chains, tools and services nobody here has actually checked</li>
+        </ul>
+      </div>
+    </div>
+    <p class="section-lede" style="margin-top: 2rem;">
+      Nothing on this site is financial or investment advice. It has no analytics, no
+      cookies, no accounts and no third-party requests: two fonts and one stylesheet,
+      all from this domain. Your progress is stored in your own browser and never leaves
+      it.
+    </p>
+  </section>
+
+  <hr class="divider" />
+
+  <section class="wrap" style="text-align: center;">
+    <p class="kicker" style="text-align: center;">Start</p>
+    <h2 style="max-width: 15ch; margin-inline: auto;">An hour to the shape of it.</h2>
+    <p class="section-lede" style="margin-inline: auto; margin-top: 1.1rem; text-align: center;">
+      {totalLessons} lessons, {GLOSSARY.length} glossary terms, {paramCount} sourced
+      parameters. Free, community owned, {SITE.contentLicense}.
+    </p>
+    <div class="btn-row" style="justify-content: center; margin-top: 2rem;">
+      <a class="btn btn-primary" href="/start/">Start with Foundations</a>
+      <a class="btn btn-ghost" href="/parameters/">See every number and its source</a>
+      <a class="btn btn-ghost" href="/contribute/">Fix something</a>
+    </div>
+  </section>
+</Base>

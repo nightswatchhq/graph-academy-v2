@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /search/
+Disallow: /gone/
+
+Sitemap: https://learn-thegraph.com/sitemap-index.xml

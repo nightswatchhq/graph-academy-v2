@@ -1,0 +1,113 @@
+---
+title: "Getting an endpoint that works"
+role: consumer
+path: "App builder"
+module: "Getting data"
+order: 1
+difficulty: beginner
+time_minutes: 9
+summary: "You are not writing a subgraph. You need a key, an endpoint, and a clear view of what can go wrong between your application and the data."
+protocol_version_verified: "Graph Horizon (2025-12-11)"
+last_verified: 2026-08-30
+verify_before: 2026-11-30
+sources:
+  - name: "The Graph Docs: querying"
+    url: "https://thegraph.com/docs/en/subgraphs/querying/introduction/"
+  - name: "The Graph Docs: managing API keys"
+    url: "https://thegraph.com/docs/en/subgraphs/querying/managing-api-keys/"
+parameters_used: []
+authors: ["@community"]
+license: "CC-BY-4.0"
+---
+
+Somebody else has published the subgraph. You want to read it from your application
+and not think about the protocol again.
+
+That is a reasonable goal and mostly achievable. This lesson is about the parts that
+are not automatic.
+
+## The shape of it.
+
+Get an API key from Subgraph Studio, find the subgraph you need in Graph Explorer, and
+query its gateway endpoint over GraphQL with your key attached.
+
+That is genuinely the whole integration. The rest of this path is about the
+assumptions that integration quietly makes.
+
+<Flow steps={["your backend", "gateway", "indexer", "GraphQL response"]} hot={1} />
+
+## Choosing a subgraph you can depend on.
+
+Anyone can publish a subgraph. Some are maintained, some were a weekend project in
+2023 that still indexes. Before building on one:
+
+- **Is it the one the protocol team actually uses?** Many protocols publish an
+  official subgraph and it is usually the right choice.
+- **Is it being served?** Check that indexers are allocated to it. A published
+  subgraph with no allocation returns nothing useful.
+- **Is it healthy?** Check indexing status. A subgraph that failed at some block has
+  stopped, and it will keep answering with data up to that block.
+- **Is it maintained?** Contract upgrades break subgraphs. An unmaintained one breaks
+  eventually and stays broken.
+- **Does it carry signal?** Signal is other people's money betting it will keep being
+  queried, which is a reasonable second opinion.
+
+<Warn title="A broken subgraph does not error">
+A subgraph that stopped indexing months ago answers your queries perfectly. It returns
+correct data for everything up to the block where it stopped, and nothing after.
+
+Your application will show stale data confidently and no exception will be raised. If
+you check one thing on a schedule, check indexing progress against chain head.
+</Warn>
+
+## The three failure modes.
+
+**Stale.** The subgraph is behind the chain head, or stopped entirely. Data is correct
+and old.
+
+**Empty.** No matching entities. Indistinguishable in the response from stale or
+broken, which is what makes it dangerous.
+
+**Slow.** Your query went to an indexer having a difficult afternoon, or your query is
+expensive. Set timeouts.
+
+None of these throws an error. All of them are handled by checking indexing status
+alongside the data, which is the single highest-value thing you can add to the
+integration.
+
+## The key.
+
+Never in a client. An API key in a web or mobile bundle is extractable and spendable by
+anyone who looks.
+
+Query through your own backend, keep the key in server configuration, and rate limit
+per user there. This is ordinary practice for a paid API and it gets skipped here
+because the per-query amounts feel small.
+
+<Quiz
+  id="consumer-getting"
+  questions={[
+    {
+      q: "A subgraph stopped indexing three months ago. What happens to your queries?",
+      options: [
+        "They return an error",
+        "They return correct data up to the block it stopped at, with no error",
+        "The gateway routes to a different subgraph",
+        "They time out"
+      ],
+      answer: 1,
+      explain: "It answers perfectly with stale data and raises nothing. Checking indexing progress against chain head is the highest-value addition to any integration for exactly this reason."
+    },
+    {
+      q: "Where should your API key live?",
+      options: [
+        "In the client bundle, scoped to your domain",
+        "In server configuration, with queries proxied through your own backend",
+        "In an environment variable in the browser",
+        "In the subgraph manifest"
+      ],
+      answer: 1,
+      explain: "Anything in a bundle is readable and spendable. Proxying through your own backend also lets you rate limit per user, which a client-side key cannot."
+    }
+  ]}
+/>

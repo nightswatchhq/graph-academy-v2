@@ -1,0 +1,11 @@
+---
+interface Props {
+  /** The prompt. Always a prediction the reader can be wrong about. */
+  question: string;
+}
+const { question } = Astro.props;
+---
+<details class="reveal-block">
+  <summary>{question}</summary>
+  <div class="reveal-body"><slot /></div>
+</details>

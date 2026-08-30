@@ -1,0 +1,176 @@
+---
+title: "Getting paid: receipts, RAVs and GraphTally"
+role: indexer
+path: "Indexer"
+module: "The economics"
+order: 2
+difficulty: advanced
+time_minutes: 14
+summary: "Every query carries a signed receipt. Receipts aggregate into vouchers, vouchers settle on chain, and one configuration value decides how much you are prepared to lose if it goes wrong."
+protocol_version_verified: "Graph Horizon (2025-12-11)"
+last_verified: 2026-08-30
+verify_before: 2026-11-30
+sources:
+  - name: "The Graph Docs: TAP and GraphTally"
+    url: "https://thegraph.com/docs/en/indexing/tap/"
+  - name: "GIP-0054: Timeline Aggregation Protocol"
+    url: "https://github.com/graphprotocol/graph-improvement-proposals/blob/main/gips/0054-timeline-aggregation-protocol.md"
+parameters_used: []
+authors: ["@community"]
+license: "CC-BY-4.0"
+---
+
+A query is worth a fraction of a cent. Settling each one on chain would cost more
+than the query earns, by a wide margin. So payment cannot happen per query, and it
+also cannot require you to trust the person paying.
+
+GraphTally, previously called TAP, is the answer. It is worth understanding properly
+because it is the part of the stack that decides whether the money actually arrives.
+
+## The mechanism.
+
+**A receipt** is a signed payment record the gateway sends alongside each query. It
+is a promise, signed by the payer, that this query is worth this much.
+
+**indexer-service-rs** validates each receipt as it arrives: is the allocation
+eligible, is the sender who they claim, is there escrow behind it. Valid receipts are
+stored.
+
+**indexer-tap-agent** periodically aggregates stored receipts into a Receipt
+Aggregate Voucher. A RAV is one signed object saying "everything up to here totals
+this much", and the RAV is what settles on chain. Signatures are produced by an
+external tap-aggregator endpoint.
+
+**indexer-agent** submits the redemption transaction, and during the finality period
+watches for reorganisations and resubmits anything that reverted.
+
+<Flow steps={["query + receipt", "validate & store", "aggregate to RAV", "redeem on chain"]} hot={3} />
+
+When an allocation closes, the remaining receipts form a final RAV marked as last.
+
+## Why aggregate at all.
+
+Three reasons, and they compose:
+
+- **Cost.** One transaction settles a great many queries. Per-query settlement would
+  cost more than the queries are worth.
+- **Trust.** A signed receipt is evidence. You are not relying on the payer's
+  goodwill, you are holding something you can redeem.
+- **Throughput.** Query serving is not blocked on chain confirmation. You serve, you
+  bank the receipt, you settle later.
+
+## The value at risk, and the knob that controls it.
+
+Here is the part to think about carefully.
+
+Between receiving a receipt and redeeming a RAV, you are holding a claim rather than
+money. If something goes wrong before aggregation and redemption, that claim can be
+worth nothing: the escrow behind the sender drains, a component fails and loses
+unaggregated receipts, an aggregation cycle does not complete.
+
+`max_amount_willing_to_lose_grt` is how you bound that. The documentation states that
+"the system aggregates receipts continuously, keeping unaggregated value below
+`max_amount_willing_to_lose_grt`."
+
+Read the name literally, because it means exactly what it says. It is not a fee cap
+or a batch size. It is you stating the largest amount of unsettled work you are
+prepared to write off.
+
+- Set it **low** and you aggregate frequently. Less exposure, more transactions and
+  more aggregator calls.
+- Set it **high** and you aggregate rarely. Cheaper to operate, and a larger amount
+  in flight when something breaks.
+
+<Warn title="Configure this deliberately">
+The default is a default, not a recommendation for your situation. An indexer serving
+substantial volume can accumulate a meaningful claim between aggregations, and the
+question "how much am I comfortable losing" has a different answer for a hobbyist and
+for an operator with delegated capital behind them.
+
+Decide the number, write down why, and revisit it when your query volume changes by
+an order of magnitude.
+</Warn>
+
+## Where it usually goes wrong.
+
+Failure here is quiet, which is what makes it dangerous. Queries keep being served
+and the money simply does not arrive.
+
+- **tap-agent is not running or has crashed.** Receipts accumulate and never
+  aggregate. Everything looks healthy from the query side.
+- **The aggregator endpoint is unreachable.** RAVs cannot be signed, so nothing can
+  be redeemed.
+- **Redemption transactions failing.** Insufficient gas, a reorganisation not
+  resubmitted, a stuck nonce.
+- **Escrow exhausted on the sender's side.** Receipts you hold are backed by nothing.
+
+Monitor unaggregated receipt value and the age of your oldest unredeemed RAV. Both
+are early warnings, and both are invisible in the metrics you would naturally watch,
+which are all about serving queries.
+
+<Model>
+Serving queries and getting paid for them are two independent systems that can fail
+separately. An indexer whose monitoring only covers the first will discover the
+second at the end of the month.
+</Model>
+
+## Note on the name.
+
+TAP is the Timeline Aggregation Protocol, specified in GIP-0054. GraphTally is the
+name now used for the implementation in the indexer stack. Documentation, code and
+forum posts use both, and older material may describe an earlier version with
+different receipt handling. When reading, check which you have.
+
+<Reveal question="Before reading on: why must the receipt be signed by the payer rather than issued by you?">
+Because you are the party with the incentive to inflate it.
+
+If an indexer could issue its own record of what it was owed, the record would be
+worth nothing as evidence. Settlement would need someone to check that the claimed
+queries were actually served, which means either a trusted referee or an on-chain
+verification of every query. The first reintroduces the centralisation the protocol
+is avoiding, and the second costs more than the queries.
+
+A payer-signed receipt moves the trust to the only place it can safely go. You cannot
+manufacture one, and you do not need permission to redeem one you hold. That
+asymmetry is the entire design, and it is why the escrow behind the sender matters as
+much as the signature.
+</Reveal>
+
+<Quiz
+  id="indexer-tap"
+  questions={[
+    {
+      q: "What is a RAV?",
+      options: [
+        "A rate limit applied per gateway",
+        "An aggregate of many receipts, signed and redeemable on chain as one settlement",
+        "A record of an allocation closing",
+        "A dispute filed against an indexer"
+      ],
+      answer: 1,
+      explain: "Receipt Aggregate Voucher. Many small signed receipts collapse into one object saying 'everything up to here totals this much', and that is what settles on chain."
+    },
+    {
+      q: "max_amount_willing_to_lose_grt controls:",
+      options: [
+        "The maximum fee you will charge for a query",
+        "How much unaggregated receipt value you tolerate before aggregating",
+        "Your slashing exposure",
+        "The gas limit on redemption transactions"
+      ],
+      answer: 1,
+      explain: "The name is literal. It bounds how much unsettled work you are prepared to write off if something fails before redemption. Lower means more frequent aggregation and less exposure."
+    },
+    {
+      q: "Your queries are being served normally but revenue has stopped arriving. Most likely cause?",
+      options: [
+        "Your cost model is priced too high",
+        "Your allocation has gone stale",
+        "tap-agent has stopped, or RAV redemption is failing",
+        "The gateway has deprioritised you"
+      ],
+      answer: 2,
+      explain: "Serving and settling are independent systems. Queries continuing to flow while money stops is the signature of a payment-side failure, and it is invisible in query metrics."
+    }
+  ]}
+/>

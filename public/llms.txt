@@ -1,0 +1,35 @@
+# The Graph Academy
+
+> A community-owned learning site for The Graph protocol. Role-based paths that
+> explain why the protocol is designed as it is, checked against the Horizon-era
+> protocol and stamped with the date somebody checked.
+
+This site is deliberately not a documentation clone and not a dashboard.
+
+- For procedures, CLI reference and configuration: https://thegraph.com/docs/en/
+- For live network data: https://thegraph.com/explorer and https://www.lodestar-dashboard.com
+
+## How to read this site accurately
+
+Every protocol number lives in one registry rather than being written into prose.
+Each lesson carries the date it was last verified, the sources it was verified
+against, and a date by which it should be checked again. A page past that date
+renders a warning banner.
+
+Where two official sources contradict each other, this site records the conflict
+rather than picking a winner. As of 2026-08-30 there are three such cases, all
+listed at /parameters/.
+
+## Structure
+
+- /paths/ - all seven learning paths
+- /start/ - Foundations, for readers new to the protocol
+- /delegators/ /curators/ /indexers/ /developers/ /consumers/ /governance/ - role paths
+- /parameters/ - every protocol number, with source, quote and date read
+- /glossary/ - terms, including obsolete ones, labelled as such
+- /changelog/ - protocol changes and corrections to this site
+- /about/ - what this site is and is not
+
+## Licence
+
+Content CC-BY-4.0. Code MIT.

@@ -1,0 +1,20 @@
+---
+interface Props {
+  type?: 'note' | 'tip' | 'warning' | 'model' | 'checkpoint' | 'disputed';
+  title?: string;
+}
+const { type = 'note', title } = Astro.props;
+const defaults: Record<string, string> = {
+  note: 'Note',
+  tip: 'Tip',
+  warning: 'Watch out',
+  model: 'Mental model',
+  checkpoint: 'Checkpoint',
+  disputed: 'The sources disagree',
+};
+const label = title ?? defaults[type];
+---
+<aside class={`adm adm--${type}`}>
+  <span class="adm-label">{label}</span>
+  <div class="adm-body"><slot /></div>
+</aside>

@@ -1,0 +1,178 @@
+---
+title: "Rewards, cuts, and what you actually take home"
+role: delegator
+path: "Delegator"
+module: "The economics"
+order: 1
+difficulty: beginner
+time_minutes: 14
+summary: "The cut is what the indexer keeps, not what you get. Work the arithmetic once with real numbers and the advertised rates stop being persuasive."
+protocol_version_verified: "Graph Horizon (2025-12-11)"
+last_verified: 2026-08-30
+verify_before: 2026-11-30
+sources:
+  - name: "The Graph Docs: delegating"
+    url: "https://thegraph.com/docs/en/resources/roles/delegating/delegating/"
+  - name: "The Graph Docs: tokenomics"
+    url: "https://thegraph.com/docs/en/resources/tokenomics/"
+  - name: "Council approval of GIP-0089, the Innovation Allocation"
+    url: "https://forum.thegraph.com/t/the-graph-council-has-approved-gip-0089-the-innovation-allocation/7035"
+parameters_used: ["max_delegation_ratio", "undelegation_period_days", "innovation_allocation_pct", "subgraph_service_issuance_per_block", "annual_issuance_pct"]
+authors: ["@community"]
+license: "CC-BY-4.0"
+---
+
+Two numbers govern the split, and the direction they point in catches people out
+constantly.
+
+## The cut is what the indexer keeps.
+
+An indexer publishes two parameters on chain:
+
+- **Indexing reward cut**: the share of indexing rewards the indexer retains.
+- **Query fee cut**: the share of query fees the indexer retains.
+
+The remainder goes to the delegation pool. So a lower cut is better for you, and
+the documentation states the boundary case plainly: "If an Indexer's reward cut is
+set to 100%, as a Delegator, you will get 0 indexing rewards."
+
+If you take one thing from this lesson, take the direction. A delegator who reads
+a 90% cut as "I get 90%" has the arithmetic exactly inverted, and will pick the
+worst available option while feeling clever about it.
+
+<Flow steps={["indexer earns", "indexer keeps its cut", "pool takes the rest", "your share of the pool"]} hot={3} />
+
+## Working it through.
+
+{/* param-lint-allow: 10,000 GRT (illustrative reward in a worked example, not the Fisherman deposit) */}
+
+Say an indexer earns 10,000 GRT of indexing rewards over a period, and sets an
+indexing reward cut of 10%.
+
+- The indexer keeps 1,000 GRT.
+- 9,000 GRT goes into the delegation pool.
+- If you hold 5% of the pool by share, your claim grows by 450 GRT.
+
+Nothing about that arithmetic is subtle. What is subtle is every input to it.
+"10,000 GRT of rewards over a period" is a function of how much stake the indexer
+actually allocated, to which subgraphs, and for how long. Two indexers with
+identical published cuts can return very different amounts because one of them
+allocates its pool attentively and the other does not.
+
+## Try it with your own numbers.
+
+<DelegationCalc />
+
+## Why the second pair of figures matters more than the first.
+
+Change the holding period in that calculator and watch the last figure move. That
+is the <Param name="undelegation_period_days" /> thawing period expressed as a
+drag on return.
+
+The logic is not complicated. If you commit capital for some number of days and
+then want it back, it is unavailable for that number of days plus the thaw, and it
+earns for only the first part. The shorter your intended holding, the larger the
+proportion of the total commitment that earns nothing.
+
+This is why comparing advertised delegation rates against, say, a lending rate is
+not comparing like with like. One of them lets you leave on Tuesday.
+
+<Warn title="The number nobody advertises">
+An advertised delegation return is calculated on the earning period. Your capital
+is committed for the earning period plus the thaw. Nobody is lying to you by
+quoting the first figure. It is simply not the figure that describes your
+position, and you have to compute the second one yourself.
+</Warn>
+
+## The pot itself just got smaller.
+
+Indexing rewards come from issuance, targeted at
+<Param name="annual_issuance_pct" /> a year. As of 2026-08-31, GIP-0089 redirects
+<Param name="innovation_allocation_pct" /> of protocol issuance to the Foundation
+treasury. The Subgraph Service rewards manager now receives
+<Param name="subgraph_service_issuance_per_block" />, reduced by 24.146 GRT per
+block.
+
+The consequence for you is direct and mechanical. Indexing rewards are the larger
+part of most delegators' return, and 20% less is arriving at the source. Any
+indexing rate measured from data collected before 2026-08-31 is describing a
+larger pot than the one that now exists.
+
+This is not a criticism of the change, which has a stated rationale worth reading.
+It is a warning about the age of the figures you are looking at.
+
+## The capacity multiplier, again.
+
+An indexer's delegation capacity is <Param name="max_delegation_ratio" /> their
+self-stake. Past that ceiling, the excess cannot be used and rewards for everyone
+in the pool are diluted.
+
+Two indexers, identical cuts, identical diligence. One has ample headroom, the
+other is over capacity. Your return from the second is worse and nothing in the
+advertised rate says so. Checking headroom takes about thirty seconds on a
+dashboard and it is the highest-value thirty seconds in the whole exercise.
+
+## The cut is not a promise.
+
+The cut is a parameter the indexer sets on chain. It is not a contract with you,
+and it is not fixed for the life of your delegation. An operator can change it.
+
+The official delegating page describes how to evaluate an indexer's parameters. It
+does not warn you that those parameters can move after you have delegated, which
+is a genuine gap. Practically, this means:
+
+- Look at an indexer's parameter history, not a snapshot.
+- Treat a cut that is dramatically better than everyone else's as a question
+  rather than an opportunity.
+- Remember that if a cut changes for the worse, your exit still takes
+  <Param name="undelegation_period_days" />.
+
+<Reveal question="Before reading on: two indexers, both 10% cut, both plenty of headroom. What could still make one materially worse?">
+How much of the pool is actually allocated, and to what.
+
+Stake sitting in the pool unallocated earns no indexing rewards. An indexer with a
+large pool who has allocated a third of it is generating rewards on a third of
+your capital, and the cut applies to the rewards that exist, not to the ones that
+should have.
+
+The subgraphs they allocate to matter too. Allocating to subgraphs with no signal
+is allocating to subgraphs that earn no indexing rewards, which produces the same
+result by a different route.
+
+None of this shows up in a cut. All of it shows up in the actual reward history,
+which is why the next lesson is about looking at that history properly.
+</Reveal>
+
+<Quiz
+  id="delegator-cuts"
+  questions={[
+    {
+      q: "An indexer sets an indexing reward cut of 85%. As a delegator you receive:",
+      options: ["85% of indexing rewards", "15% of indexing rewards, shared across the pool", "85% minus the delegation tax", "Nothing, 85% is above the legal maximum"],
+      answer: 1,
+      explain: "The cut is what the indexer keeps. 15% goes to the pool, and your claim is your share of that pool. The docs state the boundary case: a 100% cut means delegators get zero. Reading the cut as your share picks the worst option while feeling like the best."
+    },
+    {
+      q: "An indexer is above its delegation capacity. What happens to your rewards?",
+      options: [
+        "Only the delegators who pushed it over are affected",
+        "Nothing, the excess is simply refunded",
+        "Rewards for all delegators in the pool are diluted",
+        "The indexer is slashed"
+      ],
+      answer: 2,
+      explain: "The dilution falls on everyone in the pool, not just the last arrivals. That is what makes it a trap: an indexer that was a good choice when you delegated can become a poor one purely because other people delegated afterwards."
+    },
+    {
+      q: "Why is an advertised delegation rate not the return on your committed capital?",
+      options: [
+        "Because the delegation tax is deducted first",
+        "Because the rate is quoted before gas costs",
+        "Because your capital is committed for the earning period plus the thawing period, and earns only during the first part",
+        "Because rewards are paid in a different token"
+      ],
+      answer: 2,
+      explain: "The thaw is real time during which the capital is neither available nor earning. Nobody is lying by quoting the earning-period rate, but it does not describe your position, and the shorter your intended holding the bigger the gap."
+    }
+  ]}
+/>

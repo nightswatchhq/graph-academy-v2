@@ -1,0 +1,172 @@
+---
+title: "Allocations, POIs, and the gap between protocol and practice"
+role: indexer
+path: "Indexer"
+module: "Horizon mechanics"
+order: 2
+difficulty: advanced
+time_minutes: 14
+summary: "The protocol now permits allocations that stay open indefinitely. The shipped stack still recycles them. Both facts are true and you need both to plan capacity."
+protocol_version_verified: "Graph Horizon (2025-12-11)"
+last_verified: 2026-08-30
+verify_before: 2026-11-30
+sources:
+  - name: "The Graph Docs: indexing overview"
+    url: "https://thegraph.com/docs/en/indexing/overview/"
+  - name: "The Graph Docs: what changes with Graph Horizon"
+    url: "https://thegraph.com/docs/en/graph-horizon/what-changes/"
+parameters_used: ["max_poi_staleness_days", "allocation_lifetime"]
+authors: ["@community"]
+license: "CC-BY-4.0"
+---
+
+An allocation is a commitment: this much of my stake, pointed at this subgraph,
+which I undertake to index and serve. It is the unit that earns indexing rewards.
+
+## The Proof of Indexing.
+
+A POI is a hash committing to the data you derived for a subgraph up to a block. Two
+indexers who indexed the same subgraph honestly, from the same chain data, produce
+the same POI. Two who did not, do not.
+
+The protocol never re-executes your work. It cannot, affordably. Instead it makes
+your claim comparable: publish a POI, and anyone who indexed the same thing can check
+it against theirs. Disagreement is grounds for a dispute.
+
+<Model>
+A POI is not a proof in the cryptographic sense. It is a commitment that makes
+dishonesty detectable by anyone doing the same work. The security comes from
+detectability plus a penalty, not from verification at the point of use.
+</Model>
+
+## What Horizon changed.
+
+Previously an allocation had to be closed to collect its rewards, which produced a
+distinctive operational rhythm: open, run, close to collect, reopen. Every cycle cost
+transactions and created a window where stake was not earning.
+
+Under Horizon, per the indexing overview, "allocations can remain open indefinitely.
+There is no requirement to close an allocation to collect rewards." You present POIs
+periodically and collect against them.
+
+The constraint that replaces the deadline is staleness. If your most recent POI is
+older than <Param name="max_poi_staleness_days" />, the allocation is stale and stops
+earning. Nothing is confiscated. It simply stops paying, which is easy to miss.
+
+## The part most pages leave out.
+
+The registry records this as <Param name="allocation_lifetime" /> and marks it
+disputed, because the protocol capability and the operational reality are not the
+same thing today.
+
+{/* param-lint-allow: 28 days (inside a verbatim quote from the Horizon changes page, which must not be altered) */}
+
+<Disputed>
+The indexing overview describes indefinite allocations as current behaviour. The
+Horizon changes page says: "At Horizon launch the indexer stack will continue to
+operate using the current 'short lived' allocation lifecycle for an easier
+transition. This means that allocations will be recycled typically every 28 days."
+
+Both were read on 2026-08-30 and both are true statements about different layers. The
+protocol permits indefinite allocations. The shipped indexer stack still recycles
+them on the old rhythm.
+
+For planning, this means: expect the recycling behaviour from your tooling today, and
+expect it to change. Do not build operational assumptions that depend on either one
+being permanent. See
+[the parameters page](/parameters/#allocation_lifetime).
+</Disputed>
+
+This distinction is the single best example of why this site exists. Either page
+alone gives you a confident answer, and an operator who reads only the first will be
+surprised by their own agent's behaviour.
+
+## What actually earns.
+
+Three conditions, all required:
+
+1. **The allocation is open** against a subgraph.
+2. **Your POI is fresh**, within the staleness window.
+3. **The subgraph carries signal.** Allocating to a subgraph with no curation signal
+   earns no indexing rewards, however diligently you index it.
+
+Condition three catches people. A technically flawless allocation to an unsignalled
+subgraph earns nothing, and nothing about the machine looks wrong.
+
+## Failure modes worth monitoring.
+
+- **The stale allocation.** POIs stopped, earning stopped, everything still running.
+  Monitor POI age directly, not merely whether the process is alive.
+- **The failed deployment.** A subgraph fails on a contract upgrade. It has an open
+  allocation, produces no new POIs, and goes stale in a month.
+- **The wrong POI.** Divergence from other indexers, usually from a chain data
+  difference or a graph-node version difference. This is the one that gets disputed,
+  and comparing your POIs against other indexers before publishing is cheaper than
+  arbitration.
+- **The unsignalled allocation.** Earning nothing for a reason that is economic
+  rather than technical.
+
+<Warn title="What to alert on">
+Alert on POI age approaching the staleness limit, on allocations open against
+deployments that are not syncing, and on POI divergence from peers. None of these
+trips a normal process or resource alert, and all of them cost money continuously
+while looking healthy.
+</Warn>
+
+<Reveal question="Before reading on: why was requiring a close to collect rewards a problem worth removing?">
+It coupled a payment event to a capital event, and the coupling was expensive in two
+directions.
+
+Closing to collect meant repeatedly paying transaction costs for something that was
+purely about payment, and it created gaps where stake was between allocations and
+earning nothing. Operators responded by tuning the cycle, which is effort spent on
+the mechanism rather than on serving queries.
+
+It also distorted behaviour. If collecting requires closing, then the decision "should
+this stake stay here" gets entangled with "I need to collect now", and those should be
+independent questions.
+
+Separating them lets an allocation persist as long as it is the right place for the
+stake, with payment following proofs rather than following a closure. The staleness
+window keeps the obligation honest: prove you are still doing the work, or stop being
+paid for it.
+</Reveal>
+
+<Quiz
+  id="indexer-allocations"
+  questions={[
+    {
+      q: "What happens if your POI goes past the staleness limit?",
+      options: [
+        "You are slashed",
+        "The allocation is closed automatically and rewards are paid",
+        "The allocation goes stale and stops earning",
+        "Your delegators are notified"
+      ],
+      answer: 2,
+      explain: "It stops paying. Nothing is confiscated and no alarm sounds, which is why POI age is worth alerting on directly rather than inferring from process health."
+    },
+    {
+      q: "The protocol permits indefinite allocations. What does the indexer stack actually do at Horizon launch?",
+      options: [
+        "Keeps allocations open indefinitely",
+        "Continues recycling allocations on the previous short-lived cycle",
+        "Closes allocations after every POI",
+        "Requires manual closure by the operator"
+      ],
+      answer: 1,
+      explain: "The Horizon changes page is explicit that the stack continues the short-lived lifecycle for an easier transition, with allocations recycled typically every 28 days. Protocol capability and shipped behaviour are different layers, and you need both to plan."
+    },
+    {
+      q: "An allocation is open, POIs are fresh, and it earns nothing. Most likely reason?",
+      options: [
+        "The subgraph has no curation signal",
+        "The POI is diverging from other indexers",
+        "The allocation is too large",
+        "The gateway is not routing queries to you"
+      ],
+      answer: 0,
+      explain: "Indexing rewards depend on signal. A technically flawless allocation to an unsignalled subgraph earns nothing, and nothing about the machine looks wrong. The failure is economic rather than technical."
+    }
+  ]}
+/>

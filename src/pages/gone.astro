@@ -1,0 +1,40 @@
+---
+import Base from '../layouts/Base.astro';
+---
+<Base
+  title="Retired page"
+  description="This page taught something the protocol no longer does, and was retired rather than patched."
+  noindex={true}
+>
+  <section class="wrap" style="padding-block: clamp(3rem, 7vw, 5rem) 0;">
+    <p class="kicker">Retired</p>
+    <h1 style="max-width: 18ch;">This page taught something that is no longer true.</h1>
+    <p class="section-lede" style="margin-top: 1.3rem; font-size: 1.05rem;">
+      You have followed a link to material from the previous Graph Academy. It described
+      a version of the protocol that no longer exists, and it was retired rather than
+      patched, because patching it would have left a confident page with a plausible
+      shape and wrong contents.
+    </p>
+    <div class="prose" style="margin-top: 2.4rem;">
+      <h2>What was retired, and why.</h2>
+      <ul>
+        <li><strong>Hosted Service tutorials.</strong> The Hosted Service is gone.</li>
+        <li><strong>Cobb-Douglas rebate mathematics.</strong> Replaced by exponential rebates in GIP-0051.</li>
+        <li><strong>L1 curation bonding curve strategy.</strong> Curation on Arbitrum One uses a flat curve, so timing your entry does nothing.</li>
+        <li><strong>Testnet and bare-metal indexer guides.</strong> Superseded, and the economics in them predate two protocol upgrades.</li>
+        <li><strong>Delegation tax guidance.</strong> The tax was removed under Horizon.</li>
+      </ul>
+      <h2>Where to go instead.</h2>
+      <ul>
+        <li>The current curriculum: <a href="/paths/">learning paths</a>.</li>
+        <li>Every current protocol number with its source: <a href="/parameters/">parameters</a>.</li>
+        <li>Terms, including the obsolete ones you may have come here for: <a href="/glossary/">glossary</a>.</li>
+        <li>Procedures and configuration: <a href="https://thegraph.com/docs/en/" rel="external noopener">the official documentation</a>.</li>
+      </ul>
+    </div>
+    <div class="btn-row" style="margin-top: 2.4rem;">
+      <a class="btn btn-primary" href="/paths/">Browse the paths</a>
+      <a class="btn btn-ghost" href="/start/">Start from the beginning</a>
+    </div>
+  </section>
+</Base>

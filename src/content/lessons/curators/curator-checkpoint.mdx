@@ -1,0 +1,117 @@
+---
+title: "Curator checkpoint"
+role: curator
+path: "Curator"
+module: "Checkpoint"
+order: 1
+difficulty: intermediate
+time_minutes: 12
+summary: "Find a real subgraph, judge whether it will be queried, and check whether anything is actually serving it."
+protocol_version_verified: "Graph Horizon (2025-12-11)"
+last_verified: 2026-08-30
+verify_before: 2026-11-30
+sources:
+  - name: "Graph Explorer"
+    url: "https://thegraph.com/explorer"
+  - name: "Lodestar: curation"
+    url: "https://www.lodestar-dashboard.com/curate"
+parameters_used: []
+authors: ["@community"]
+license: "CC-BY-4.0"
+---
+
+## Recall
+
+<Quiz
+  id="curator-checkpoint"
+  title="Curator checkpoint"
+  questions={[
+    {
+      q: "Curation exists primarily to:",
+      options: [
+        "Rate the quality of subgraph code",
+        "Tell indexers where to point finite capacity, before query demand is observable",
+        "Give subgraph developers governance rights",
+        "Distribute indexing rewards to token holders"
+      ],
+      answer: 1,
+      explain: "It is a scheduling mechanism with capital behind it. A new subgraph has no queries until it is indexed, so somebody has to forecast, and the forecast has to cost something for it to carry information."
+    },
+    {
+      q: "The curation deposit charge goes to:",
+      options: ["Indexers", "Earlier curators", "The Foundation treasury", "Nobody, it is burned"],
+      answer: 3,
+      explain: "Burned. Paying it to earlier curators would make recruiting the next curator more profitable than forecasting demand, and signal would stop carrying information about demand."
+    },
+    {
+      q: "Curation on Arbitrum One uses a flat curve. The main consequence is:",
+      options: [
+        "Signal is now free",
+        "Timing your entry no longer affects your terms",
+        "Curators now earn indexing rewards",
+        "Unsignalling requires a thawing period"
+      ],
+      answer: 1,
+      explain: "No early discount, no late penalty. Timing stopped being a source of return, which makes forecasting query demand the only remaining edge."
+    },
+    {
+      q: "You signalled on a subgraph. It has queries, but you have earned nothing. First thing to check:",
+      options: [
+        "Whether the thawing period has elapsed",
+        "Whether any indexer is actually allocated to it",
+        "Whether your shares have vested",
+        "Whether the developer has approved your signal"
+      ],
+      answer: 1,
+      explain: "Signal makes a subgraph attractive to index but compels nobody. If nothing is allocated, no fees are generated no matter how much demand exists. Check allocations as well as signal when reviewing a position."
+    },
+    {
+      q: "The most common way a curator loses money is:",
+      options: [
+        "Being slashed for a bad forecast",
+        "The subgraph developer withdrawing signal",
+        "Capital sitting in a position that quietly earns nothing",
+        "Gas costs on Arbitrum One"
+      ],
+      answer: 2,
+      explain: "A slow, silent opportunity cost, with the entry charge already burned. Nothing liquidates and nothing warns you, which is exactly why a scheduled review matters more here than in roles with visible failure modes."
+    }
+  ]}
+/>
+
+## Practical task
+
+No wallet needed. The aim is to make one real forecast and write it down, so that
+in three months you can find out whether you were right.
+
+<Checklist
+  id="curator-checkpoint"
+  title="Make one real forecast"
+  items={[
+    "Open Graph Explorer and find a subgraph you can identify a live application behind.",
+    "Write down, in one sentence, why that data will be queried over the next year.",
+    "Find the current signal on it, and the query fees it has generated.",
+    "Compare those two numbers. Is the pool crowded relative to the revenue it produces?",
+    "Check whether any indexer is currently allocated to it. If none is, ask yourself why.",
+    "Find a second subgraph with similar fees and much less signal, and say which position you would prefer.",
+    "Note today's date beside your one-sentence forecast, and set a reminder to check it in three months.",
+    "If you could not write the sentence without using the word 'probably' twice, that is a finding too."
+  ]}
+/>
+
+## Before you signal anything
+
+<Warn>
+Nothing here is financial advice and none of these figures are live. Confirm
+current signal, fees and allocations on
+[Graph Explorer](https://thegraph.com/explorer) or a dashboard before committing
+capital. The deposit charge is burned on entry regardless of what happens
+afterwards, so the research is the cheap part and it comes first.
+</Warn>
+
+## Where next
+
+- What indexers do with the signal you provide: **[the indexer path](/indexers/)**.
+- Why a subgraph exists at all, and what makes one worth curating:
+  **[the developer path](/developers/)**.
+- Who sets the parameters you have been reading: **[governance](/governance/)**.

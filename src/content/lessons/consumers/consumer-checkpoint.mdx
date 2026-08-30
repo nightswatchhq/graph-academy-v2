@@ -1,0 +1,97 @@
+---
+title: "App builder checkpoint"
+role: consumer
+path: "App builder"
+module: "Checkpoint"
+order: 1
+difficulty: beginner
+time_minutes: 10
+summary: "Audit one real integration against the failure modes that do not raise errors."
+protocol_version_verified: "Graph Horizon (2025-12-11)"
+last_verified: 2026-08-30
+verify_before: 2026-11-30
+sources:
+  - name: "Graph Explorer"
+    url: "https://thegraph.com/explorer"
+  - name: "Subgraph Studio"
+    url: "https://thegraph.com/studio/"
+parameters_used: []
+authors: ["@community"]
+license: "CC-BY-4.0"
+---
+
+## Recall
+
+<Quiz
+  id="consumer-checkpoint"
+  title="App builder checkpoint"
+  questions={[
+    {
+      q: "The single most valuable addition to an integration is:",
+      options: [
+        "Retry with exponential backoff",
+        "Querying indexing status alongside the data",
+        "A second API key for failover",
+        "Client-side caching"
+      ],
+      answer: 1,
+      explain: "It separates fresh from behind from failed. Without it those three states all render as an empty result and none of them errors, so a broken data source looks like a user with no data."
+    },
+    {
+      q: "Where must the API key live?",
+      options: ["In the client, scoped by domain", "In server configuration behind your own backend", "In a public environment file", "In the subgraph manifest"],
+      answer: 1,
+      explain: "Anything shipped to a browser or a phone is extractable. A backend proxy also gives you the per-user rate limiting the gateway cannot do, since it does not know your users."
+    },
+    {
+      q: "Which data is safe to cache for a long time?",
+      options: [
+        "Anything at chain head",
+        "Confirmed historical data below the head",
+        "Nothing, chain data changes",
+        "Only aggregate counts"
+      ],
+      answer: 1,
+      explain: "History below a confirmed block does not change retroactively, which makes it unusually cacheable. Only data near the head needs frequent revalidation."
+    },
+    {
+      q: "Before depending on a third-party subgraph, the most important check is:",
+      options: [
+        "How many GitHub stars it has",
+        "Whether indexers are allocated to it and it is indexing healthily",
+        "Whether it uses the newest graph-node features",
+        "Whether it was published recently"
+      ],
+      answer: 1,
+      explain: "A published subgraph with no allocation returns nothing useful, and one that failed at some block keeps answering with data up to that block forever. Neither state announces itself."
+    }
+  ]}
+/>
+
+## Practical task
+
+Audit something real. If you have no integration yet, audit one you are planning.
+
+<Checklist
+  id="consumer-checkpoint"
+  title="Audit one integration"
+  items={[
+    "Name the subgraph you depend on and find who maintains it.",
+    "Check whether indexers are currently allocated to it, and whether it is indexing healthily.",
+    "Confirm your API key is not present in any client bundle. Actually search the build output.",
+    "Add indexing status to your most important query, and decide what the UI shows for behind and for failed.",
+    "Find every query without a timeout and give it one.",
+    "Find your highest-volume screen and count the queries it makes per view.",
+    "Work out queries per user session, and multiply by your expected users.",
+    "Decide what your application renders when the data source is unavailable, and check that it does that."
+  ]}
+/>
+
+## Where next
+
+- Understanding the subgraph you depend on, and maybe writing your own:
+  **[the developer path](/developers/)**.
+- Why your subgraph is or is not being served:
+  **[the curator path](/curators/)**.
+- Who serves your queries and what they are dealing with:
+  **[the indexer path](/indexers/)**.

@@ -1,0 +1,134 @@
+---
+import Base from '../layouts/Base.astro';
+import { SITE, OUTBOUND } from '../lib/site';
+import { PROTOCOL_VERSION, params } from '../lib/params';
+const count = Object.keys(params).length;
+---
+<Base
+  title="About"
+  description="What this site is, who owns it, why the last version rotted, and the machinery built to stop this one doing the same."
+>
+  <section class="wrap" style="padding-block: clamp(2.8rem, 6vw, 4.4rem) 0;">
+    <p class="kicker">About</p>
+    <h1 style="max-width: 16ch;">A learning site with an expiry date on every page.</h1>
+    <p class="section-lede" style="margin-top: 1.2rem; font-size: 1.05rem;">
+      The Graph Academy is community owned. It teaches the protocol by role and from
+      first principles, and it links out for everything it is not the right place for.
+    </p>
+  </section>
+
+  <section class="wrap" style="padding-top: 2rem;">
+    <div class="prose">
+      <h2>What happened to the last one.</h2>
+      <p>
+        The original Graph Academy was a WordPress site, last substantially updated in
+        2022. It taught Cobb-Douglas rebates, L1 curation bonding curves, and deploying
+        to the Hosted Service. All three are now wrong, and the site had no way to know
+        it.
+      </p>
+      <p>
+        That is the ordinary fate of educational material about a protocol that changes.
+        Numbers get typed into paragraphs, the paragraphs stop being true, and nothing
+        goes red. A reader has no way to tell a page written last month from one written
+        in 2021, because both look equally confident.
+      </p>
+
+      <h2>What this rebuild does differently.</h2>
+      <p>
+        Three mechanisms, all of them boring, which is the point.
+      </p>
+      <ul>
+        <li>
+          <strong>Every protocol number lives in one registry.</strong> No lesson
+          hard-codes a value. The <a href="/parameters/">parameters page</a> carries all
+          {count} of them with the source, a quote from it, and the date somebody read
+          it. Change it once and every lesson updates.
+        </li>
+        <li>
+          <strong>Every lesson carries a stamp and an expiry.</strong> What it was
+          checked against, when, and when it is due another look. Past that date the page
+          says so at the top, in a banner nobody can miss.
+        </li>
+        <li>
+          <strong>The build fails loudly.</strong> A nightly job lists pages past their
+          re-verification date and parameters nobody has read in ninety days. A lesson
+          referencing a parameter that does not exist fails the build outright.
+        </li>
+      </ul>
+
+      <h2>When the sources disagree, we say so.</h2>
+      <p>
+        Reading the official documentation carefully turns up places where two pages give
+        different answers, and places where the protocol permits one thing while the
+        shipped software does another. On 2026-08-30 we found three.
+      </p>
+      <p>
+        The comfortable move is to pick one and write confidently. This site records the
+        disagreement instead, marks the parameter, and tells you where to settle it. A
+        reader who knows two official pages conflict is better informed than one given a
+        confident answer that happens to be the wrong half of a contradiction.
+      </p>
+
+      <h2>What this site is not.</h2>
+      <ul>
+        <li>
+          <strong>Not the documentation.</strong> Procedures, CLI flags and configuration
+          belong in
+          <a href={OUTBOUND.docs} rel="external noopener">the official docs</a>, where
+          they are maintained by the people who change the software. This site explains
+          why, and links there for how.
+        </li>
+        <li>
+          <strong>Not a dashboard.</strong> Nothing here is live.
+          <a href={OUTBOUND.explorer} rel="external noopener">Graph Explorer</a> and
+          <a href={OUTBOUND.lodestar} rel="external noopener">Lodestar</a> carry the
+          current numbers.
+        </li>
+        <li>
+          <strong>Not financial advice.</strong> Nothing on this site is financial or
+          investment advice. It explains mechanisms so you can make your own decision.
+        </li>
+        <li>
+          <strong>Not anyone's marketing.</strong> The site is community owned. Where a
+          tool is recommended it is because it does the job, and where the protocol has a
+          weakness the lessons say so.
+        </li>
+      </ul>
+
+      <h2>Privacy.</h2>
+      <p>
+        No accounts, no sign-in, no cookies, no analytics, no third-party requests of any
+        kind. Your progress through the paths and your quiz answers are stored in your
+        own browser and never leave it. Clearing site data clears them.
+      </p>
+      <p>
+        Every asset on every page is served from this domain. Open the network panel and
+        check: two fonts, one stylesheet, the page itself.
+      </p>
+
+      <h2>Licensing.</h2>
+      <p>
+        Content is <strong>{SITE.contentLicense}</strong>, attributed to the Graph Academy
+        community. Take it, translate it, teach from it. Code is
+        <strong>{SITE.codeLicense}</strong>. The design system is
+        <a href="https://github.com/cargopete/cargopete-style" rel="external noopener">cargopete-style</a>,
+        also MIT. The two fonts are SIL Open Font Licence 1.1.
+      </p>
+
+      <h2>Current state.</h2>
+      <p>
+        Everything on this site was checked against <strong>{PROTOCOL_VERSION}</strong>.
+        The freshness of individual pages is visible on each one, and the
+        <a href="/changelog/">changelog</a> records what has moved.
+      </p>
+
+      <h2>Credit.</h2>
+      <p>
+        Built by the community, for the community. Design system and initial build by
+        <a href="https://github.com/cargopete" rel="external noopener">cargopete</a> and
+        The Night's Watch. No organisation owns this site, and the source is at
+        <a href={SITE.repo} rel="external noopener">{SITE.repo.replace('https://github.com/', '')}</a>.
+      </p>
+    </div>
+  </section>
+</Base>

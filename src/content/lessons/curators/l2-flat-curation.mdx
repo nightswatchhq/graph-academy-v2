@@ -1,0 +1,158 @@
+---
+title: "The flat curve on Arbitrum"
+role: curator
+path: "Curator"
+module: "The mechanics"
+order: 2
+difficulty: intermediate
+time_minutes: 10
+summary: "Curation on L1 rewarded arriving early. On Arbitrum it does not. An entire genre of curation strategy became obsolete, and it is still being taught."
+protocol_version_verified: "Graph Horizon (2025-12-11)"
+last_verified: 2026-08-30
+verify_before: 2026-11-30
+sources:
+  - name: "The Graph Docs: L2 Transfer Tools guide"
+    url: "https://thegraph.com/docs/en/arbitrum/l2-transfer-tools-guide/"
+  - name: "The Graph Docs: tokenomics"
+    url: "https://thegraph.com/docs/en/resources/tokenomics/"
+parameters_used: ["l2_curation_curve", "settlement_layer", "curation_tax_pct"]
+authors: ["@community"]
+license: "CC-BY-4.0"
+---
+
+If you have read anything about curation written before the move to
+<Param name="settlement_layer" />, you have probably read about bonding curves. That
+material describes a mechanism the protocol no longer uses, and following it will
+lose you money in a way that is difficult to notice.
+
+## What a bonding curve did.
+
+On Ethereum mainnet, the price of a curation share rose as more shares were issued
+for a subgraph. Signal early and each share cost less. Signal after a rush and each
+share cost more. Unsignalling moved back down the same curve.
+
+The intent was to reward the curator who identified demand before anyone else,
+which is a defensible thing to want to reward.
+
+What it produced in practice was a game about position rather than about data. The
+profitable move was often to identify subgraphs that were about to attract signal,
+rather than subgraphs that were about to attract queries. Those are different
+skills, and only one of them is useful to the network.
+
+It also made exits treacherous. Unsignalling from a position you entered late meant
+selling down a curve, and a rush for the exit made everyone's exit worse. Curators
+found themselves reasoning about other curators' behaviour instead of about query
+demand, which is precisely the cognitive load the protocol has been removing from
+its other roles as well.
+
+## What Arbitrum does instead.
+
+The curve is <Param name="l2_curation_curve" />. Per the L2 transfer guide, "the
+curation bonding curves on L2 are flat, which makes it easier for other Curators to
+curate on subgraphs, increasing the rewards for Indexers."
+
+Signal and unsignal at a consistent cost regardless of who arrived first. There is
+no discount for being early and no penalty for being late.
+
+<Model>
+On L1, curation had two questions: is this data going to be queried, and am I early?
+On Arbitrum there is one question. Everything you know about timing the curve is now
+noise.
+</Model>
+
+## What this changes about how you should think.
+
+**Timing is no longer a source of return.** If the only reason to signal on
+something is that others are about to, there is now no mechanism through which that
+pays. Your return comes from query fees on data that gets queried, and from nothing
+else.
+
+**Exits are no longer a coordination problem.** You are not racing other curators
+down a curve. You can leave a position because your view changed, without modelling
+whether everyone else is about to leave too.
+
+**Being late is not a reason not to act.** Under a bonding curve, arriving after a
+run-up could make an otherwise sound forecast unprofitable. Flat pricing removes
+that. If the data will be queried, signal on it, whenever you noticed.
+
+**Research beats reflexes.** The remaining edge is entirely in judging what will
+actually be queried, which rewards understanding an application's data needs. That
+is slower, less exciting, and a considerably healthier basis for a market.
+
+## The cost that remains.
+
+Flat does not mean free. Entering still costs <Param name="curation_tax_pct" />,
+burned. Since that charge lands on entry rather than accruing over time, the
+economics still favour deciding once and staying put over reshuffling positions.
+
+The difference is what you are being charged for. Under a bonding curve you paid for
+arriving late. Now you pay for arriving at all, once, at the same rate as everyone
+else.
+
+<Warn title="How to spot obsolete curation advice">
+Any of these means the page predates the move and its economics are wrong:
+
+- It advises you to signal early to secure a better share price.
+- It discusses "the curve" as something to time an entry or exit against.
+- It warns you about other curators exiting ahead of you.
+- It describes signal transfers from L1, which was a migration exercise rather than
+  ongoing practice.
+
+The mechanism, not just the numbers, has changed. Adjusting the figures in that
+advice does not rescue it.
+</Warn>
+
+<Reveal question="Before reading on: flat curves make signalling easier, so why does the L2 guide describe that as increasing rewards for indexers?">
+Because indexing rewards depend on signal, and the bonding curve was suppressing it.
+
+Under a curve, a curator considering a subgraph that already had substantial signal
+faced a worse price than the curators before them. That discouraged additional
+signal on subgraphs that were already identified as valuable, exactly where more
+indexing capacity would have been most useful.
+
+Flatten it and later curators face the same terms as earlier ones. More signal
+accumulates on subgraphs people actually believe in, more indexing rewards flow
+towards them, and indexers have a clearer picture of where capacity is wanted.
+
+The change reads as a curator convenience. It is really a fix to the signal quality
+the whole allocation mechanism depends on.
+</Reveal>
+
+<Quiz
+  id="curator-flat"
+  questions={[
+    {
+      q: "On Arbitrum One, signalling early on a subgraph gets you:",
+      options: [
+        "A lower price per share than later curators",
+        "The same terms as later curators",
+        "A higher share of query fees",
+        "A discount on the deposit charge"
+      ],
+      answer: 1,
+      explain: "The curve is flat. There is no early-mover discount and no late-mover penalty, which removes timing as a source of return entirely."
+    },
+    {
+      q: "A guide tells you to watch for other curators exiting before you do. What does this tell you about the guide?",
+      options: [
+        "It is describing sound risk management",
+        "It predates the move to Arbitrum and describes the L1 bonding curve",
+        "It is describing the thawing period",
+        "It is about delegation, not curation"
+      ],
+      answer: 1,
+      explain: "Racing other curators down a curve was an L1 concern. With flat pricing your exit value does not depend on the order of exits, so modelling other curators' behaviour is wasted effort."
+    },
+    {
+      q: "Under flat curation, where does a curator's edge come from?",
+      options: [
+        "Identifying subgraphs before other curators do",
+        "Timing entries around signal movements",
+        "Judging which data will actually be queried",
+        "Holding shares for longer to reduce the deposit charge"
+      ],
+      answer: 2,
+      explain: "The only remaining route to a return is query fees on data that gets queried. That rewards understanding what applications actually need, which is slower and considerably healthier as a basis for the mechanism."
+    }
+  ]}
+/>

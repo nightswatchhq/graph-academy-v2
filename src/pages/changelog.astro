@@ -1,0 +1,111 @@
+---
+import Base from '../layouts/Base.astro';
+
+interface Entry {
+  date: string;
+  kind: 'protocol' | 'site' | 'correction';
+  title: string;
+  body: string;
+  links?: { label: string; url: string }[];
+}
+
+// Newest first. A protocol entry records a change to the network. A correction
+// records this site being wrong, which is worth publishing rather than quietly
+// editing.
+const ENTRIES: Entry[] = [
+  {
+    date: '2026-08-31',
+    kind: 'protocol',
+    title: 'GIP-0089 takes effect: 20% of issuance redirected',
+    body:
+      'The Innovation Allocation begins. The SubgraphService rewards manager drops from 120.73 to 96.584 GRT per block, with the difference routed to the Foundation treasury through an existing DirectAllocation contract. Total issuance is unchanged; its destination is not. Indexers and, through them, delegators receive 20% less issuance than before this date, so any reward rate computed from earlier data describes a larger pot.',
+    links: [
+      { label: 'Council approval thread', url: 'https://forum.thegraph.com/t/the-graph-council-has-approved-gip-0089-the-innovation-allocation/7035' },
+      { label: 'Registry entry', url: '/parameters/#innovation_allocation_pct' },
+    ],
+  },
+  {
+    date: '2026-08-30',
+    kind: 'site',
+    title: 'The Academy rebuild goes live',
+    body:
+      'Seven role-based paths, 44 lessons, a 23-entry parameter registry and a freshness system that fails loudly. Every protocol number was read from its source on this date rather than carried over from the previous site, which taught Cobb-Douglas rebates, L1 bonding curves and the Hosted Service until it was retired.',
+    links: [{ label: 'What changed and why', url: '/about/' }],
+  },
+  {
+    date: '2026-08-30',
+    kind: 'correction',
+    title: 'Three contradictions found in the official documentation',
+    body:
+      'Reading the sources for the registry turned up three places where official pages disagree with each other or with the shipped software. The tokenomics page still describes a delegation tax that Horizon removed. The delegating page and the Horizon changes page give different limits for simultaneous undelegation requests. The indexing overview describes indefinite allocations while the Horizon changes page says the shipped stack still recycles them. All three are recorded rather than resolved, and each names the contract that would settle it.',
+    links: [{ label: 'The recorded conflicts', url: '/parameters/' }],
+  },
+  {
+    date: '2025-12-11',
+    kind: 'protocol',
+    title: 'Graph Horizon goes live',
+    body:
+      'Stake becomes provisioned against named data services rather than pooled generally. The delegation tax is removed. Slashing becomes flexible, judged by arbitrators within a cap. Allocations may in principle remain open indefinitely with periodic POIs, though the shipped indexer stack continues recycling them at launch. The technical capability to slash delegated stake is introduced and left switched off for the Subgraph Service.',
+    links: [
+      { label: 'What changes with Graph Horizon', url: 'https://thegraph.com/docs/en/graph-horizon/what-changes/' },
+      { label: 'Horizon for delegators', url: '/delegators/horizon-changes-for-delegators/' },
+    ],
+  },
+];
+
+const kindLabel: Record<Entry['kind'], string> = {
+  protocol: 'Protocol',
+  site: 'This site',
+  correction: 'Correction',
+};
+---
+<Base
+  title="Changelog"
+  description="What changed in the protocol, when this site noticed, and where this site has been wrong."
+>
+  <section class="wrap" style="padding-block: clamp(2.8rem, 6vw, 4.4rem) 0;">
+    <p class="kicker">Changelog</p>
+    <h1 style="max-width: 16ch;">What changed, and when we noticed.</h1>
+    <p class="section-lede" style="margin-top: 1.2rem; font-size: 1.05rem;">
+      Protocol changes that move the numbers, and corrections where this site was wrong.
+      Both belong here. A learning site that only publishes its successes is not showing
+      you its accuracy, it is showing you its editing.
+    </p>
+  </section>
+
+  <section class="wrap" style="padding-top: 2.4rem;">
+    <div style="max-width: 46rem;">
+      {ENTRIES.map((e) => (
+        <article style="padding-block: 28px; border-bottom: 1px solid var(--border);">
+          <div style="display: flex; gap: 12px; align-items: baseline; flex-wrap: wrap;">
+            <span class="module-num">{e.date}</span>
+            <span class={e.kind === 'correction' ? 'tag tag--rust' : 'tag'}>{kindLabel[e.kind]}</span>
+          </div>
+          <h3 style="margin-top: 12px; font-family: var(--sans); font-weight: 700; font-size: 1.1rem;">{e.title}</h3>
+          <p style="color: var(--text-muted); margin-top: 10px; font-size: 0.97rem; line-height: 1.65;">{e.body}</p>
+          {e.links && (
+            <p style="margin-top: 12px; font-size: 0.88rem; display: flex; gap: 14px; flex-wrap: wrap;">
+              {e.links.map((l) => (
+                <a href={l.url} class={l.url.startsWith('http') ? 'out' : ''} rel={l.url.startsWith('http') ? 'external noopener' : undefined}>{l.label}</a>
+              ))}
+            </p>
+          )}
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section class="wrap">
+    <p class="kicker">How this list stays honest</p>
+    <h2 style="max-width: 22ch;">A correction is an entry, not an edit.</h2>
+    <p class="section-lede" style="margin-top: 1.1rem;">
+      When this site turns out to be wrong, the fix goes in and a correction goes here.
+      Silently editing a page and moving on would leave every reader who acted on the old
+      version with no way to know.
+    </p>
+    <div class="btn-row" style="margin-top: 1.8rem;">
+      <a class="btn btn-primary" href="/parameters/">Every number, with its source</a>
+      <a class="btn btn-ghost" href="/contribute/">Report something wrong</a>
+    </div>
+  </section>
+</Base>

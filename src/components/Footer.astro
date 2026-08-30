@@ -1,0 +1,33 @@
+---
+import { SITE, OUTBOUND } from '../lib/site';
+import { PROTOCOL_VERSION } from '../lib/params';
+---
+<footer class="site">
+  <div class="wrap foot">
+    <div>
+      <div style="color: var(--text); font-weight: 600;">The Graph Academy</div>
+      <p class="license" style="margin-top: 8px;">
+        Content {SITE.contentLicense} &middot; Code {SITE.codeLicense} &middot; Checked against {PROTOCOL_VERSION}
+      </p>
+      <p class="foot-credit" style="margin-top: 6px;">
+        Community owned. Built by the community, for the community.
+      </p>
+    </div>
+    <div class="foot-links">
+      <a href="/about/">About</a>
+      <a href="/contribute/">Contribute</a>
+      <a href="/changelog/">Changelog</a>
+      <a href="/parameters/">Parameters</a>
+      <a class="out" href={OUTBOUND.docs} rel="external noopener">Official docs</a>
+      <a class="out" href={OUTBOUND.lodestar} rel="external noopener">Lodestar</a>
+      <a class="out" href={SITE.repo} rel="external noopener">Source</a>
+    </div>
+  </div>
+  <div class="wrap" style="margin-top: 28px;">
+    <p class="foot-credit" style="max-width: 60ch;">
+      Nothing on this site is financial or investment advice. Every protocol number
+      carries the date somebody last checked it. Where the official documentation
+      contradicts itself, this site says so rather than picking a winner quietly.
+    </p>
+  </div>
+</footer>

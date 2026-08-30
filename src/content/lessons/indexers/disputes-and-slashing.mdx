@@ -1,0 +1,167 @@
+---
+title: "Disputes, arbitration and flexible slashing"
+role: indexer
+path: "Indexer"
+module: "Operations"
+order: 3
+difficulty: advanced
+time_minutes: 12
+summary: "What can actually get you slashed, who decides, how much it costs, and the cheap habits that keep you out of it."
+protocol_version_verified: "Graph Horizon (2025-12-11)"
+last_verified: 2026-08-30
+verify_before: 2026-11-30
+sources:
+  - name: "The Graph Docs: indexing overview"
+    url: "https://thegraph.com/docs/en/indexing/overview/"
+  - name: "The Graph Docs: what changes with Graph Horizon"
+    url: "https://thegraph.com/docs/en/graph-horizon/what-changes/"
+parameters_used: ["fisherman_dispute_deposit", "max_slash_pct", "recommended_slash_pct", "delegated_stake_slashable"]
+authors: ["@community"]
+license: "CC-BY-4.0"
+---
+
+Slashing is the mechanism that makes an indexer's answer worth trusting. Understanding
+it precisely is worth doing, because the folklore is more frightening than the reality
+and the reality has sharper edges in places the folklore ignores.
+
+## What can be disputed.
+
+Two categories, and they are not equally likely.
+
+**A POI that disagrees with honest indexing.** You published a commitment to derived
+data, and it does not match what other indexers derived from the same chain data. This
+is the main event.
+
+**A query response that was wrong.** You served an answer that did not correspond to
+the indexed data.
+
+Note what is not on the list. Downtime is not slashable. Being slow is not slashable.
+Serving no queries is not slashable. Those cost you revenue, which is the network's
+way of handling them, and the distinction is deliberate: slashing is for claims that
+were false, not for service that was poor.
+
+## Who raises one, and at what cost.
+
+A Fisherman raises a dispute and posts a deposit of at least
+<Param name="fisherman_dispute_deposit" />.
+
+The deposit is the mechanism that keeps disputes serious. Without it, raising them
+would be free and an indexer could be harassed by anyone with a grudge. With it, a
+challenger has to believe they are right by more than the deposit is worth.
+
+The consequence for you is reassuring in one direction and not in the other. Frivolous
+disputes are expensive to bring, so you are unlikely to face one at random. A dispute
+you do face has somebody's capital behind it, which means they think they have
+evidence.
+
+## Arbitration, and what flexible slashing means.
+
+Arbitrators decide. Under Horizon the amount is a judgement rather than a fixed
+figure: arbitrators "determine appropriate slash amounts based on the severity and
+context of infractions", capped at <Param name="max_slash_pct" /> of the indexer's
+stake, with a recommended value of <Param name="recommended_slash_pct" />.
+
+This is a genuine improvement for honest operators. A fixed penalty had to be set
+high enough to deter deliberate misbehaviour, which meant an operator whose POI
+diverged because of an infrastructure fault faced the same consequence as one who
+deliberately served rubbish. Judgement within a cap lets those be treated differently.
+
+It also means the outcome is not fully predictable in advance, and severity and
+context are human assessments. An operator who can show what went wrong, when they
+noticed and what they changed is in a materially different position from one who
+cannot. Keep records.
+
+<Warn title="Delegated stake, precisely">
+Delegated stake is currently <Param name="delegated_stake_slashable" /> slashable for
+the Subgraph Service. The capability exists in Horizon and is switched off.
+
+If you accept delegation, your delegators' exposure to this is something to tell them
+plainly rather than let them discover. It is also something to watch, because
+enabling it is a governance decision, and a service you provision to later may make a
+different choice.
+</Warn>
+
+## Keeping out of it.
+
+The habits are cheap and the failure they prevent is not.
+
+**Compare POIs before publishing.** Divergence from other indexers on the same
+deployment is detectable before it is disputable. Community tooling exists for exactly
+this, and consulting it costs nothing.
+
+**Pin your chain data sources.** Most divergence traces to chain data differences
+rather than to anything you did wrong. An unreliable or subtly different endpoint is
+the usual culprit.
+
+**Track graph-node versions.** Different versions can produce different results for
+the same subgraph. Knowing which version produced which POI is the difference between
+diagnosing a divergence in an hour and arguing about it for a week.
+
+**Do not publish a POI you cannot explain.** If a deployment has been through
+something odd, a resync, a rollback, a version change, check before publishing rather
+than after.
+
+**Keep an operational log.** When a dispute is judged on severity and context, being
+able to show what happened is worth real money.
+
+<Model>
+Slashing punishes false claims, not poor service. Your protection is not perfect
+uptime, it is being able to demonstrate that every claim you published was your honest
+output, and to notice divergence before somebody else does.
+</Model>
+
+<Reveal question="Before reading on: why require a deposit from the Fisherman rather than letting anyone raise a dispute freely?">
+Because free disputes are a denial-of-service tool.
+
+Arbitration costs the arbitrators time and the accused indexer attention and
+uncertainty. If raising one were free, a competitor could file continuously against
+every rival, and honest operators would spend their days defending themselves.
+
+The deposit prices the challenger's confidence. Somebody who genuinely believes an
+indexer published a false POI can afford to risk it. Somebody fishing cannot afford to
+be wrong repeatedly.
+
+It is the same design idea as the thawing period and the curation deposit charge:
+where a mechanism could be abused by acting cheaply and often, attach a cost to acting
+and let the cost do the filtering. Once you notice the pattern it turns up throughout
+the protocol.
+</Reveal>
+
+<Quiz
+  id="indexer-disputes"
+  questions={[
+    {
+      q: "Which of these can get an indexer slashed?",
+      options: [
+        "Extended downtime",
+        "Serving queries slowly",
+        "Publishing a POI that disagrees with honest indexing of the same data",
+        "Allocating to an unsignalled subgraph"
+      ],
+      answer: 2,
+      explain: "Slashing is for false claims. Downtime, slowness and poor allocation cost you revenue, which is how the network handles them. The distinction between bad service and false claims is deliberate."
+    },
+    {
+      q: "Why must a Fisherman post a deposit to raise a dispute?",
+      options: [
+        "To pay the arbitrators' fees",
+        "To compensate the indexer if the dispute fails",
+        "So that raising disputes is not free, which would make it a harassment tool",
+        "To prove they are a registered indexer"
+      ],
+      answer: 2,
+      explain: "The deposit prices the challenger's confidence. It is the same design idea as the thawing period and the curation deposit charge: attach a cost to acting cheaply and often, and let the cost filter."
+    },
+    {
+      q: "What is the practical benefit of flexible slashing for an honest operator?",
+      options: [
+        "Slashing no longer applies to the Subgraph Service",
+        "An infrastructure fault can be treated differently from deliberate misbehaviour",
+        "Disputes are resolved automatically",
+        "The cap was removed"
+      ],
+      answer: 1,
+      explain: "A fixed penalty had to be high enough to deter deliberate misbehaviour, so an honest operator with a chain data fault faced the same consequence. Judgement within a cap separates them, which is why keeping records of what went wrong is worth real money."
+    }
+  ]}
+/>

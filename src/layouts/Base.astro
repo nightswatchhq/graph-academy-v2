@@ -1,0 +1,81 @@
+---
+import '../styles/tokens.css';
+import '../styles/academy.css';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+import { SITE } from '../lib/site';
+
+interface Props {
+  title: string;
+  description: string;
+  /** JSON-LD injected as-is. Lessons and paths declare LearningResource / Course. */
+  jsonLd?: Record<string, unknown>;
+  noindex?: boolean;
+}
+const { title, description, jsonLd, noindex = false } = Astro.props;
+const pageTitle = title === SITE.name ? title : `${title} - ${SITE.name}`;
+const canonical = new URL(Astro.url.pathname, SITE.url).href;
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex" />}
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={SITE.name} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta name="twitter:card" content="summary" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <link rel="preload" href="/fonts/space-grotesk.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/jetbrains-mono.woff2" as="font" type="font/woff2" crossorigin />
+    <script is:inline>
+      // Theme before first paint, so a reload does not flash the wrong ground.
+      try {
+        var t = localStorage.getItem('academy-theme');
+        if (!t) t = matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+        if (t === 'light') document.documentElement.setAttribute('data-theme', 'light');
+      } catch (e) { /* storage blocked: the dark default stands */ }
+    </script>
+    {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
+  </head>
+  <body>
+    <Nav />
+    <main id="main">
+      <slot />
+    </main>
+    <Footer />
+    <script is:inline>
+      (function () {
+        var btn = document.getElementById('theme-toggle');
+        if (btn) {
+          btn.addEventListener('click', function () {
+            var light = document.documentElement.getAttribute('data-theme') === 'light';
+            if (light) document.documentElement.removeAttribute('data-theme');
+            else document.documentElement.setAttribute('data-theme', 'light');
+            try { localStorage.setItem('academy-theme', light ? 'dark' : 'light'); } catch (e) {}
+          });
+        }
+
+        // One entrance, driven by IntersectionObserver. Never a scroll listener.
+        var els = document.querySelectorAll('.reveal');
+        if (els.length && 'IntersectionObserver' in window) {
+          var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (e) {
+              if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+            });
+          }, { rootMargin: '0px 0px -8% 0px' });
+          els.forEach(function (el) { io.observe(el); });
+        } else {
+          els.forEach(function (el) { el.classList.add('in'); });
+        }
+      })();
+    </script>
+  </body>
+</html>

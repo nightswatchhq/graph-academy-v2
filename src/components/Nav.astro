@@ -1,0 +1,44 @@
+---
+import Mark from './Mark.astro';
+import { OUTBOUND } from '../lib/site';
+
+const path = Astro.url.pathname;
+const links = [
+  { href: '/paths/', label: 'Paths' },
+  { href: '/delegators/', label: 'Delegators' },
+  { href: '/curators/', label: 'Curators' },
+  { href: '/indexers/', label: 'Indexers' },
+  { href: '/developers/', label: 'Developers' },
+  { href: '/glossary/', label: 'Glossary' },
+  { href: '/parameters/', label: 'Parameters' },
+];
+const current = (href: string) => (path === href || path.startsWith(href) ? 'page' : undefined);
+---
+<a class="skip" href="#main">Skip to content</a>
+<header class="site">
+  <nav class="nav" aria-label="Main">
+    <a class="brand" href="/">
+      <Mark />
+      <span class="brand-name">The Graph <b>Academy</b></span>
+    </a>
+    <div class="nav-links">
+      {links.map((l) => <a href={l.href} aria-current={current(l.href)}>{l.label}</a>)}
+      <a class="out" href={OUTBOUND.docs} rel="external noopener">Docs</a>
+    </div>
+    <div class="nav-tools">
+      <a class="icon-btn" href="/search/" aria-label="Search the Academy">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
+             stroke-linecap="round" aria-hidden="true">
+          <circle cx="10.5" cy="10.5" r="6.5" /><path d="m15.5 15.5 4 4" />
+        </svg>
+      </a>
+      <button class="icon-btn" id="theme-toggle" type="button"
+              aria-label="Switch between the dark and light theme">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
+             stroke-linecap="round" aria-hidden="true">
+          <path d="M20 13.4A8.2 8.2 0 0 1 10.6 4a8.2 8.2 0 1 0 9.4 9.4Z" />
+        </svg>
+      </button>
+    </div>
+  </nav>
+</header>

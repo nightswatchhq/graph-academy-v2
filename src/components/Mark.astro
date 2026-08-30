@@ -1,0 +1,13 @@
+---
+// A graph: three nodes and the edges between them. Drawn to the house standard
+// at 1.7 stroke, not imported from an icon library.
+interface Props { class?: string }
+const { class: cls } = Astro.props;
+---
+<svg class={cls} viewBox="0 0 24 24" fill="none" aria-hidden="true"
+     stroke="currentColor" stroke-width="1.7" stroke-linecap="round">
+  <circle cx="5.5" cy="17.5" r="2.6" />
+  <circle cx="18.5" cy="17.5" r="2.6" />
+  <circle cx="12" cy="5" r="2.6" />
+  <path d="M10.7 7.3 6.8 15.2M13.3 7.3l3.9 7.9M8.1 17.5h7.8" />
+</svg>

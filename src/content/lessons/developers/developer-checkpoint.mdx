@@ -1,0 +1,126 @@
+---
+title: "Developer checkpoint"
+role: developer
+path: "Developer"
+module: "Checkpoint"
+order: 1
+difficulty: intermediate
+time_minutes: 13
+summary: "Pick the right service for a real requirement, then design a schema before writing any handler."
+protocol_version_verified: "Graph Horizon (2025-12-11)"
+last_verified: 2026-08-30
+verify_before: 2026-11-30
+sources:
+  - name: "Subgraph Studio"
+    url: "https://thegraph.com/studio/"
+  - name: "The Graph Docs: subgraph quick start"
+    url: "https://thegraph.com/docs/en/subgraphs/quick-start/"
+parameters_used: []
+authors: ["@community"]
+license: "CC-BY-4.0"
+---
+
+## Recall
+
+<Quiz
+  id="developer-checkpoint"
+  title="Developer checkpoint"
+  questions={[
+    {
+      q: "Why can a subgraph mapping not call an external API?",
+      options: [
+        "AssemblyScript has no HTTP client",
+        "It would break determinism, so honest indexers would produce different POIs",
+        "It would be too slow",
+        "External calls are billed separately"
+      ],
+      answer: 1,
+      explain: "Determinism is what makes indexers' proofs comparable. It also matters that an external service is a trust assumption nobody in the protocol can audit, in a system whose purpose is not having one."
+    },
+    {
+      q: "You publish a subgraph. Nothing indexes it. Why?",
+      options: [
+        "It needs Foundation approval",
+        "No curation signal, so allocating to it earns no indexing rewards",
+        "The schema failed validation",
+        "You must wait for the next epoch"
+      ],
+      answer: 1,
+      explain: "Publishing makes service possible rather than guaranteed. Signal is what makes your subgraph worth an indexer's stake, which is why the docs suggest developers curate their own."
+    },
+    {
+      q: "Which schema change is safe for existing consumers?",
+      options: ["Renaming a field", "Adding a field", "Changing a field type", "Removing a field"],
+      answer: 1,
+      explain: "Adding is safe. The others break queries you cannot see, and consumers query a specific deployment rather than following your latest version."
+    },
+    {
+      q: "Your application needs token balances across four chains, this week. Best choice?",
+      options: ["Four subgraphs", "The Token API", "A Substreams module per chain", "Run Firehose for each chain"],
+      answer: 1,
+      explain: "That is exactly the repeated question the Token API absorbs. Authoring four subgraphs to answer a solved question costs weeks and consumes indexing capacity re-deriving data somebody already derived."
+    },
+    {
+      q: "A query returns an empty array. What should your application do?",
+      options: [
+        "Render an empty state",
+        "Retry until data appears",
+        "Check indexing status, since empty, still syncing and broken deployment look identical",
+        "Fail the request"
+      ],
+      answer: 2,
+      explain: "None of the three errors. Absent data rendering as a healthy empty state is one of the most persistent bugs in applications built on indexed data, precisely because nothing goes wrong visibly."
+    },
+    {
+      q: "Which is the strongest reason NOT to use Substreams?",
+      options: [
+        "Your history is small and your team does not write Rust",
+        "You need data from multiple chains",
+        "You want to compute aggregations",
+        "Your backfill is slow"
+      ],
+      answer: 0,
+      explain: "The parallelism solves a problem you do not have, and a module one person understands is a liability when that person is away. A maintainable subgraph beats an unmaintainable pipeline."
+    }
+  ]}
+/>
+
+## Practical task
+
+Design before you build. This is the exercise that saves the most time later, and it
+requires no code.
+
+<Checklist
+  id="developer-checkpoint"
+  title="Design one real integration"
+  items={[
+    "Write down, in one sentence, the question your application needs answered from chain data.",
+    "Run it through the decision order. Say which service you land on and why the layer above it does not suffice.",
+    "If the answer is a subgraph: list your entities and, for each, say what its ID is and why that ID is stable across every event that touches it.",
+    "Write the GraphQL query your most important screen will make. Check that your schema actually supports it.",
+    "Identify the contracts you will watch. Check whether any is a proxy, and note what happens to your mapping if it is upgraded.",
+    "Estimate how much history you need and be honest about whether a handler loop can cover it in acceptable time.",
+    "Budget the curation signal you will post so that somebody actually indexes it.",
+    "Write down what your application does when a query returns empty, distinguishing no data from not indexed yet from broken."
+  ]}
+/>
+
+## Then build it
+
+<Warn>
+The commands, flags and scaffolding live in the
+[official quick start](https://thegraph.com/docs/en/subgraphs/quick-start/) and in
+[Subgraph Studio](https://thegraph.com/studio/), where they are maintained. This site
+deliberately does not repeat them, because a static copy of a CLI interface ages into
+a source of confusing errors.
+
+Sync fully in Studio before publishing. Most defects only appear well into history.
+</Warn>
+
+## Where next
+
+- Making sure somebody actually indexes your work: **[the curator path](/curators/)**.
+- What the operators serving your subgraph are dealing with:
+  **[the indexer path](/indexers/)**.
+- Getting an endpoint into production and paying for it:
+  **[app builders](/consumers/)**.

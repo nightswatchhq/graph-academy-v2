@@ -1,0 +1,157 @@
+---
+title: "Building and publishing, and what each step commits you to"
+role: developer
+path: "Developer"
+module: "Subgraphs"
+order: 2
+difficulty: intermediate
+time_minutes: 12
+summary: "Studio for development, the network for production. The decisions that are hard to undo, and the one that determines whether anyone indexes your work at all."
+protocol_version_verified: "Graph Horizon (2025-12-11)"
+last_verified: 2026-08-30
+verify_before: 2026-11-30
+sources:
+  - name: "The Graph Docs: subgraph quick start"
+    url: "https://thegraph.com/docs/en/subgraphs/quick-start/"
+  - name: "The Graph Docs: publishing a subgraph"
+    url: "https://thegraph.com/docs/en/subgraphs/developing/publishing/publishing-a-subgraph/"
+parameters_used: ["recommended_dev_signal", "curation_tax_pct"]
+authors: ["@community"]
+license: "CC-BY-4.0"
+---
+
+The commands are in the official quick start and they change. What this covers is
+what each stage means and which parts are difficult to reverse.
+
+## The two environments.
+
+**Subgraph Studio** is where you develop. You deploy, it indexes, you query it, you
+iterate. Nothing is on the network, nobody else is serving it, and you can break it
+freely.
+
+**The network** is where you publish. Publishing puts the subgraph on chain so that
+independent indexers can choose to index it and applications can query it through the
+gateway.
+
+The distinction that matters: in Studio one system serves you. On the network you are
+asking a market to serve you, and a market can decline.
+
+<Flow steps={["author", "deploy to Studio", "test", "publish to network", "signal"]} hot={4} />
+
+## The sequence, and what each step costs.
+
+**Author against the real contracts.** Real addresses, real start blocks. The
+[house rule](/contribute/) against placeholders applies to your own work for a
+practical reason: a subgraph written against a test contract has not encountered the
+proxy upgrade, the unusual event ordering, or the factory pattern that will actually
+break it.
+
+**Deploy to Studio and let it sync fully.** Not partially. Most defects, non-determinism,
+mishandled reorgs, entity identity collisions, only appear well into history.
+
+**Query it the way your application will.** The schema looks fine until you write the
+query your product needs and find it requires a field you did not model or a
+relationship you did not create.
+
+**Publish.** This is the step that is awkward to undo. Publishing creates on-chain
+state, and a version people integrate against becomes something you cannot simply
+delete.
+
+**Signal on it.** This is the step people skip, and skipping it means nothing indexes
+your subgraph.
+
+## The step everyone forgets.
+
+A published subgraph with no curation signal is generally not worth an indexer's
+stake, because allocating to it earns no indexing rewards. You can publish, be
+delighted, and find weeks later that nothing is serving it.
+
+The documentation suggests developers curate their own subgraph, giving
+<Param name="recommended_dev_signal" /> as a starting figure, while being explicit
+that the right number moves with network activity. Entering costs
+<Param name="curation_tax_pct" />, burned.
+
+Treat it as a cost of publishing rather than an investment. You are buying indexing
+capacity for your own application, and the return you want is reliable service.
+
+<Warn title="Publish then wait is not a plan">
+If your application depends on the subgraph being served, verify that an indexer is
+actually allocated to it before you point production traffic at it. Signal makes your
+subgraph attractive to index. It does not compel anyone.
+</Warn>
+
+## Versioning, and the part that hurts.
+
+Publishing a new version does not migrate your consumers. They query a specific
+deployment, and moving them is a coordination exercise.
+
+Two consequences worth planning around:
+
+- **Schema changes are breaking changes.** Removing a field breaks queries you cannot
+  see. Adding is safe, removing and renaming are not.
+- **A new version needs indexing from scratch.** Indexers must sync it, which takes
+  time, and signal on the old version does not automatically make the new one
+  attractive.
+
+The practical upshot is to get the schema right before you have consumers, because
+afterwards the cost is theirs as well as yours.
+
+## Where to get the actual commands.
+
+Deliberately not here. The CLI, its flags and its scaffolding change, and a static
+page repeating them ages into a source of confusing errors.
+
+The [official quick start](https://thegraph.com/docs/en/subgraphs/quick-start/) is
+maintained, and [Subgraph Studio](https://thegraph.com/studio/) walks the deploy and
+publish steps directly.
+
+<Reveal question="Before reading on: why does the protocol not simply index every published subgraph?">
+Because indexing is not free and the cost is borne by somebody.
+
+Every subgraph indexed is a database that grows, chain history re-read, and machine
+time. If publication compelled indexing, anyone could impose unbounded cost on
+operators for nothing, and the obvious attack is to publish thousands of subgraphs
+over the busiest contracts you can find.
+
+Requiring signal makes indexing follow somebody's willingness to pay. If nobody will
+put capital behind the claim that this data will be queried, including you who
+published it, the network's judgement is that the capacity is better spent elsewhere.
+
+It feels like friction when your own subgraph sits unindexed. It is the mechanism
+stopping the network's capacity being consumed by data nobody wants, and the signal
+you post is you answering the question on your own behalf.
+</Reveal>
+
+<Quiz
+  id="dev-publish"
+  questions={[
+    {
+      q: "What is the practical difference between Studio and the network?",
+      options: [
+        "Studio is free, the network is paid",
+        "In Studio one system serves you; on the network you are asking a market to serve you, and it can decline",
+        "Studio supports more chains",
+        "The network does not support GraphQL"
+      ],
+      answer: 1,
+      explain: "That is the shift that catches people. Publishing does not guarantee service, it makes service possible, and whether it happens depends on whether indexing your subgraph is worth an operator's stake."
+    },
+    {
+      q: "You publish a subgraph and nothing indexes it. Most likely reason?",
+      options: [
+        "The schema is invalid",
+        "You have not signalled on it, so allocating to it earns no indexing rewards",
+        "The gateway has not approved it",
+        "You must wait for a governance vote"
+      ],
+      answer: 1,
+      explain: "Signal is what makes a subgraph worth an indexer's stake. Publishing and waiting is the most common way a developer ends up with a subgraph nobody serves."
+    },
+    {
+      q: "Which schema change is safe for existing consumers?",
+      options: ["Renaming a field", "Removing an unused field", "Adding a new field", "Changing a field's type"],
+      answer: 2,
+      explain: "Adding is safe. Removing, renaming and retyping break queries you cannot see, and consumers query a specific deployment rather than following your latest version automatically."
+    }
+  ]}
+/>

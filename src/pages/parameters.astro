@@ -1,0 +1,143 @@
+---
+import Base from '../layouts/Base.astro';
+import { params, paramGroups, PROTOCOL_VERSION, conflictedParams, staleParams } from '../lib/params';
+
+const disputed = conflictedParams();
+const stale = staleParams(90);
+const all = Object.values(params);
+const newest = all.map((p) => p.verified).sort().at(-1);
+---
+<Base
+  title="Protocol parameters"
+  description="Every protocol number this site uses, with the source, a quote from it, and the date somebody read it. Where two official pages disagree, both are recorded."
+>
+  <section class="wrap" style="padding-block: clamp(2.8rem, 6vw, 4.4rem) 0;">
+    <p class="kicker">The registry</p>
+    <h1 style="max-width: 16ch;">Every number, with its receipt.</h1>
+    <p class="section-lede" style="margin-top: 1.2rem; font-size: 1.05rem;">
+      No lesson on this site hard-codes a protocol number. They all call this registry,
+      and every entry carries the source, a quote from it, and the date a human opened
+      that page and read the value there.
+    </p>
+    <div class="lesson-meta" style="margin-top: 1.6rem;">
+      <span class="m"><b>{all.length}</b> parameters</span>
+      <span class="m">checked against <b>{PROTOCOL_VERSION}</b></span>
+      <span class="m">newest reading <b>{newest}</b></span>
+      <span class="m"><b>{disputed.length}</b> with recorded conflicts</span>
+    </div>
+  </section>
+
+  <section class="wrap" style="padding-block: 2.6rem 0;">
+    <div class="adm adm--warning" style="max-width: 46rem; margin-top: 0;">
+      <span class="adm-label">Read this before using these numbers</span>
+      <div class="adm-body">
+        <p>
+          This page is not live. It is a record of what official sources said on the
+          dates shown. Before acting on any figure, confirm it against the linked source
+          or the deployed contract.
+        </p>
+        <p>
+          {stale.length === 0
+            ? `No parameter here has gone more than 90 days without being re-read.`
+            : `${stale.length} parameters have gone more than 90 days without being re-read. Treat those with particular suspicion.`}
+        </p>
+      </div>
+    </div>
+  </section>
+
+  {disputed.length > 0 && (
+    <section class="wrap" style="padding-block: 3rem 0;">
+      <p class="kicker">Where the sources disagree</p>
+      <h2 style="max-width: 20ch;">Recorded, not resolved.</h2>
+      <p class="section-lede" style="margin-top: 1.1rem;">
+        These are cases where two official pages give different answers, or where the
+        protocol permits one thing and the shipped software does another. Picking a
+        winner quietly would be more comfortable and less useful.
+      </p>
+      <div style="max-width: 46rem; margin-top: 1.8rem;">
+        {disputed.map((p) => (
+          <div class="adm adm--disputed" id={`disputed-${p.key}`}>
+            <span class="adm-label">{p.label}</span>
+            <div class="adm-body">
+              <p>{p.note}</p>
+              <p style="font-family: var(--mono); font-size: 0.74rem; letter-spacing: 0.04em;">
+                <a class="out" href={p.source} rel="external noopener">primary source</a>
+                {p.note_source && <span style="color: var(--text-faint);"> · </span>}
+                {p.note_source && (
+                  <a class="out" href={p.note_source} rel="external noopener">conflicting source</a>
+                )}
+                {p.onchain_ref && (
+                  <span style="color: var(--text-muted);"> · settle it at <code>{p.onchain_ref}</code></span>
+                )}
+              </p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  )}
+
+  {paramGroups.map((group) => (
+    <section class="wrap" style="padding-block: 3.4rem 0;">
+      <p class="kicker">{group.title}</p>
+      <div style="overflow-x: auto;">
+      <table class="ptable" style="min-width: 34rem;">
+        <thead>
+          <tr>
+            <th style="width: 32%;">Parameter</th>
+            <th style="width: 20%;">Value</th>
+            <th style="width: 16%;">Status</th>
+            <th style="width: 16%;">Read on</th>
+          </tr>
+        </thead>
+        <tbody>
+          {group.keys.map((key) => {
+            const p = params[key];
+            return (
+              <tr id={key}>
+                <td class="pl">
+                  {p.label}
+                  <div style="font-family: var(--mono); font-size: 0.68rem; color: var(--text-faint); margin-top: 4px;">{key}</div>
+                </td>
+                <td class="pv">{p.display}<div style="font-family: var(--sans); font-size: 0.78rem; color: var(--text-muted); margin-top: 4px;">{p.unit}</div></td>
+                <td><span class={`pstatus pstatus--${p.status}`}>{p.status}</span></td>
+                <td class="pdate">
+                  {p.verified}
+                  <div style="margin-top: 6px;">
+                    <a class="out" href={p.source} rel="external noopener" style="font-size: 0.72rem;">source</a>
+                  </div>
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+      </div>
+      {group.keys.map((key) => {
+        const p = params[key];
+        return (p.quote || p.note) ? (
+          <div style="margin-top: 18px; max-width: 46rem;">
+            <p style="font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--rust);">{p.label}</p>
+            {p.quote && <p class="pquote">{p.quote}</p>}
+            {p.note && <p class="pnote">{p.note}</p>}
+          </div>
+        ) : null;
+      })}
+    </section>
+  ))}
+
+  <section class="wrap">
+    <p class="kicker">How to fix one</p>
+    <h2 style="max-width: 20ch;">Found a number that has moved?</h2>
+    <p class="section-lede" style="margin-top: 1.1rem;">
+      The registry lives in <code>data/parameters.toml</code>. Change the value, change
+      the source and the quote, set <code>verified</code> to the date you read it, and
+      open a pull request. Every lesson using it updates automatically, which is the
+      whole reason it works this way.
+    </p>
+    <div class="btn-row" style="margin-top: 1.8rem;">
+      <a class="btn btn-primary" href="/contribute/">How to contribute</a>
+      <a class="btn btn-ghost" href="/changelog/">What has changed</a>
+    </div>
+  </section>
+</Base>

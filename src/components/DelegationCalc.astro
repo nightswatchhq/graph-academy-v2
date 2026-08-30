@@ -1,0 +1,70 @@
+---
+// Net delegation return, and what the thawing period does to it. The second
+// half is the point: a headline APR quoted without the thaw is not the return
+// a delegator actually earns.
+import { param } from '../lib/params';
+const thaw = Number(param('undelegation_period_days').value);
+---
+<section class="calc" data-delegation data-thaw={thaw}>
+  <span class="calc-label">Net return, and what the thaw costs</span>
+  <div class="calc-fields">
+    <div class="calc-field">
+      <label for="dc-amount">Delegated (GRT)</label>
+      <input id="dc-amount" type="number" min="0" step="100" value="10000" inputmode="decimal" />
+    </div>
+    <div class="calc-field">
+      <label for="dc-gross">Gross pool APR (%)</label>
+      <input id="dc-gross" type="number" min="0" step="0.1" value="9" inputmode="decimal" />
+    </div>
+    <div class="calc-field">
+      <label for="dc-cut">Indexing reward cut (%)</label>
+      <input id="dc-cut" type="number" min="0" max="100" step="0.5" value="10" inputmode="decimal" />
+    </div>
+    <div class="calc-field">
+      <label for="dc-hold">Days delegated</label>
+      <input id="dc-hold" type="number" min="1" step="1" value="365" inputmode="numeric" />
+    </div>
+  </div>
+  <div class="calc-out">
+    <div><div class="n" data-out="net">8.1<span>%</span></div><div class="l">Net APR after the cut</div></div>
+    <div><div class="n" data-out="grt">810<span> GRT</span></div><div class="l">Earned over the period</div></div>
+    <div><div class="n" data-out="eff">7.5<span>%</span></div><div class="l">Including the thaw</div></div>
+    <div><div class="n" data-out="drag">28<span> days</span></div><div class="l">Locked and earning nothing</div></div>
+  </div>
+  <p class="calc-note">
+    The last two figures are the ones nobody quotes. Capital committed for the period
+    you choose is locked for that period plus the thaw, and earns for only the first
+    part of it. Shorten the holding and the gap widens: the same indexer at the same
+    rate returns materially less to somebody who rotates every quarter than to somebody
+    who leaves it alone. Gross pool APR varies with issuance, the size of the delegation
+    pool and how much of the indexer's stake is actually allocated, so take it from
+    live data rather than from this box.
+  </p>
+</section>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-delegation]').forEach((el) => {
+    const thaw = Number(el.dataset.thaw);
+    const q = (id: string) => el.querySelector<HTMLInputElement>(id)!;
+    const amount = q('#dc-amount'), gross = q('#dc-gross'), cut = q('#dc-cut'), hold = q('#dc-hold');
+    const out = (k: string) => el.querySelector<HTMLElement>(`[data-out="${k}"]`)!;
+    const grt = (n: number) => n.toLocaleString('en-GB', { maximumFractionDigits: 0 });
+
+    function render() {
+      const a = Math.max(0, Number(amount.value) || 0);
+      const g = Math.max(0, Number(gross.value) || 0) / 100;
+      const c = Math.min(100, Math.max(0, Number(cut.value) || 0)) / 100;
+      const d = Math.max(1, Number(hold.value) || 1);
+      const net = g * (1 - c);
+      const earned = a * net * (d / 365);
+      // Capital is committed for d + thaw days but earns for d of them.
+      const effective = net * (d / (d + thaw));
+      out('net').innerHTML = `${(net * 100).toFixed(1)}<span>%</span>`;
+      out('grt').innerHTML = `${grt(earned)}<span> GRT</span>`;
+      out('eff').innerHTML = `${(effective * 100).toFixed(1)}<span>%</span>`;
+      out('drag').innerHTML = `${thaw}<span> days</span>`;
+    }
+    [amount, gross, cut, hold].forEach((i) => i.addEventListener('input', render));
+    render();
+  });
+</script>

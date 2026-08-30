@@ -1,0 +1,22 @@
+---
+import { param } from '../lib/params';
+
+interface Props {
+  /** Registry key. An unknown key fails the build rather than rendering blank. */
+  name: string;
+  /** Render only the bare number, without the unit. */
+  bare?: boolean;
+}
+const { name, bare = false } = Astro.props;
+const p = param(name);
+const text = bare ? String(p.value) : p.display;
+const cls = `param param--${p.status}`;
+const tip = [
+  p.label,
+  `value: ${p.display}`,
+  `status: ${p.status}`,
+  `read on ${p.verified}`,
+  p.note ? 'sources disagree, see /parameters/' : null,
+].filter(Boolean).join('\n');
+---
+<a class={cls} href={`/parameters/#${p.key}`} title={tip}>{text}</a>

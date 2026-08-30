@@ -1,0 +1,131 @@
+---
+import Base from '../../layouts/Base.astro';
+import { PATHS, pathByHub, modulesForHub, lessonsForHub, pathDuration } from '../../lib/paths';
+import { SITE } from '../../lib/site';
+
+export async function getStaticPaths() {
+  return PATHS.map((p) => ({ params: { hub: p.hub } }));
+}
+
+const { hub } = Astro.params;
+const meta = pathByHub(hub!);
+const modules = await modulesForHub(hub!);
+const lessons = await lessonsForHub(hub!);
+const minutes = await pathDuration(hub!);
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Course',
+  name: `${meta.path} path`,
+  description: meta.lede,
+  provider: { '@type': 'Organization', name: SITE.name, url: SITE.url },
+  educationalLevel: meta.difficulty,
+  inLanguage: 'en',
+  hasCourseInstance: {
+    '@type': 'CourseInstance',
+    courseMode: 'online',
+    courseWorkload: `PT${minutes}M`,
+  },
+};
+---
+<Base title={meta.title} description={meta.lede} jsonLd={jsonLd}>
+  <section class="wrap" style="padding-block: clamp(2.8rem, 6vw, 4.4rem) 0;">
+    <p class="kicker">{meta.kicker}</p>
+    <h1 style="max-width: 16ch;">{meta.title}</h1>
+    <p class="section-lede" style="margin-top: 1.2rem; font-size: 1.1rem;">{meta.lede}</p>
+    <div class="lesson-meta" style="margin-top: 1.6rem;">
+      <span class="m"><b>{lessons.length}</b> lessons</span>
+      <span class="m"><b>{minutes}</b> min end to end</span>
+      <span class="m">{meta.difficulty}</span>
+    </div>
+
+    <div class="progress" data-progress={hub} data-ids={lessons.map((l) => l.id).join(',')}>
+      <div class="progress-bar"><div class="progress-fill"></div></div>
+      <p class="progress-text">
+        <b class="pct">0</b>% done, <b class="cnt">0</b> of {lessons.length} lessons
+        <button class="progress-reset" type="button">reset</button>
+      </p>
+    </div>
+  </section>
+
+  <section class="wrap" style="padding-top: 1rem;">
+    <div class="modules">
+      {modules.map((m, mi) => (
+        <div>
+          <div class="module-head">
+            <span class="module-num">Module {mi + 1}</span>
+            <h3>{m.name}</h3>
+          </div>
+          <div class="lesson-list">
+            {m.lessons.map((l) => (
+              <a class="lesson-row" href={`/${l.id}/`} data-lesson={l.id}>
+                <span class="tick" aria-hidden="true"></span>
+                <span class="rtitle">{l.data.title}</span>
+                <span class="rmeta"><b>{l.data.time_minutes}</b> min</span>
+              </a>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <section class="wrap">
+    <p class="kicker">Where to go next</p>
+    <h2 style="max-width: 18ch;">This path explains why. Two other places carry the rest.</h2>
+    <div class="cta-row" style="margin-top: 1.8rem;">
+      <a class="cta-card out" href={meta.docs.url} rel="external noopener">
+        <span class="cta-label">The procedure</span>
+        <span>{meta.docs.label}</span>
+        <span class="cta-text">
+          Exact steps, flags and configuration, maintained by the people who ship the code.
+          This site does not duplicate them and never will.
+        </span>
+      </a>
+      {meta.live && (
+        <a class="cta-card out" href={meta.live.url} rel="external noopener">
+          <span class="cta-label">The live numbers</span>
+          <span>{meta.live.label}</span>
+          <span class="cta-text">
+            Nothing here updates on its own. Live stake, signal, fees and indexer
+            performance come from a dashboard reading the network.
+          </span>
+        </a>
+      )}
+    </div>
+  </section>
+</Base>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-progress]').forEach((el) => {
+    const ids = (el.dataset.ids ?? '').split(',').filter(Boolean);
+    const fill = el.querySelector<HTMLElement>('.progress-fill')!;
+    const pct = el.querySelector<HTMLElement>('.pct')!;
+    const cnt = el.querySelector<HTMLElement>('.cnt')!;
+    const reset = el.querySelector<HTMLButtonElement>('.progress-reset')!;
+
+    const read = (): string[] => {
+      try { return JSON.parse(localStorage.getItem('academy-done') ?? '[]'); } catch { return []; }
+    };
+
+    function paint() {
+      const done = read();
+      const n = ids.filter((id) => done.includes(id)).length;
+      const p = ids.length ? Math.round((n / ids.length) * 100) : 0;
+      fill.style.width = `${p}%`;
+      pct.textContent = String(p);
+      cnt.textContent = String(n);
+      document.querySelectorAll<HTMLElement>('[data-lesson]').forEach((row) => {
+        row.dataset.done = done.includes(row.dataset.lesson!) ? '1' : '0';
+      });
+    }
+
+    reset.addEventListener('click', () => {
+      const done = read().filter((id) => !ids.includes(id));
+      try { localStorage.setItem('academy-done', JSON.stringify(done)); } catch { /* blocked */ }
+      paint();
+    });
+
+    paint();
+  });
+</script>

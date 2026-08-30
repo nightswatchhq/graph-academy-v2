@@ -1,0 +1,34 @@
+---
+// style-audit-allow: bang
+// The warn prefix glyph is an exclamation mark. It is terminal chrome, not prose.
+export interface Line {
+  /** cmd renders a slate prompt, ok a green tick, warn an amber bar, out is plain. */
+  kind: 'cmd' | 'ok' | 'warn' | 'out' | 'serve';
+  text: string;
+}
+interface Props {
+  title: string;
+  /** Describes what the run did, for a screen reader. Not what the panel looks like. */
+  label: string;
+  lines: Line[];
+}
+const { title, label, lines } = Astro.props;
+const pre: Record<string, string> = { cmd: '$', ok: '✓', warn: '!', out: ' ', serve: '●' };
+const cls: Record<string, string> = {
+  cmd: 'pre-cmd', ok: 'pre-ok', warn: 'pre-warn', out: '', serve: 'pre-serve',
+};
+---
+<div class="term" role="img" aria-label={label}>
+  <div class="term-bar">
+    <span class="term-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+    <span class="term-title">{title}</span>
+  </div>
+  <div class="term-body" aria-hidden="true">
+    {lines.map((l) => (
+      <div class={l.kind === 'cmd' ? 'tline' : 'tline tline--out'} data-serve={l.kind === 'serve' ? '1' : undefined}>
+        <span class={`tline-pre ${cls[l.kind]}`}>{pre[l.kind]}</span>
+        <span class="tline-body">{l.text}</span>
+      </div>
+    ))}
+  </div>
+</div>

@@ -1,0 +1,19 @@
+# Subject-matter review by section. A content change needs one approval from
+# the owner of the section it touches.
+
+*                                   @nightswatchhq/maintainers
+
+/src/content/lessons/indexers/      @nightswatchhq/indexer-sme @nightswatchhq/maintainers
+/src/content/lessons/delegators/    @nightswatchhq/delegation-sme @nightswatchhq/maintainers
+/src/content/lessons/curators/      @nightswatchhq/curation-sme @nightswatchhq/maintainers
+/src/content/lessons/developers/    @nightswatchhq/devtooling-sme @nightswatchhq/maintainers
+/src/content/lessons/consumers/     @nightswatchhq/devtooling-sme @nightswatchhq/maintainers
+/src/content/lessons/governance/    @nightswatchhq/governance-sme @nightswatchhq/maintainers
+
+# The registry is the single source of every number on the site. Changes here
+# affect every page at once.
+/data/parameters.toml               @nightswatchhq/maintainers
+
+# Synced from cargopete-style. Do not edit here; change it upstream and re-sync.
+/src/styles/tokens.css              @nightswatchhq/maintainers
+/tools/contrast.py                  @nightswatchhq/maintainers

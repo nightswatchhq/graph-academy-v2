@@ -1,0 +1,135 @@
+---
+title: "Indexer checkpoint"
+role: indexer
+path: "Indexer"
+module: "Checkpoint"
+order: 1
+difficulty: advanced
+time_minutes: 16
+summary: "Test the economics rather than the trivia, then plan the monitoring you would need before you allocate anything real."
+protocol_version_verified: "Graph Horizon (2025-12-11)"
+last_verified: 2026-08-30
+verify_before: 2026-11-30
+sources:
+  - name: "The Graph Docs: indexing overview"
+    url: "https://thegraph.com/docs/en/indexing/overview/"
+  - name: "Lodestar: indexing status"
+    url: "https://www.lodestar-dashboard.com/indexing-status"
+parameters_used: []
+authors: ["@community"]
+license: "CC-BY-4.0"
+---
+
+## Recall
+
+<Quiz
+  id="indexer-checkpoint"
+  title="Indexer checkpoint"
+  questions={[
+    {
+      q: "Under exponential rebates, an indexer with a stake ratio of 10 on a subgraph keeps roughly:",
+      options: ["10% of query fees", "60% of query fees", "Over 99% of query fees", "It depends on other indexers' stake"],
+      answer: 2,
+      explain: "The curve is effectively flat past a ratio of about 8, where over 99% is already returned. And no part of it depends on other indexers, which was the whole point of replacing Cobb-Douglas."
+    },
+    {
+      q: "Your allocation is open, the deployment is synced, and it earns no indexing rewards. Most likely reason?",
+      options: [
+        "The subgraph has no curation signal",
+        "You have not closed the allocation to collect",
+        "Your delegation capacity is exceeded",
+        "The rebate function returned zero"
+      ],
+      answer: 0,
+      explain: "Indexing rewards require signal on the subgraph. Under Horizon you no longer close to collect, and a technically perfect allocation to an unsignalled subgraph earns nothing while looking entirely healthy."
+    },
+    {
+      q: "max_amount_willing_to_lose_grt set very high means:",
+      options: [
+        "You will charge more per query",
+        "You aggregate receipts less often, holding more unsettled value at risk",
+        "You accept larger delegations",
+        "Your slashing exposure increases"
+      ],
+      answer: 1,
+      explain: "It bounds unaggregated receipt value. High means fewer aggregations, cheaper to operate, and more money in flight when something breaks. The name is literal."
+    },
+    {
+      q: "Which is NOT grounds for slashing?",
+      options: [
+        "A POI disagreeing with honest indexing",
+        "Serving a query response that does not match the indexed data",
+        "Being offline for a week",
+        "None of these, all are slashable"
+      ],
+      answer: 2,
+      explain: "Downtime costs you revenue, which is the network's way of handling it. Slashing is for false claims, not for poor service, and the separation is deliberate."
+    },
+    {
+      q: "Horizon permits indefinite allocations. What does the shipped indexer stack do at launch?",
+      options: [
+        "Holds allocations open indefinitely",
+        "Continues the previous short-lived recycling behaviour",
+        "Closes an allocation after each POI",
+        "Requires the operator to close manually"
+      ],
+      answer: 1,
+      explain: "Protocol capability and shipped behaviour are different layers, and the docs state both on different pages. An operator who reads only the capability will be surprised by their own agent."
+    },
+    {
+      q: "Which failure is invisible on a standard systems dashboard?",
+      options: [
+        "Postgres out of disk",
+        "graph-node crash looping",
+        "A cost model priced above the field, so you serve no queries",
+        "Chain endpoint returning 5xx"
+      ],
+      answer: 2,
+      explain: "Overpricing looks exactly like low demand from your side. Every economic failure mode in this path reports green on a machine dashboard, which is why the advice is to monitor the money rather than only the machine."
+    }
+  ]}
+/>
+
+## Practical task
+
+Two parts. Work the decision honestly, then plan the monitoring you would need before
+committing anything.
+
+<Checklist
+  id="indexer-checkpoint"
+  title="Before you commit stake"
+  items={[
+    "Write down your capital and compare it against the protocol minimum. State plainly whether you can also accept delegation, and how you intend to attract any.",
+    "Price archive access for every chain you intend to index, monthly, as a real number.",
+    "Compute what the same capital would earn delegated to an existing indexer, doing nothing. That is the number you must beat.",
+    "Pick three subgraphs you would allocate to and write one sentence each on why, without referring to their signal rank.",
+    "Open a dashboard and check whether those three are already crowded with allocated stake.",
+    "List the four silent failure modes from this path and say, for each, what alert you would build.",
+    "Decide your max_amount_willing_to_lose_grt and write down the reasoning, not just the number.",
+    "Name the person who covers your alerts when you are unavailable. If there is no name, that is your finding."
+  ]}
+/>
+
+## An honest closing note
+
+<Warn>
+This path deliberately spends more effort on economics and failure modes than on
+installation, because installation is documented elsewhere and is not where operators
+lose money.
+
+If working through the checklist above produced more discomfort than enthusiasm, that
+is a useful result rather than a failure. The [delegator path](/delegators/) covers a
+role that pays for capital without the operational burden, and you will now evaluate
+indexers far better than most people who delegate.
+</Warn>
+
+## Where next
+
+- The procedures this path deliberately omits:
+  [official indexing documentation](https://thegraph.com/docs/en/indexing/overview/).
+- Live indexing status, POI comparison and performance data:
+  [Lodestar](https://www.lodestar-dashboard.com/indexing-status).
+- Who sets the parameters you have been reading, and how they change:
+  **[governance](/governance/)**.
+- What the people signalling on your subgraphs are thinking:
+  **[the curator path](/curators/)**.

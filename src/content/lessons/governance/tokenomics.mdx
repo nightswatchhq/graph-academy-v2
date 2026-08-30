@@ -1,0 +1,160 @@
+---
+title: "Tokenomics: issuance, burns, and where it just moved"
+role: governance
+path: "Governance"
+module: "The money"
+order: 1
+difficulty: intermediate
+time_minutes: 13
+summary: "Three percent issuance, several burns, and a twenty percent redirect that took effect this month. The arithmetic of who pays for the network to exist."
+protocol_version_verified: "Graph Horizon (2025-12-11)"
+last_verified: 2026-08-30
+verify_before: 2026-11-30
+sources:
+  - name: "The Graph Docs: tokenomics"
+    url: "https://thegraph.com/docs/en/resources/tokenomics/"
+  - name: "Council approval of GIP-0089, the Innovation Allocation"
+    url: "https://forum.thegraph.com/t/the-graph-council-has-approved-gip-0089-the-innovation-allocation/7035"
+parameters_used: ["annual_issuance_pct", "initial_supply", "curation_tax_pct", "query_fee_burn_pct", "delegation_tax_pct", "innovation_allocation_pct", "subgraph_service_issuance_per_block"]
+authors: ["@community"]
+license: "CC-BY-4.0"
+---
+
+GRT's supply moves in two directions at once, and both directions are doing a job.
+
+## Issuance: paying for capacity before demand.
+
+The protocol issues new GRT at a target of <Param name="annual_issuance_pct" /> a year,
+against an initial supply of <Param name="initial_supply" />. That issuance pays
+indexing rewards.
+
+The reason is the ordering problem from
+[the value loop](/start/the-value-loop/): a subgraph gets no queries until it is
+indexed, and it is not indexed until somebody spends money. Query fees alone cannot
+break that deadlock, because the first mover would be paying to serve a subgraph nobody
+is querying yet.
+
+Issuance pays for capacity to exist ahead of demand. The cost is dilution of existing
+holders, which is a real cost and an honest description of the arrangement.
+
+## Burns: the other direction.
+
+Several mechanisms remove GRT from supply:
+
+- **The curation deposit charge**, <Param name="curation_tax_pct" />, burned on entry.
+- **Query fees**, <Param name="query_fee_burn_pct" /> of them, burned.
+- **Historically, the delegation tax**, now <Param name="delegation_tax_pct" /> and
+  removed under Horizon.
+
+Note what the surviving burns have in common. Each attaches a cost to an action that
+would otherwise be free to repeat: entering a curation position, sending a query. Each
+one is a small friction on a mechanism that could be spammed, and burning rather than
+redistributing means nobody in the system profits from encouraging the behaviour.
+
+<Model>
+Issuance funds capacity. Burns price actions that would otherwise be free. Whether the
+two net out to inflation or deflation depends on query volume, which is another way of
+saying it depends on whether the network is being used.
+</Model>
+
+## What changed this month.
+
+GIP-0089, the Innovation Allocation, was approved by Council on 2026-08-26 and took
+effect on 2026-08-31. It redirects <Param name="innovation_allocation_pct" /> of
+protocol issuance to the Foundation treasury.
+
+Concretely: the Subgraph Service rewards manager now receives
+<Param name="subgraph_service_issuance_per_block" />, down by 24.146 GRT per block. The
+difference is routed through an existing DirectAllocation contract via the Issuance
+Allocator, so no new contract code was required.
+
+The stated argument is that a share of issuance was reaching participants providing no
+value, with the forum post citing that 15.2% of indexing rewards went to underperforming
+indexers in 2025, so a redirect of this size does not come out of productive work.
+
+<Warn title="What this means for the numbers you read">
+Total issuance did not change. Where it goes did.
+
+Indexers and, through them, delegators receive 20% less issuance than before
+2026-08-31. Any indexing reward rate calculated from data collected earlier is
+describing a larger pot. Dashboards computing trailing rates will show the transition
+gradually rather than as a step, which makes it easy to miss.
+
+This site records the change with the date, which is the entire reason the
+[parameters registry](/parameters/) exists.
+</Warn>
+
+## How to think about the fee-to-issuance balance.
+
+The healthy long-run picture is one where query fees, real revenue from real demand, are
+large relative to issuance. That would mean the network is paid for by its users rather
+than by dilution of its holders.
+
+Today issuance dominates. That is what you would expect of infrastructure still building
+out its demand side, and it is also the thing to watch: the ratio of query fees to
+issuance is the single clearest indicator of whether the network is becoming
+self-sustaining.
+
+You will not find that ratio on this site, because it changes daily.
+[Lodestar](https://www.lodestar-dashboard.com/protocol) and the network subgraph carry
+it live, and it is worth looking at once a quarter.
+
+<Reveal question="Before reading on: why burn the curation charge and the query fee slice rather than paying them to a treasury?">
+Because a recipient creates an interest, and an interest creates pressure.
+
+If the curation charge went to a treasury, that treasury would benefit from curation
+churn, and whoever controlled it would have a reason to encourage entering and exiting
+positions. If the query fee slice went to a recipient, that recipient would benefit
+from query volume regardless of whether the queries were useful.
+
+Neither would necessarily be abused. Both create a constituency whose interest is not
+the network's, and mechanisms tend to bend towards their beneficiaries over long
+periods.
+
+Burning has no beneficiary. The benefit is spread across everyone holding the token, in
+proportion, without anyone being in a position to lobby for more of it. That is a
+weaker benefit and a much more robust one.
+
+Worth noting that GIP-0089 does the opposite with a share of issuance, deliberately,
+creating a funded body with a mandate. That is a considered trade rather than a
+contradiction, and it is exactly the kind of thing governance exists to decide.
+</Reveal>
+
+<Quiz
+  id="gov-tokenomics"
+  questions={[
+    {
+      q: "Why does the protocol issue new GRT rather than paying indexers only from query fees?",
+      options: [
+        "To reward long-term holders",
+        "To pay for indexing capacity to exist before there is query demand for it",
+        "To offset gas costs on Arbitrum",
+        "Because query fees are paid in a different token"
+      ],
+      answer: 1,
+      explain: "A subgraph gets no queries until indexed, and is not indexed until someone spends money. Issuance breaks that deadlock, at the cost of dilution, which is an honest description of the arrangement."
+    },
+    {
+      q: "What do the surviving burn mechanisms have in common?",
+      options: [
+        "They all apply to indexers",
+        "Each attaches a cost to an action that would otherwise be free to repeat",
+        "They are all fixed at 1%",
+        "They all fund the Foundation"
+      ],
+      answer: 1,
+      explain: "Entering a curation position, sending a query. Burning rather than redistributing means nobody in the system profits from encouraging that behaviour, which is why there is no constituency lobbying for more of it."
+    },
+    {
+      q: "GIP-0089 changed:",
+      options: [
+        "The total issuance rate",
+        "Where a share of existing issuance goes",
+        "The query fee burn percentage",
+        "The delegation capacity multiplier"
+      ],
+      answer: 1,
+      explain: "Total issuance is unchanged; the routing is not. Indexers and delegators receive 20% less than before 2026-08-31, and trailing-average dashboards will show it as a gradual drift rather than a step."
+    }
+  ]}
+/>

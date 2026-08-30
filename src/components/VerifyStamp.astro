@@ -1,0 +1,48 @@
+---
+interface Props {
+  protocolVersion: string;
+  lastVerified: Date;
+  verifyBefore: Date;
+  sources: { name: string; url: string }[];
+  reviewers: string[];
+}
+const { protocolVersion, lastVerified, verifyBefore, sources, reviewers } = Astro.props;
+const iso = (d: Date) => d.toISOString().slice(0, 10);
+const stale = Date.now() > verifyBefore.getTime();
+---
+{stale && (
+  <div class="stale-banner">
+    <span class="stale-label">Past its re-verification date</span>
+    This lesson was checked against {protocolVersion} on {iso(lastVerified)} and was due
+    another look by {iso(verifyBefore)}. Nobody has been back to it since. Treat the
+    numbers as suspect and confirm them against the official documentation before you
+    act on anything here.
+  </div>
+)}
+<div class={stale ? 'stamp stamp--stale' : 'stamp'}>
+  <p class="stamp-line">
+    <span class="stamp-key">Checked against</span>
+    <span class="stamp-val">{protocolVersion}</span>
+  </p>
+  <p class="stamp-line" style="margin-top: 5px;">
+    <span class="stamp-key">Last read</span>
+    <span class="stamp-val">{iso(lastVerified)}</span>
+    <span class="stamp-key" style="margin-left: 10px;">Due again</span>
+    <span class="stamp-val">{iso(verifyBefore)}</span>
+  </p>
+  {reviewers.length > 0 && (
+    <p class="stamp-line" style="margin-top: 5px;">
+      <span class="stamp-key">Reviewed by</span>
+      <span class="stamp-val">{reviewers.join(', ')}</span>
+    </p>
+  )}
+  <div class="stamp-sources">
+    Every protocol claim below was read at these sources on {iso(lastVerified)}.
+    Where they disagree with each other, the lesson says so.
+    <ul>
+      {sources.map((s) => (
+        <li><a class="out" href={s.url} rel="external noopener">{s.name}</a></li>
+      ))}
+    </ul>
+  </div>
+</div>

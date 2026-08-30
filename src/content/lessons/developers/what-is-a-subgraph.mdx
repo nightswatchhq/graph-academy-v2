@@ -1,0 +1,157 @@
+---
+title: "What a subgraph actually is"
+role: developer
+path: "Developer"
+module: "Subgraphs"
+order: 1
+difficulty: intermediate
+time_minutes: 12
+summary: "Three files that together define a deterministic function from chain events to queryable rows. Getting the mental model right saves you from most subgraph bugs."
+protocol_version_verified: "Graph Horizon (2025-12-11)"
+last_verified: 2026-08-30
+verify_before: 2026-11-30
+sources:
+  - name: "The Graph Docs: developing subgraphs"
+    url: "https://thegraph.com/docs/en/subgraphs/developing/introduction/"
+  - name: "The Graph Docs: subgraph quick start"
+    url: "https://thegraph.com/docs/en/subgraphs/quick-start/"
+parameters_used: []
+authors: ["@community"]
+license: "CC-BY-4.0"
+---
+
+A subgraph is three files that together say: watch these contracts, and when this
+happens, write this.
+
+- **`subgraph.yaml`**, the manifest. Which contracts, from which block, which events,
+  and which handler runs for each.
+- **`schema.graphql`**, the schema. Which entities exist and what fields they have.
+  This becomes both your storage model and your query API.
+- **mappings**, usually AssemblyScript. The handlers themselves. An event comes in, an
+  entity goes out.
+
+Deploy those and an indexer replays chain history through your handlers, materialising
+your entities, then keeps following the chain. Applications query the result over
+GraphQL.
+
+## The property everything depends on.
+
+A subgraph must be **deterministic**. Given the same chain data, every indexer running
+it must produce byte-identical results.
+
+This is not a style preference. It is the requirement that makes the whole protocol
+work. Indexers publish Proofs of Indexing, hashes committing to what they derived, and
+the security model rests on honest indexers producing matching hashes. If your
+subgraph could produce different output on different machines, honest indexers would
+disagree, and disputes would fire against people who did nothing wrong.
+
+So the mapping runtime forbids everything that could vary:
+
+- No network calls. You cannot fetch a price from an API mid-handler.
+- No wall-clock time or randomness. Only block time and block data.
+- No filesystem, no environment.
+- Only chain state and what you have already written.
+
+<Model>
+A mapping is a pure function from chain data to entity writes. Anything that would
+make two runs differ is unavailable, and the restriction is what makes the output
+worth trusting.
+</Model>
+
+Once you internalise this, a whole class of design questions answers itself. "Can I
+call an oracle here" is no. "Can I use the current time" is no, use block time. "Can I
+read from a database I control" is no.
+
+## Where the difficulty actually lives.
+
+Not in the syntax. The syntax is a day's work. These are where the time goes:
+
+**Modelling.** The schema is the API your consumers live with, and changing it later
+means a new deployment and a resync. Entity identity is the load-bearing decision:
+what is the ID of this thing, and is it stable across every event that touches it?
+
+**Reorgs.** The chain can retract blocks. The framework handles unwinding, and your
+mapping still has to be written so that unwinding makes sense, which mostly means not
+accumulating state in ways that cannot be reversed.
+
+**Factories and dynamic sources.** Contracts deployed by contracts mean the set of
+addresses to watch grows during indexing. Template data sources handle this and they
+are a common source of confusion.
+
+**Contract upgrades.** A proxy upgrade changes behaviour under a stable address. Your
+mapping was written against the old ABI. This is the most common way a working
+subgraph starts failing without anyone touching it.
+
+**Indexing time.** Reading a large history through handlers is slow. If your backfill
+takes days, that is a design constraint, and it is a large part of why Substreams
+exists.
+
+<Warn title="The schema is a commitment">
+Applications will be written against your entities and field names. Changing them
+means publishing a new version and consumers migrating.
+
+Spend real time on the schema before writing a single handler. Names, entity
+boundaries and identity are considerably more expensive to change than any handler
+logic.
+</Warn>
+
+## What it is not.
+
+- **Not a server.** You do not run it. You define it, and indexers execute it.
+- **Not a database you write to.** The only writer is your mapping, and its only input
+  is chain data.
+- **Not able to see anything off chain.** If your product depends on off-chain state,
+  that stays in your own systems.
+- **Not free to run.** It needs signal to be indexed at all, which is
+  [the curator path's](/curators/) subject and a real cost to plan for.
+
+<Reveal question="Before reading on: why can a mapping not call an external API, even a highly reliable one?">
+Because reliability is not the issue. Reproducibility is.
+
+The protocol's guarantee is that anyone can re-derive the same data from the same
+chain and check it. An external call breaks that in two ways: the API can return
+different answers at different times, and it can disappear entirely, making history
+unverifiable at any point in the future.
+
+Even a perfectly reliable API answering identically forever would still be a problem,
+because now the truth of your subgraph depends on a service nobody in the protocol can
+audit. You have imported a trusted third party into a system whose purpose is not
+having one.
+
+If you need off-chain data in your product, join it outside the subgraph, in your own
+application, where trust assumptions are yours to make.
+</Reveal>
+
+<Quiz
+  id="dev-subgraph"
+  questions={[
+    {
+      q: "Why must subgraph mappings be deterministic?",
+      options: [
+        "To reduce indexing cost",
+        "So all honest indexers produce identical Proofs of Indexing and disputes only fire against genuine misbehaviour",
+        "Because AssemblyScript does not support async code",
+        "To allow queries to be cached"
+      ],
+      answer: 1,
+      explain: "The security model rests on honest indexers producing matching hashes. Non-determinism would make honest indexers disagree, firing disputes at people who did nothing wrong."
+    },
+    {
+      q: "Which is the most expensive decision to change later?",
+      options: ["Handler logic", "The schema and entity identity", "The start block", "Which events you handle"],
+      answer: 1,
+      explain: "The schema is the API your consumers build against. Changing it means a new deployment, a resync, and consumers migrating. Handler logic is comparatively cheap to revise."
+    },
+    {
+      q: "A working subgraph suddenly starts failing without anyone changing it. Most likely cause?",
+      options: [
+        "The indexer upgraded graph-node",
+        "A proxy contract was upgraded and the ABI no longer matches",
+        "Curation signal was withdrawn",
+        "The GraphQL schema expired"
+      ],
+      answer: 1,
+      explain: "A proxy upgrade changes behaviour under a stable address while your mapping still expects the old ABI. It is the most common way a subgraph breaks with no change on your side."
+    }
+  ]}
+/>
