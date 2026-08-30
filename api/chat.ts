@@ -133,12 +133,14 @@ function indexBlock(): string {
   return (knowledge.index as any[]).map((p) => `${p.url} ${p.title} (${p.kind})`).join('\n');
 }
 
-export const config = { runtime: 'nodejs' };
+// Named HTTP method exports, not a default export. Vercel's Node default export
+// has the signature (req, res) => void and IGNORES a returned Response, which
+// fails silently with an empty body rather than an error.
+export function GET(): Response {
+  return json({ error: 'POST a JSON body of { message, history }.' }, 405);
+}
 
-export default async function handler(req: Request): Promise<Response> {
-  if (req.method !== 'POST') {
-    return json({ error: 'POST only' }, 405);
-  }
+export async function POST(req: Request): Promise<Response> {
   if (!process.env.ANTHROPIC_API_KEY) {
     return json({ error: 'The assistant is not configured.' }, 503);
   }
