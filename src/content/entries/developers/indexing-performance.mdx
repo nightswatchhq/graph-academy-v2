@@ -1,0 +1,138 @@
+---
+title: "Why your subgraph is slow"
+role: developer
+path: "Developer"
+module: "Practice"
+order: 1
+difficulty: intermediate
+time_minutes: 13
+summary: "Three modelling decisions account for most of the difference between a subgraph that syncs in hours and one that takes days. None of them is about how clever your handler code is."
+protocol_version_verified: "Graph Horizon (2025-12-11)"
+last_verified: 2026-08-30
+verify_before: 2026-11-30
+sources:
+  - name: "The Graph Docs: immutable entities and bytes as IDs"
+    url: "https://thegraph.com/docs/en/subgraphs/best-practices/immutable-entities-bytes-as-ids/"
+  - name: "The Graph Docs: avoid eth_calls"
+    url: "https://thegraph.com/docs/en/subgraphs/best-practices/avoid-eth-calls/"
+parameters_used: []
+authors: ["@community"]
+license: "CC-BY-4.0"
+---
+
+Indexing speed is mostly decided before you write a handler. Three decisions in the schema
+and the manifest account for most of the spread, and all three are invisible if you are
+reading the mapping code looking for the slow part.
+
+## 1. eth_calls are the wrong kind of slow
+
+A call from inside a handler leaves your process and waits on somebody else's node. Per the
+documentation, an `eth_call`'s speed "relies not on the Subgraph but on the connectivity and
+responsiveness of the Ethereum node being queried."
+
+That is a different category of slow from ordinary work. Your handler is no longer bounded
+by how much computing it does, it is bounded by a network round trip, once per call, per
+event, across the entire history you are indexing. A million events with one call each is a
+million round trips.
+
+Three ways out, in descending order of how much they help.
+
+**Emit the data in the event.** If you control the contract, put what the indexer needs in
+the event parameters. The call disappears rather than getting faster. This is the only fix
+that removes the problem instead of reducing it.
+
+**Declare the call in the manifest.** If you cannot change the contract, declaring the call
+lets graph-node run it in parallel ahead of the handlers rather than sequentially inside
+them. The results are cached in memory, so the handler's call retrieves the cached value
+"instead of making an actual RPC call." Requires `specVersion >= 1.2.0`.
+
+Note what this does and does not do. The documentation is precise: parallel execution
+"reduce[s] the total time spent in calls but does not eliminate it completely." You are
+paying the same number of round trips, concurrently instead of serially.
+
+**Do without the value.** Frequently the call is fetching something derivable from data you
+already have, or something the consumer could join client-side.
+
+<Model>
+An undeclared eth_call inside a handler is a synchronous network request in the middle of a
+loop over the whole chain. Everything else in this entry is a constant factor. This one is
+a different shape.
+</Model>
+
+## 2. Mutable entities pay rent on every write
+
+An entity that can change carries a block range recording when its version was valid.
+Updating it means graph-node "adjust[s] the block range of previous versions, increasing
+database workload."
+
+So every update is two pieces of work: writing the new version and closing off the old one.
+An entity you update ten times has paid that ten times.
+
+Declaring an entity `(immutable: true)` removes the bookkeeping entirely, because a thing
+that never changes needs no version history. Event logs are the obvious candidates: a
+`Transfer` happened, and it will not un-happen.
+
+The constraint is exactly what it sounds like. If a field like `status` has to change over
+the entity's life, it is not immutable and saying otherwise is a lie the database will
+enforce. The usual fix is to split: an immutable record of what happened, and a separate
+mutable entity holding current state derived from those records.
+
+## 3. Bytes IDs versus String IDs
+
+This one looks like a detail and is not. The documentation gives two mechanisms:
+
+Character strings take "twice as much space as Byte strings to store binary data", and,
+more importantly, "comparisons of UTF-8 character strings must take the locale into account
+which is much more expensive than the bytewise comparison used to compare Byte strings."
+
+An ID is compared constantly: every lookup, every index traversal, every join. Making the
+comparison locale-aware when the value is a hex address is paying for a feature you cannot
+use, several million times.
+
+The measured effect, quoted directly: "Tests have highlighted up to a **28% increase in
+query performance** and up to a **48% acceleration in indexing speeds**."
+
+Nearly half the indexing time, for a type change in the schema.
+
+<Warn title="When not to">
+Bytes IDs are the wrong choice when the ID genuinely must be human-readable, when you need
+auto-incrementing numbers, or when you are integrating with a data model that expects
+strings. The documentation says so, and a hex blob in a URL your users see is a real cost.
+
+But if your ID is an address, a transaction hash, or a concatenation of those, it is
+already bytes. Storing it as a string is paying to pretend otherwise.
+</Warn>
+
+## The order to fix them in
+
+If a subgraph is syncing too slowly, look in this order:
+
+1. **Are there eth_calls in handlers?** Remove, declare, or do without them. Nothing else
+   you do will matter as much.
+2. **Are the event-log entities immutable?** They almost always can be, and it is a one-word
+   change per entity.
+3. **Are the IDs Bytes?** If they are hex values stored as strings, change them, resync, and
+   collect the measured improvement.
+4. **Only then** look at handler logic.
+
+The reason for that order is that the first three are properties of the schema and manifest,
+so they are cheap to change and their effects are multiplicative across the whole history.
+Handler logic is where people look first and where the least of the time usually goes.
+
+<Reveal question="Before reading on: all three fixes require a resync. Is a faster subgraph worth reindexing from scratch for?">
+It depends on a number you can estimate before committing.
+
+The one-off cost is a full resync, once. The saving is on every subsequent resync, every
+new version you publish, and every indexer who ever syncs your subgraph, forever. If your
+history is large and your subgraph is long-lived, the arithmetic is not close.
+
+Where it genuinely does not pay: a subgraph over a young contract with little history, one
+you expect to replace shortly, or one already syncing comfortably inside your tolerance.
+Chasing 48% of a sync that takes twenty minutes is optimising something that is not a
+problem.
+
+The case worth watching for is the third: a subgraph that syncs fine today over two years
+of history and will not in two more. Sync time grows with the chain whether or not you do
+anything, and these three fixes get harder to apply the more consumers you have. Doing it
+early is considerably cheaper than doing it under pressure.
+</Reveal>

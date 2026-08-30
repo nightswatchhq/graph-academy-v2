@@ -82,7 +82,7 @@ export const COLLECTIONS: CollectionMeta[] = [
     lede:
       'Author a subgraph, or decide you want Substreams or the Token API instead. Three lanes onto the same data, with different costs.',
     difficulty: 'intermediate',
-    modules: ['Subgraphs', 'The other lanes', 'Choosing', 'Practicum'],
+    modules: ['Subgraphs', 'Practice', 'The other lanes', 'Choosing', 'Practicum'],
     live: { label: 'Subgraph Dock on Lodestar', url: 'https://www.lodestar-dashboard.com/subgraph-dock' },
     docs: { label: 'Official developer docs', url: 'https://thegraph.com/docs/en/subgraphs/developing/introduction/' },
   },

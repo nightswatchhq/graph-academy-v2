@@ -1,0 +1,108 @@
+---
+title: "Grafting, and shipping a fix without a resync"
+role: developer
+path: "Developer"
+module: "Practice"
+order: 3
+difficulty: intermediate
+time_minutes: 10
+summary: "It reuses an existing subgraph's data and carries on from a chosen block, turning a multi-day resync into a deploy. The docs advise against it exactly where you will want it most."
+protocol_version_verified: "Graph Horizon (2025-12-11)"
+last_verified: 2026-08-30
+verify_before: 2026-11-30
+sources:
+  - name: "The Graph Docs: grafting"
+    url: "https://thegraph.com/docs/en/subgraphs/guides/grafting/"
+  - name: "The Graph Docs: grafting for a hotfix"
+    url: "https://thegraph.com/docs/en/subgraphs/best-practices/grafting-hotfix/"
+parameters_used: []
+authors: ["@community"]
+license: "CC-BY-4.0"
+---
+
+A subgraph fails at block 5,956,000 because a handler hit a case its author did not expect.
+The fix is four lines. Applying it normally means reindexing from the start block, which on
+a long history is hours or days during which your application has no data.
+
+Grafting is the way out. It lets a new deployment "reuse the data from an existing Subgraph
+and start indexing it at a later block."
+
+## The syntax
+
+```yaml
+features:
+  - grafting
+graft:
+  base: Qm...        # the deployment ID to copy from
+  block: 5956000     # copy up to and including this block, then index onward
+```
+
+The documentation describes the mechanic exactly: "The Graph will copy the data of the base
+Subgraph up to and including the given block and then continue indexing the new Subgraph
+from that block on."
+
+So you choose a block you trust the data up to, usually just before the failure, and the
+new deployment inherits everything before it.
+
+## What you are allowed to change
+
+The grafted schema must be a valid schema in its own right, and may differ from the base in
+specific ways:
+
+- add or remove entity types
+- remove attributes from entity types
+- add **nullable** attributes
+- convert non-nullable attributes to nullable
+- add enum values
+- add or remove interfaces
+- modify which entities implement an interface
+
+Read the shape of that list rather than memorising it. Everything permitted is either
+additive or a loosening. You may add a nullable field, because existing rows can be null
+for it. You may not add a non-nullable one, because there is no honest value to put in the
+rows you inherited.
+
+<Model>
+Grafting copies rows you are not going to recompute. So the schema may change only in ways
+that leave the inherited rows still valid. That single principle predicts every rule on the
+list, and it predicts the ones that are not on it.
+</Model>
+
+## The warning that matters
+
+The documentation is direct: "It is recommended to not use grafting for Subgraphs published
+to The Graph Network."
+
+Which is awkward, because a published subgraph with live consumers is exactly where a
+multi-day resync hurts most, and therefore exactly where grafting is most tempting.
+
+The reasoning is about trust rather than mechanics. A grafted subgraph's early history was
+not derived by the deployment serving it; it was copied from another deployment. Any indexer
+syncing it inherits that data rather than computing it. For something the network is meant
+to be able to verify independently, that is a meaningfully weaker position.
+
+The suggested pattern is to deploy an initial version without grafting, and use grafting for
+subsequent updates once the subgraph is "stable and functioning as expected". In practice
+that means: graft freely in development and to recover a failure, and think hard before
+grafting something that becomes the canonical published history.
+
+## Its interaction with pruning
+
+You cannot graft at a pruned block height. If grafting is part of how you ship, your
+[pruning setting](/developers/pruning-and-history/) has to retain enough history to graft
+from.
+
+That constraint is easy to miss because the two settings live in different parts of the
+manifest and are decided at different times, usually months apart. `prune: auto` plus a
+grafting habit is a combination that works until the day you need it not to.
+
+<Warn title="Choosing the graft block">
+Graft from a block you are confident the base data is correct at, not simply the block
+before the failure. If the bug was silently writing wrong entities for a while before it
+crashed, grafting just before the crash inherits the wrong entities and you have shipped
+the bug into the new deployment with a clean bill of health.
+
+Work out when the bug started producing wrong data, not when it started failing. Those are
+frequently different blocks, and the gap between them is exactly the data you do not want
+to keep.
+</Warn>

@@ -1,0 +1,100 @@
+---
+title: "Pruning, and what history costs"
+role: developer
+path: "Developer"
+module: "Practice"
+order: 2
+difficulty: intermediate
+time_minutes: 10
+summary: "A subgraph's database grows forever unless you tell it not to. Pruning is the switch, and it trades away two features you may be relying on without realising."
+protocol_version_verified: "Graph Horizon (2025-12-11)"
+last_verified: 2026-08-30
+verify_before: 2026-11-30
+sources:
+  - name: "The Graph Docs: pruning"
+    url: "https://thegraph.com/docs/en/subgraphs/best-practices/pruning/"
+  - name: "The Graph Docs: grafting"
+    url: "https://thegraph.com/docs/en/subgraphs/guides/grafting/"
+parameters_used: []
+authors: ["@community"]
+license: "CC-BY-4.0"
+---
+
+A subgraph keeps historical versions of every mutable entity, so that a query can ask what
+the state was at some past block. That history is why the database grows without bound, and
+most subgraphs never use it.
+
+Pruning "removes archival entities from the Subgraph's database up to a given block". The
+documentation says the query performance improvement is "often dramatically" better, while
+being honest that it gives no benchmark, so treat the size of the win as unquantified.
+
+## The setting
+
+It lives in `subgraph.yaml` under `indexerHints`, with three options:
+
+```yaml
+indexerHints:
+  prune: auto
+```
+
+**`auto`** retains the minimum history the indexer determines it needs. It is the
+recommended setting and has been the default since graph-cli 0.66.0, which means a
+recently scaffolded subgraph is probably already pruning and you may not have noticed.
+
+**A number of blocks** keeps exactly that much history. This is the setting for when you
+know what you need.
+
+**`never`** keeps everything.
+
+## What you give up
+
+Two things, and both bite quietly.
+
+**Time travel queries.** Asking what the state was at block N requires the history at block
+N to still exist. The documentation is explicit that these "become incompatible with
+`prune: auto`". If your application queries historical state, or your analytics does,
+`auto` will break it, and it will break it as an empty or wrong answer rather than an error.
+
+**Grafting.** You cannot graft at a pruned block height. If grafting is part of how you
+ship fixes, and [it is a good way to ship fixes](/developers/grafting-and-hotfixes/), your
+retention has to cover the range you might need to graft from.
+
+<Warn title="The failure mode is silence">
+Neither of these announces itself. A time travel query against pruned history does not
+raise an error, and a graft against a pruned height fails at deploy time when you are
+already under pressure to ship a fix.
+
+Decide the setting deliberately, write down why, and put it next to the reason. `auto`
+because we never query history is a decision. `auto` because it was the default is an
+accident that will surface at the worst moment.
+</Warn>
+
+## How to choose
+
+**`prune: auto`** if your consumers only ever ask about current state, you do not graft, and
+you want the database to stay a sensible size. This covers most application subgraphs.
+
+**A block count** if you graft, or if you query recent history but not all of it. Size it
+against the deepest graft or oldest query you actually make, then add margin.
+
+**`prune: never`** if historical state is the product. Analytics subgraphs, anything doing
+point-in-time reconstruction, anything where somebody will ask what this looked like last
+March. Accept the growth as the cost of the feature.
+
+<Model>
+History is not free and it is not obviously useful. The question is not "might somebody
+want this" but "does anything actually query it". Most subgraphs are asked only about now,
+and are paying storage and query performance for a capability nobody uses.
+</Model>
+
+## The indexer's side
+
+`indexerHints` is a hint, which is worth reading literally. You are telling indexers what
+history this subgraph needs, and they act on it when deciding what to retain.
+
+That makes pruning one of the few places where a subgraph author's decision lands directly
+on an operator's disk. A subgraph set to `never` over a long history is a materially more
+expensive thing to serve, and
+[an indexer weighing what to allocate to](/indexers/cost-models-and-rules/) is weighing that
+cost. Setting `never` without needing it is asking operators to carry storage on your behalf
+for nothing.
