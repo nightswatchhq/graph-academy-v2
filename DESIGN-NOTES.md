@@ -84,6 +84,15 @@ happily passed, including the caption reading "real output of this site's
 nightly check, not an illustration", which is the site's central honesty claim.
 That is why Lighthouse now runs in CI rather than by hand.
 
+CI gates **accessibility** and **best-practices** only. Both are DOM assertions
+and give the same answer on any machine, so a failure is always a real defect.
+**Performance is reported, not gated**: the score is CPU-bound and shared runners
+are slow and variable. This suite measures 100 on a laptop and 81 on a GitHub
+runner, with the whole gap in total-blocking-time, speed-index and
+max-potential-fid. Gating it produces flaky failures that no change to this
+repository can fix. Measure it against the real deployment instead:
+`LH_BASE=https://learn-thegraph.com npm run lighthouse`.
+
 ### 5. The terminal bar uses a token, not a colour-mix
 
 The house markup builds the terminal's title bar with
