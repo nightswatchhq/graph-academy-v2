@@ -232,5 +232,11 @@
       "destination": "/governance/following-a-proposal/",
       "permanent": true
     }
+  ],
+  "rewrites": [
+    {
+      "source": "/api/chat/",
+      "destination": "/api/chat"
+    }
   ]
 }
