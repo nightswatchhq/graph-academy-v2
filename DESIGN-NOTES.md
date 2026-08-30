@@ -62,6 +62,47 @@ than only by the audit script. The site takes no user input and renders no
 user-supplied content, so the residual injection surface is the repository
 itself. If Astro's CSP hashing matures, move to hashes and drop the exception.
 
+### 4. Terminal window titles are muted, not faint
+
+The house style lists terminal window titles among the legitimate uses of
+`--text-faint`. On the light theme that measures 2.49 against the terminal's
+title bar, and axe flags it.
+
+Axe is right. The panel carries `role="img"` and an `aria-label`, and its chrome
+is now `aria-hidden`, which spares a screen reader. None of that helps a sighted
+reader with low vision, who still has to look at the text. So the title runs at
+`--text-muted`, which clears AA on every surface in both themes.
+
+Outside `tokens.css` itself, `--text-faint` now survives in exactly four places,
+all genuinely losable: the breadcrumb separator, the dash in a comparison table
+cell (which the house style explicitly permits, because the meaning rests on the
+glyph rather than the colour), and two inline middle-dot separators on the
+parameters and glossary pages. `npm run audit:style` warns on any new use.
+
+Lighthouse found nine violations of this contract that the audit script had
+happily passed, including the caption reading "real output of this site's
+nightly check, not an illustration", which is the site's central honesty claim.
+That is why Lighthouse now runs in CI rather than by hand.
+
+### 5. The terminal bar uses a token, not a colour-mix
+
+The house markup builds the terminal's title bar with
+`color-mix(in srgb, var(--text) 5%, var(--bg-code))`. That is a fifth surface,
+and `tools/contrast.py` never sees it: the validator checks every ink against the
+four surface **tokens**, which is exactly the right thing to do and is blind to
+surfaces composed at use sites.
+
+In the light theme that mix lands near `#edecea`, where `--text-muted` measures
+**4.36** and misses AA. Nothing was misusing a token, so the bespoke audit passed
+it and only Lighthouse caught it.
+
+The bar now uses `var(--bg-inset)`, a real validated surface that reads as lifted
+in both themes: `--text-muted` measures 4.55 on it in light and 5.33 in dark.
+
+**Worth pushing back upstream.** Any `color-mix` that produces a surface escapes
+the validator, so either the style should avoid composing surfaces at use sites,
+or `contrast.py` should learn about the mixes the components actually use.
+
 ## The terminal on the home page
 
 The style forbids invented transcripts, and that rule is load-bearing rather than

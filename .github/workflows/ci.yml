@@ -27,6 +27,25 @@ jobs:
       - name: Design system audit
         run: npm run audit:style
 
+  lighthouse:
+    # Runs against a local preview of the real build. Blocking on accessibility
+    # and performance: this job caught nine contrast violations that the bespoke
+    # style audit passed, so it is the one that actually protects readers.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - name: Serve and audit
+        run: |
+          npx astro preview --port 4321 &
+          npx wait-on http://localhost:4321/ --timeout 60000
+          node scripts/lighthouse-check.mjs
+
   contrast:
     # Blocking. An accessibility regression is not a matter of taste.
     runs-on: ubuntu-latest

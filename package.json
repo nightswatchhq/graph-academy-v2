@@ -14,7 +14,8 @@
     "reconcile": "node scripts/reconcile-onchain.mjs",
     "contrast": "python3 tools/contrast.py",
     "og": "node scripts/make-og.mjs",
-    "audit:style": "node scripts/style-audit.mjs"
+    "audit:style": "node scripts/style-audit.mjs",
+    "lighthouse": "node scripts/lighthouse-check.mjs"
   },
   "dependencies": {
     "@astrojs/mdx": "^4.3.6",
@@ -27,6 +28,7 @@
     "@astrojs/check": "^0.9.4",
     "chrome-launcher": "^1.2.1",
     "lighthouse": "^13.4.1",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "wait-on": "^9.1.0"
   }
 }

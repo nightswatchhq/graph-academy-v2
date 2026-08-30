@@ -175,13 +175,24 @@ a.role-card:hover { border-color: var(--border-hi); transform: translateY(-3px);
 .term-bar {
   display: flex; align-items: center; gap: 0.75rem;
   padding: 0.6rem 0.9rem;
-  background: color-mix(in srgb, var(--text) 5%, var(--bg-code));
+  /* The house markup mixes 5% ink into --bg-code here. That produces a fifth
+     surface which tools/contrast.py never sees, because the validator checks ink
+     against the four surface TOKENS. In the light theme the mix lands at about
+     #edecea, where --text-muted measures 4.36 and misses AA by a hair, and the
+     bespoke audit passed it because no token was misused.
+     --bg-inset is a real, validated surface and reads as lifted in both themes. */
+  background: var(--bg-inset);
   border-bottom: 1px solid var(--border);
 }
 .term-dots { display: inline-flex; gap: 0.45rem; }
 .term-dots i { width: 11px; height: 11px; border-radius: 50%; background: var(--border-hi); }
 .term-dots i:first-child { background: color-mix(in srgb, var(--rust) 70%, transparent); }
-.term-title { font-family: var(--mono); font-size: 0.72rem; color: var(--text-faint);
+/* The house style lists terminal window titles as a legitimate --text-faint
+   use. It measures 2.49 against the light-theme bar and axe flags it, correctly:
+   aria-hidden spares a screen reader but does nothing for a sighted reader with
+   low vision, who still has to look at it. Muted instead. Recorded in
+   DESIGN-NOTES.md as a deliberate departure. */
+.term-title { font-family: var(--mono); font-size: 0.72rem; color: var(--text-muted);
               margin-inline: auto; padding-right: 3rem; }
 .term-body { font-family: var(--mono); font-size: clamp(0.7rem, 1.7vw, 0.86rem);
              line-height: 1.85; padding: 1.1rem 1.2rem 1.4rem;
@@ -539,7 +550,9 @@ details.reveal-block > summary:hover { color: var(--text); }
 .module-head { display: flex; align-items: baseline; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
 .module-num { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.12em;
               text-transform: uppercase; color: var(--rust); }
-.module-head h3 { font-size: 1.08rem; }
+/* A module name is an h2 for document order, sized like a card heading
+   because visual weight and heading level are different questions. */
+.module-head h2 { font-size: 1.08rem; letter-spacing: -0.02em; }
 .lesson-list { display: flex; flex-direction: column; gap: 1px;
                border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
 a.lesson-row {
