@@ -97,7 +97,7 @@ const newest = all.map((p) => p.verified).sort().at(-1);
               <tr id={key}>
                 <td class="pl">
                   {p.label}
-                  <div style="font-family: var(--mono); font-size: 0.68rem; color: var(--text-faint); margin-top: 4px;">{key}</div>
+                  <div style="font-family: var(--mono); font-size: 0.68rem; color: var(--text-muted); margin-top: 4px;">{key}</div>
                 </td>
                 <td class="pv">{p.display}<div style="font-family: var(--sans); font-size: 0.78rem; color: var(--text-muted); margin-top: 4px;">{p.unit}</div></td>
                 <td><span class={`pstatus pstatus--${p.status}`}>{p.status}</span></td>

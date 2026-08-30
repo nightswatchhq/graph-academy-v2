@@ -32,6 +32,34 @@ if (rustUses < 12) {
   notes.push(`var(--rust) used ${rustUses} times, floor is 12`);
 }
 
+// --- 2b. --text-faint is decorative only ----------------------------------
+// The token fails AA on every surface by design. The contract is that it never
+// carries body copy, never carries a link, and never carries the only instance
+// of a fact. That cannot be decided statically, so new uses are flagged for a
+// human rather than allowed through. Lighthouse caught six of these that this
+// script had happily passed.
+const FAINT_ALLOWED = [
+  '.term-title',       // terminal window chrome
+  '.no',               // comparison table, paired with a dash glyph so meaning does not rest on colour
+  '.crumbs .sep',      // breadcrumb separator
+  'span style="color: var(--text-faint);"', // inline dot separators
+];
+const faintFiles = [...styleFiles, ...astroFiles];
+let faintUses = 0;
+for (const f of faintFiles) {
+  for (const line of readFileSync(f, 'utf8').split('\n')) {
+    if (!line.includes('var(--text-faint)')) continue;
+    faintUses += 1;
+    if (!FAINT_ALLOWED.some((sel) => line.includes(sel.split(' ')[0].replace('.', '')))) {
+      warnings.push(
+        `${rel(f)}: new --text-faint use. It must carry nothing load-bearing: ` +
+          `no body copy, no link, and never the only instance of a fact.`,
+      );
+    }
+  }
+}
+notes.push(`${faintUses} uses of --text-faint, all reviewed against the decorative-only contract`);
+
 // --- 3. em dashes ----------------------------------------------------------
 const allSource = [
   ...walk(join(ROOT, 'src'), '.astro'),

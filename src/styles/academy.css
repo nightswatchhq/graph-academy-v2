@@ -78,8 +78,8 @@ footer.site { border-top: 1px solid var(--border); padding-block: 40px; margin-t
 .foot-links a { color: var(--text-muted); }
 .foot-links a:hover { color: var(--text); }
 .foot .license { font-family: var(--mono); font-size: 12px; letter-spacing: 0.06em;
-                 color: var(--text-faint); text-transform: uppercase; }
-.foot-credit { font-family: var(--mono); font-size: 12px; letter-spacing: 0.06em; color: var(--text-faint); }
+                 color: var(--text-muted); text-transform: uppercase; }
+.foot-credit { font-family: var(--mono); font-size: 12px; letter-spacing: 0.06em; color: var(--text-muted); }
 
 /* --------------------------------------------------------------------------
    Buttons, chips, tags
@@ -355,7 +355,7 @@ a.role-card:hover { border-color: var(--border-hi); transform: translateY(-3px);
 .prose img { max-width: 100%; height: auto; border-radius: var(--radius); }
 .prose figure { margin: 0; }
 .prose figcaption { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.08em;
-  text-transform: uppercase; color: var(--text-faint); margin-top: 10px; }
+  text-transform: uppercase; color: var(--text-muted); margin-top: 10px; }
 
 .prose pre {
   background: var(--bg-code); border: 1px solid var(--border);
@@ -416,7 +416,7 @@ details.reveal-block > summary {
 }
 details.reveal-block > summary::-webkit-details-marker { display: none; }
 details.reveal-block > summary::after {
-  content: 'show'; margin-left: auto; color: var(--text-faint);
+  content: 'show'; margin-left: auto; color: var(--text-muted);
   letter-spacing: 0.1em; text-transform: uppercase; font-size: 0.66rem;
   flex-shrink: 0; padding-top: 0.15rem;
 }
@@ -570,7 +570,7 @@ a.lesson-row:hover { background: var(--bg-inset); text-decoration: none; }
 .progress-text b { color: var(--rust); font-weight: 400; }
 .progress-reset { background: none; border: 0; padding: 0; margin-left: 12px;
   font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase;
-  color: var(--text-faint); cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+  color: var(--text-muted); cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
 .progress-reset:hover { color: var(--text-muted); }
 
 .checklist { display: flex; flex-direction: column; gap: 10px; margin: 0; padding: 0; list-style: none; }
@@ -656,7 +656,7 @@ a.cta-card:hover { border-color: var(--border-hi); transform: translateY(-2px); 
 .gloss-item { padding-block: 16px; border-bottom: 1px solid var(--border); scroll-margin-top: 90px; }
 .gloss-term { font-weight: 600; color: var(--text); font-size: 1.02rem; }
 .gloss-alias { font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.08em;
-               text-transform: uppercase; color: var(--text-faint); margin-left: 10px; }
+               text-transform: uppercase; color: var(--text-muted); margin-left: 10px; }
 .gloss-def { color: var(--text-muted); margin-top: 7px; font-size: 0.96rem; line-height: 1.65; }
 .gloss-more { margin-top: 8px; font-size: 0.86rem; }
 
