@@ -3,6 +3,7 @@ import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
 import pagefind from 'astro-pagefind';
 import { rehypeExternalLinks } from './src/lib/rehype-external.mjs';
+import { rehypeGlossary } from './src/lib/rehype-glossary.mjs';
 
 // The Graph Academy. Static, zero third-party requests, CSS inlined into the
 // document so a lesson page is one request for the HTML and one per font.
@@ -22,7 +23,7 @@ export default defineConfig({
   },
   integrations: [mdx(), sitemap(), pagefind()],
   markdown: {
-    rehypePlugins: [rehypeExternalLinks],
+    rehypePlugins: [rehypeGlossary, rehypeExternalLinks],
     shikiConfig: {
       // defaultColor false emits both palettes as CSS variables, so the theme
       // toggle moves the code colours with everything else. No client-side

@@ -17,7 +17,7 @@ const pageTitle = title === SITE.name ? title : `${title} - ${SITE.name}`;
 const canonical = new URL(Astro.url.pathname, SITE.url).href;
 ---
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="light">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -36,12 +36,15 @@ const canonical = new URL(Astro.url.pathname, SITE.url).href;
     <link rel="preload" href="/fonts/space-grotesk.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="/fonts/jetbrains-mono.woff2" as="font" type="font/woff2" crossorigin />
     <script is:inline>
-      // Theme before first paint, so a reload does not flash the wrong ground.
+      // Light is the default and is set on <html> server-side, so this script
+      // only has to undo it for a reader who chose dark. Running before first
+      // paint means the choice survives a reload without a flash, and a reader
+      // with JavaScript off still gets the default rather than nothing.
       try {
-        var t = localStorage.getItem('academy-theme');
-        if (!t) t = matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
-        if (t === 'light') document.documentElement.setAttribute('data-theme', 'light');
-      } catch (e) { /* storage blocked: the dark default stands */ }
+        if (localStorage.getItem('academy-theme') === 'dark') {
+          document.documentElement.removeAttribute('data-theme');
+        }
+      } catch (e) { /* storage blocked: the light default stands */ }
     </script>
     {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
   </head>

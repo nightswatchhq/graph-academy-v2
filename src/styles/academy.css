@@ -124,7 +124,12 @@ footer.site { border-top: 1px solid var(--border); padding-block: 40px; margin-t
   transition: border-color 0.22s var(--ease), transform 0.22s var(--ease);
 }
 .cell:hover { border-color: var(--border-hi); transform: translateY(-3px); }
-.cell .tag { align-self: flex-start; }
+.cell .tag {
+  align-self: flex-start;
+  /* The tag is a stamped plate above a heading. Flush against it, it reads as
+     part of the heading rather than a label on it. */
+  margin-bottom: 14px;
+}
 .cell h3 { font-family: var(--sans); font-weight: 700; font-size: 1.14rem; margin: 0 0 9px; }
 .cell p { color: var(--text-muted); font-size: 0.97rem; margin: 0; }
 .c-third { grid-column: span 2; }
@@ -155,6 +160,7 @@ a.role-card:hover { border-color: var(--border-hi); transform: translateY(-3px);
 
 .flow { display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
         font-family: var(--mono); font-size: 12px; color: var(--text-muted); }
+.flow-step { display: inline-flex; align-items: center; gap: 10px; white-space: nowrap; }
 .flow .chip { background: var(--bg); border: 1px solid var(--border);
               border-radius: 8px; padding: 7px 11px; }
 .flow .chip--hot { color: var(--accent); border-color: var(--border-hi); }
@@ -325,6 +331,20 @@ a.role-card:hover { border-color: var(--border-hi); transform: translateY(-3px);
 .prose a { text-decoration: underline; text-underline-offset: 3px;
            text-decoration-color: color-mix(in srgb, var(--accent) 40%, transparent); }
 .prose a:hover { text-decoration-color: var(--accent); }
+
+/* A glossary link is a definition, not a destination. It stays in body ink with
+   a dotted rule, so a dozen of them on a page do not compete with the handful
+   of links that actually send the reader somewhere. */
+.prose a.gloss-link {
+  color: inherit;
+  text-decoration: underline dotted;
+  text-decoration-color: color-mix(in srgb, var(--rust) 55%, transparent);
+  text-underline-offset: 4px;
+}
+.prose a.gloss-link:hover {
+  color: var(--rust);
+  text-decoration-color: var(--rust);
+}
 .prose table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 0.93rem; display: block; overflow-x: auto; }
 .prose table th { text-align: left; font-family: var(--mono); font-size: 0.68rem;
   letter-spacing: 0.1em; text-transform: uppercase; color: var(--rust);

@@ -9,9 +9,11 @@ const { steps, hot = -1, sep = '→' } = Astro.props;
 ---
 <div class="flow" style="margin-top: 1.4rem;">
   {steps.map((s, i) => (
-    <>
+    /* The arrow travels with the chip that follows it. Wrapping them separately
+       leaves a dangling arrow at the end of a line, which reads as a mistake. */
+    <span class="flow-step">
       {i > 0 && <span class="arrow" aria-hidden="true">{sep}</span>}
       <span class={i === hot ? 'chip chip--hot' : 'chip'}>{s}</span>
-    </>
+    </span>
   ))}
 </div>

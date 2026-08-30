@@ -1,19 +1,27 @@
-# Subject-matter review by section. A content change needs one approval from
-# the owner of the section it touches.
+# Subject-matter review by section.
+#
+# NOTE: the per-section SME teams described in the contribution model do not
+# exist yet, and a CODEOWNERS entry naming a non-existent team is silently
+# inert: GitHub requests review from nobody. So every line below currently
+# points at the account that actually has write access.
+#
+# When the org creates @nightswatchhq/maintainers and the SME teams, swap the
+# handles in and delete this note. The intended mapping is kept beside each
+# line so the structure is not lost in the meantime.
 
-*                                   @nightswatchhq/maintainers
+*                                   @cargopete
 
-/src/content/lessons/indexers/      @nightswatchhq/indexer-sme @nightswatchhq/maintainers
-/src/content/lessons/delegators/    @nightswatchhq/delegation-sme @nightswatchhq/maintainers
-/src/content/lessons/curators/      @nightswatchhq/curation-sme @nightswatchhq/maintainers
-/src/content/lessons/developers/    @nightswatchhq/devtooling-sme @nightswatchhq/maintainers
-/src/content/lessons/consumers/     @nightswatchhq/devtooling-sme @nightswatchhq/maintainers
-/src/content/lessons/governance/    @nightswatchhq/governance-sme @nightswatchhq/maintainers
+/src/content/lessons/indexers/      @cargopete   # intended: @nightswatchhq/indexer-sme
+/src/content/lessons/delegators/    @cargopete   # intended: @nightswatchhq/delegation-sme
+/src/content/lessons/curators/      @cargopete   # intended: @nightswatchhq/curation-sme
+/src/content/lessons/developers/    @cargopete   # intended: @nightswatchhq/devtooling-sme
+/src/content/lessons/consumers/     @cargopete   # intended: @nightswatchhq/devtooling-sme
+/src/content/lessons/governance/    @cargopete   # intended: @nightswatchhq/governance-sme
 
-# The registry is the single source of every number on the site. Changes here
-# affect every page at once.
-/data/parameters.toml               @nightswatchhq/maintainers
+# The registry is the single source of every number on the site. A change here
+# moves every page at once.
+/data/parameters.toml               @cargopete
 
 # Synced from cargopete-style. Do not edit here; change it upstream and re-sync.
-/src/styles/tokens.css              @nightswatchhq/maintainers
-/tools/contrast.py                  @nightswatchhq/maintainers
+/src/styles/tokens.css              @cargopete
+/tools/contrast.py                  @cargopete
