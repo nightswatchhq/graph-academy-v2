@@ -14,7 +14,12 @@ const styleFiles = walk(join(ROOT, 'src'), '.css').filter((f) => !f.endsWith('to
 const astroFiles = [...walk(join(ROOT, 'src'), '.astro'), ...walk(join(ROOT, 'src'), '.mdx')];
 const HEX = /#[0-9a-fA-F]{3,8}\b/g;
 for (const f of [...styleFiles, ...astroFiles]) {
-  const src = readFileSync(f, 'utf8');
+  // Comments are stripped first. A hex in a comment is documentation, usually
+  // the record of a colour we deliberately stopped using, and flagging it makes
+  // it impossible to write that record down.
+  const src = readFileSync(f, 'utf8')
+    .replace(/\/\*[\s\S]*?\*\//g, ' ')
+    .replace(/^\s*\/\/.*$/gm, ' ');
   for (const m of src.match(HEX) ?? []) {
     // an id selector or a URL fragment is not a colour
     if (/^#[0-9a-fA-F]{3}$|^#[0-9a-fA-F]{4}$|^#[0-9a-fA-F]{6}$|^#[0-9a-fA-F]{8}$/.test(m)) {
