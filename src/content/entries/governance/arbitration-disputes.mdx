@@ -1,0 +1,116 @@
+---
+title: "Arbitration and disputes"
+role: governance
+path: "Governance"
+module: "Disputes"
+order: 1
+difficulty: intermediate
+time_minutes: 10
+summary: "The part of the protocol where correctness is enforced by people rather than by code, why it has to be, and what that costs."
+protocol_version_verified: "Graph Horizon (2025-12-11)"
+last_verified: 2026-08-30
+verify_before: 2026-11-30
+sources:
+  - name: "The Graph Docs: indexing overview"
+    url: "https://thegraph.com/docs/en/indexing/overview/"
+  - name: "The Graph Docs: what changes with Graph Horizon"
+    url: "https://thegraph.com/docs/en/graph-horizon/what-changes/"
+parameters_used: ["fisherman_dispute_deposit", "max_slash_pct", "recommended_slash_pct"]
+authors: ["@community"]
+license: "CC-BY-4.0"
+---
+
+Almost everything in this protocol is enforced by contracts. Disputes are the exception,
+and understanding why is a good way to understand where cryptoeconomic systems have
+their limits.
+
+## Why not just verify on chain.
+
+The obvious design would be for the protocol to check every answer. It cannot, for a
+reason that is structural rather than a matter of engineering effort.
+
+Verifying that an indexer derived the right data means re-deriving it. Re-deriving it
+means doing the indexing work again, on chain, for every claim. That costs more than the
+work being checked, by orders of magnitude, and it defeats the purpose: the whole point
+is to move the expensive derivation off chain.
+
+So the protocol does something cheaper. It makes claims **comparable** rather than
+verified. An indexer publishes a Proof of Indexing, a commitment to what they derived.
+Anyone who did the same work can compare. Disagreement is evidence, and evidence
+triggers a human process.
+
+<Model>
+The protocol does not know whether an answer is right. It knows whether two parties who
+should agree do agree, and it provides an expensive, slow, deliberate procedure for
+resolving the cases where they do not. That is a considerably cheaper guarantee and it
+is enough, provided being caught is costly.
+</Model>
+
+## The roles.
+
+**Fishermen** raise disputes. Anyone can be one. Raising a dispute requires a deposit of
+at least <Param name="fisherman_dispute_deposit" />, which is what stops the mechanism
+becoming a harassment tool. A challenger has to believe they are right by more than the
+deposit is worth.
+
+**Arbitrators** decide. This is a human judgement about evidence, and under Horizon it
+is also a judgement about penalty: arbitrators determine an appropriate slash amount by
+severity and context, capped at <Param name="max_slash_pct" /> of the indexer's stake,
+with a recommended value of <Param name="recommended_slash_pct" />.
+
+**The accused indexer** presents their side. Records of what happened, when it was
+noticed and what changed matter here in a way they would not under a fixed automatic
+penalty.
+
+## What flexible slashing fixed.
+
+Previously the amount was fixed by the protocol. A fixed penalty faces an impossible
+calibration problem: it must be severe enough to deter deliberate misbehaviour, which
+makes it disproportionate for an honest operator whose chain endpoint served subtly
+different data.
+
+Judgement within a cap lets those be different. That is better for honest operators and
+it introduces genuine discretion, which is a real trade rather than a free improvement.
+Discretion means outcomes are less predictable and depend on who is arbitrating.
+
+The protocol has chosen predictability of process over predictability of outcome, which
+is roughly the choice legal systems make and for similar reasons.
+
+## Why the delays exist.
+
+Both thawing periods, the delegator's and the indexer's, exist because of this process.
+Misbehaviour is discovered after the fact. Arbitration takes time. If capital could leave
+immediately, every economic guarantee would be conditional on nobody noticing quickly
+enough.
+
+So the delays are not friction to be optimised away. They are the window in which
+consequences can still attach to capital, and they are sized against how long a human
+process takes.
+
+<Warn title="What is not disputable">
+Downtime is not slashable. Slow responses are not slashable. Serving few queries is not
+slashable. All of those cost an indexer revenue, which is how the network handles poor
+service.
+
+Disputes are for false claims: a POI that disagrees with honest indexing, or a query
+response that does not match the indexed data. Keeping bad service and false claims in
+separate categories is deliberate, and it is why an indexer having a bad week is not a
+governance matter.
+</Warn>
+
+<Reveal question="Before reading on: what stops arbitrators simply being wrong, or captured?">
+Nothing in the mechanism, and it is worth being honest about that.
+
+Arbitration is the point where the protocol depends on people behaving well rather than
+on incentives making misbehaviour unprofitable. The protections are procedural rather
+than cryptographic: arbitrators are appointed through governance, decisions are visible,
+the cap bounds the damage any single decision can do, and the deposit filters the volume
+of cases.
+
+That is a real limitation and it is shared by every system that needs to judge whether
+off-chain work was done correctly. The alternatives are worse: on-chain verification
+costs more than the work, and no enforcement at all means the answers are worth nothing.
+
+Knowing where a system's trust assumptions actually sit is more useful than believing it
+has none. This is where The Graph's sit.
+</Reveal>

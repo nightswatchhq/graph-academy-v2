@@ -1,0 +1,136 @@
+---
+title: "The roles, and the loop that pays for them"
+role: newcomer
+path: "Foundations"
+module: "The roles"
+order: 1
+difficulty: beginner
+time_minutes: 12
+summary: "Four roles, two sources of money, and one loop. Once you can draw the loop from memory, most of the protocol stops being surprising."
+protocol_version_verified: "Graph Horizon (2025-12-11)"
+last_verified: 2026-08-30
+verify_before: 2026-11-30
+sources:
+  - name: "The Graph Docs: tokenomics"
+    url: "https://thegraph.com/docs/en/resources/tokenomics/"
+  - name: "The Graph Docs: indexing overview"
+    url: "https://thegraph.com/docs/en/indexing/overview/"
+  - name: "The Graph Docs: delegating"
+    url: "https://thegraph.com/docs/en/resources/roles/delegating/delegating/"
+parameters_used: ["annual_issuance_pct", "query_fee_burn_pct", "curation_tax_pct", "innovation_allocation_pct"]
+authors: ["@community"]
+license: "CC-BY-4.0"
+---
+
+Four roles do the work. Two separate pots of money pay for it. Almost every
+question a newcomer asks turns out to be a question about which pot, and who
+decides how it splits.
+
+## The four roles, in one line each.
+
+**Indexers** run the machines. They stake GRT, follow the chains, build the
+indexes, and answer queries. They are the only role that operates infrastructure,
+and the only role that can be punished for getting it wrong.
+
+**Delegators** put GRT behind an indexer without running anything. They take a
+share of what that indexer earns, minus a cut the indexer sets. They are, in
+effect, choosing which operators the network should have more of.
+
+**Curators** signal on subgraphs by depositing GRT against them. Signal is the
+protocol's way of saying "this data is worth indexing" before anybody has queried
+it. Curators are paid out of query fees on the data they backed.
+
+**Developers** write the subgraph: the definition of what the data even is for a
+given set of contracts. Without that, there is nothing for an indexer to build.
+
+<Model>
+Curators say what to index. Developers say what indexing means. Indexers do it.
+Delegators decide which indexers get bigger. Nobody is in charge of any of the
+others, and that is deliberate.
+</Model>
+
+## Two pots of money, and they behave differently.
+
+This is the distinction worth getting right early, because they are often talked
+about as though they were one thing.
+
+**Query fees** are real revenue. Somebody wanted data, somebody paid for it, GRT
+moved from a consumer to an indexer. This pot is as large as demand for the data
+and no larger. A small slice, <Param name="query_fee_burn_pct" /> of query fees,
+is burned.
+
+**Indexing rewards** are new issuance. The protocol mints GRT at a target of
+<Param name="annual_issuance_pct" /> per year and distributes it to indexers who
+are allocated to subgraphs and can prove they did the indexing. This pot exists
+whether or not anyone queried anything. It is what pays for an index to exist
+before there is demand for it, which is the chicken-and-egg problem the protocol
+has to solve to be useful at all.
+
+<Warn title="Issuance is not fixed forever, and it just moved">
+As of <Param name="innovation_allocation_pct" /> of protocol issuance is
+redirected away from indexing rewards to the Foundation treasury, effective
+2026-08-31 under GIP-0089. Any indexing reward rate quoted from data collected
+before that date is measuring a larger pot. This is the single most recent change
+to the numbers on this site, and it is a good illustration of why every page here
+carries a date.
+</Warn>
+
+## The loop.
+
+<Flow steps={["consumer pays", "gateway", "indexer serves", "fees + issuance", "delegators & curators"]} hot={2} />
+
+Read it as a cycle rather than a line:
+
+1. A developer publishes a subgraph, defining what the data means.
+2. Curators signal GRT on it. Signal is what tells indexers where the demand is
+   likely to be, and it costs <Param name="curation_tax_pct" /> to enter, which is
+   burned.
+3. Indexers see signal, allocate stake to that subgraph, and build the index.
+   While allocated and proving their work, they earn indexing rewards from
+   issuance.
+4. An application sends a query through a gateway and pays a fee.
+5. The indexer that served it collects that fee, subject to the rebate mechanism.
+6. Both the fees and the rewards get split: the indexer keeps a cut it sets
+   publicly, delegators take the rest of their share, and curators take a share of
+   query fees on the subgraph they signalled.
+7. More earnings on a subgraph attracts more signal and more indexers, which is
+   the feedback that is supposed to route capacity towards data people actually
+   want.
+
+<Reveal question="Before reading on: why pay indexers with new issuance at all, rather than only with query fees?">
+Because of ordering. A subgraph has no query traffic until it is indexed, and it
+is not indexed until somebody has spent money running the machine. If indexers
+were paid only from query fees, nothing new would ever get indexed, since the
+first mover would be paying to serve a subgraph nobody is querying yet.
+
+Issuance breaks that deadlock. It pays for capacity to exist ahead of demand, and
+signal is the mechanism that points that spending at the data most likely to be
+wanted. The cost is dilution, which is why the issuance rate and where it goes are
+governance questions rather than settled ones.
+</Reveal>
+
+## Where each role's risk sits.
+
+Worth laying out plainly, because the roles are not symmetric and marketing
+material tends to flatten them.
+
+- The **indexer** carries operational risk and slashing risk. They are running
+  real infrastructure and their stake can be cut for provable misbehaviour.
+- The **delegator** carries selection risk and liquidity risk. Their capital is
+  locked while thawing, and a badly chosen indexer earns them less. Whether their
+  stake can be slashed is a live question with a precise answer, covered in the
+  delegator path.
+- The **curator** carries opportunity risk. Signal on a subgraph nobody queries
+  earns nothing, and the deposit tax to enter is gone regardless.
+- The **developer** carries the ordinary risk of building the wrong thing.
+
+No role is passive, and none of them is risk free. Anywhere you see the network
+described as though delegating were a savings account, be suspicious of the rest
+of the page.
+
+## What to take from this.
+
+If you can draw the loop, name which pot pays whom, and say what each role stands
+to lose, you have the shape of the protocol. Everything after this is detail about
+mechanism: how signal is priced, how allocations prove work, how fees actually
+reach an indexer without anyone trusting anyone.

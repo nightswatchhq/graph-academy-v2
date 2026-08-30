@@ -29,8 +29,8 @@ for (const [key, p] of paramEntries) {
 
 if (!registry.protocol_version) errors.push('registry: no protocol_version');
 
-const lessons = walk(join(ROOT, 'src/content/lessons')).map(frontmatter);
-for (const l of lessons) {
+const entries = walk(join(ROOT, 'src/content/entries')).map(frontmatter);
+for (const l of entries) {
   const used = new Set([...l.body.matchAll(/<Param\s+name=["']([a-z0-9_]+)["']/g)].map((m) => m[1]));
   for (const k of used) {
     if (!known.has(k)) errors.push(`${rel(l.file)}: <Param name="${k}"/> is not in the registry`);
@@ -81,7 +81,7 @@ if (skippedBlocks > 0) {
 }
 console.log(
   `\n${errors.length === 0 ? c.green + 'ok' + c.reset : c.red + 'fail' + c.reset}` +
-    `    ${paramEntries.length} parameters, ${lessons.length} lessons, ` +
+    `    ${paramEntries.length} parameters, ${entries.length} entries, ` +
     `${errors.length} errors, ${warnings.length} warnings`,
 );
 process.exit(errors.length > 0 ? 1 : 0);

@@ -1,0 +1,56 @@
+---
+title: "Reading an indexer yourself"
+role: delegator
+path: "Delegator"
+module: "Practicum"
+order: 1
+difficulty: intermediate
+time_minutes: 14
+summary: "Evaluate a real indexer against the criteria in this collection, and compute what you would actually take home."
+protocol_version_verified: "Graph Horizon (2025-12-11)"
+last_verified: 2026-08-30
+verify_before: 2026-11-30
+sources:
+  - name: "Graph Explorer"
+    url: "https://thegraph.com/explorer"
+  - name: "Lodestar: compare indexers"
+    url: "https://www.lodestar-dashboard.com/delegate"
+parameters_used: ["undelegation_period_days"]
+authors: ["@community"]
+license: "CC-BY-4.0"
+---
+
+
+Nothing here is a test. It needs no wallet and costs nothing. Pick
+one real indexer and put it through the criteria properly.
+
+### Evaluate one real indexer
+
+- Open Graph Explorer or Lodestar and pick an indexer that is not in the top three by size.
+- Write down its self-stake and its current delegated stake. Compute how much headroom it has under the capacity multiplier.
+- Find its indexing reward cut and query fee cut. Say out loud which side of the split you are on, to be sure you have the direction right.
+- Find how much of its stake is currently allocated versus idle. This is the ratio that explains most of the difference between operators.
+- Look for its parameter history. Have the cuts moved in the last six months?
+- Search the community forum for the operator's name. Do they post under it, and do they answer questions?
+- Put your intended amount and holding period into the calculator in the rewards entry, and read the two right-hand figures rather than the two left-hand ones.
+- Write one sentence saying why you would or would not delegate to this indexer. If the sentence contains only a rate, go back to the top.
+
+
+## Before you commit anything
+
+<Warn>
+Nothing in this collection is financial advice, and the site holds no live data. Confirm
+every current figure on [Graph Explorer](https://thegraph.com/explorer) or a
+dashboard before acting. Delegated capital is unavailable for
+<Param name="undelegation_period_days" /> after you decide to leave, so treat the
+decision as one you are making for a long period rather than a reversible one.
+</Warn>
+
+## Where next
+
+- Curious what your indexer is doing all day, and why allocation matters so much:
+  **[indexer](/indexers/)**.
+- Curious what determines whether a subgraph earns anything at all:
+  **[curator](/curators/)**.
+- Curious who decided the issuance rate, and how GIP-0089 passed:
+  **[governance](/governance/)**.

@@ -9,8 +9,8 @@ const MAX_PARAM_AGE_DAYS = 90;
 const today = new Date();
 const strict = process.argv.includes('--strict');
 
-const lessons = walk(join(ROOT, 'src/content/lessons')).map(frontmatter);
-const overdue = lessons
+const entries = walk(join(ROOT, 'src/content/entries')).map(frontmatter);
+const overdue = entries
   .filter((l) => l.data.verify_before && new Date(l.data.verify_before) < today)
   .sort((a, b) => String(a.data.verify_before).localeCompare(String(b.data.verify_before)));
 
@@ -21,12 +21,12 @@ const staleParams = paramEntries
 const disputed = paramEntries.filter(([, p]) => p.conflict === true);
 
 console.log(`${c.bold}freshness report${c.reset}  ${today.toISOString().slice(0, 10)}`);
-console.log(`${c.dim}${lessons.length} lessons, ${paramEntries.length} parameters${c.reset}\n`);
+console.log(`${c.dim}${entries.length} entries, ${paramEntries.length} parameters${c.reset}\n`);
 
 if (overdue.length === 0) {
-  console.log(`${c.green}ok${c.reset}    0 lessons past their re-verification date`);
+  console.log(`${c.green}ok${c.reset}    0 entries past their re-verification date`);
 } else {
-  console.log(`${c.yellow}stale${c.reset} ${overdue.length} lessons past their re-verification date`);
+  console.log(`${c.yellow}stale${c.reset} ${overdue.length} entries past their re-verification date`);
   for (const l of overdue) {
     console.log(`      ${rel(l.file)}  due ${l.data.verify_before}, ${days(today, new Date(l.data.verify_before))} days ago`);
   }

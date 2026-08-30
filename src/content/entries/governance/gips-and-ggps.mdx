@@ -1,0 +1,103 @@
+---
+title: "How a change to the protocol actually ships"
+role: governance
+path: "Governance"
+module: "How change ships"
+order: 1
+difficulty: intermediate
+time_minutes: 11
+summary: "A GIP is a proposal. A GGP is a vote. Knowing the difference lets you tell a discussion from a decision, which is most of reading this ecosystem accurately."
+protocol_version_verified: "Graph Horizon (2025-12-11)"
+last_verified: 2026-08-30
+verify_before: 2026-11-30
+sources:
+  - name: "GIP-0001: the GIP process"
+    url: "https://github.com/graphprotocol/graph-improvement-proposals/blob/main/gips/0001-gip-process.md"
+  - name: "The Graph: governance"
+    url: "https://thegraph.com/ecosystem/governance/"
+parameters_used: []
+authors: ["@community"]
+license: "CC-BY-4.0"
+---
+
+Most confusion about The Graph's roadmap comes from reading a proposal as though it
+were a decision. The process distinguishes them clearly, and once you can tell them
+apart the ecosystem becomes considerably easier to follow.
+
+## GIP: the proposal.
+
+A Graph Improvement Proposal is a written argument for a change. It lives in the
+public repository, carries a number, and goes through discussion on the forum.
+
+A GIP has a status. Draft, under discussion, approved, and so on. A GIP existing
+means somebody wrote it down. It does not mean anybody agreed.
+
+GIPs are also where the reasoning is recorded, which makes them the best documentation
+of why the protocol is shaped as it is. GIP-0051 on exponential rebates, for instance,
+explains the Cobb-Douglas problem more clearly than any secondary source, and openly
+records where the new mechanism could be gamed.
+
+<Model>
+Read the GIP when you want to know why, not merely what. The rationale sections are
+the closest thing this protocol has to design documentation, and they are unusually
+honest about trade-offs.
+</Model>
+
+## GGP: the vote.
+
+A Graph Governance Proposal is what actually gets voted on. Several GIPs may be bundled
+into a release and voted as one GGP.
+
+The vote happens on Snapshot, with each Council member able to vote. Six positive votes
+mean the proposal is accepted, which follows directly from the Council being a
+six-of-ten multisig.
+
+<Flow steps={["GIP written", "forum discussion", "bundled into a GGP", "Council vote", "deployed"]} hot={3} />
+
+## Why two stages.
+
+The separation does real work. Anyone can write a GIP, so the proposal stage is
+permissionless and open. Executing a change to contracts holding a great deal of value
+cannot be, so the decision stage is bounded and accountable.
+
+Bundling into releases also reflects reality: protocol changes ship together, get
+audited together, and are deployed together. Voting on each individually would produce
+combinations nobody tested.
+
+## Reading status correctly.
+
+This is the practical skill. When you read that The Graph "is adding" something, work
+out which stage it is at:
+
+- **A GIP in draft or discussion** is somebody's argument. It may never ship.
+- **A GIP approved but not deployed** is decided and not yet real. The distinction
+  matters if you are planning around it.
+- **A deployed change** is current behaviour, and even then the tooling may lag, which
+  [the allocations entry](/indexers/allocations-and-pois/) shows concretely.
+
+Announcements, conference talks and enthusiastic threads routinely blur these. The
+repository does not, which is why it is worth going there.
+
+<Warn title="Roadmap is not behaviour">
+Several things you will read about The Graph are announced rather than shipped. This
+site marks anything in that category explicitly, and where a capability exists but is
+switched off, such as delegated stake slashing, it says so rather than describing it as
+either impossible or current.
+
+Apply the same test to anything you read elsewhere. Ask what stage it is at, and check
+the repository rather than the announcement.
+</Warn>
+
+## A live example.
+
+GIP-0089, the Innovation Allocation, is worth following through the whole pipeline
+because it completed recently and it changed real numbers.
+
+It was written as a GIP, discussed publicly, approved by Council on 2026-08-26, and
+took effect on 2026-08-31, redirecting a share of protocol issuance to the Foundation
+treasury. The
+[forum thread](https://forum.thegraph.com/t/the-graph-council-has-approved-gip-0089-the-innovation-allocation/7035)
+carries the argument, the figures and the objections.
+
+Read it as a specimen of the process rather than only for its content. Everything about
+how change happens here is visible in that one thread.

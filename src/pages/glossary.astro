@@ -37,7 +37,7 @@ const total = groups.reduce((n, g) => n + g.terms.length, 0);
               </div>
               <p class="gloss-def">{t.def}</p>
               <p class="gloss-more">
-                {t.more && <a href={t.more}>Read the lesson</a>}
+                {t.more && <a href={t.more}>Read the entry</a>}
                 {t.more && t.param && <span style="color: var(--text-faint);"> · </span>}
                 {t.param && (
                   <a href={`/parameters/#${t.param}`}>

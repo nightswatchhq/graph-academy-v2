@@ -15,11 +15,11 @@ const newest = all.map((p) => p.verified).sort().at(-1);
     <p class="kicker">The registry</p>
     <h1 style="max-width: 16ch;">Every number, with its receipt.</h1>
     <p class="section-lede" style="margin-top: 1.2rem; font-size: 1.05rem;">
-      No lesson on this site hard-codes a protocol number. They all call this registry,
+      No entry on this site hard-codes a protocol number. They all call this registry,
       and every entry carries the source, a quote from it, and the date a human opened
       that page and read the value there.
     </p>
-    <div class="lesson-meta" style="margin-top: 1.6rem;">
+    <div class="entry-meta" style="margin-top: 1.6rem;">
       <span class="m"><b>{all.length}</b> parameters</span>
       <span class="m">checked against <b>{PROTOCOL_VERSION}</b></span>
       <span class="m">newest reading <b>{newest}</b></span>
@@ -132,7 +132,7 @@ const newest = all.map((p) => p.verified).sort().at(-1);
     <p class="section-lede" style="margin-top: 1.1rem;">
       The registry lives in <code>data/parameters.toml</code>. Change the value, change
       the source and the quote, set <code>verified</code> to the date you read it, and
-      open a pull request. Every lesson using it updates automatically, which is the
+      open a pull request. Every entry using it updates automatically, which is the
       whole reason it works this way.
     </p>
     <div class="btn-row" style="margin-top: 1.8rem;">

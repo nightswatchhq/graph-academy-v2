@@ -1,0 +1,129 @@
+---
+title: "What delegation actually is"
+role: delegator
+path: "Delegator"
+module: "What delegation is"
+order: 1
+difficulty: beginner
+time_minutes: 10
+summary: "You are not staking, and you are not lending. You are buying a share of one operator's future earnings, and choosing which operators the network should have more of."
+protocol_version_verified: "Graph Horizon (2025-12-11)"
+last_verified: 2026-08-30
+verify_before: 2026-11-30
+sources:
+  - name: "The Graph Docs: delegating"
+    url: "https://thegraph.com/docs/en/resources/roles/delegating/delegating/"
+  - name: "The Graph Docs: what changes with Graph Horizon"
+    url: "https://thegraph.com/docs/en/graph-horizon/what-changes/"
+parameters_used: ["max_delegation_ratio", "delegation_tax_pct", "undelegation_period_days", "delegated_stake_slashable"]
+authors: ["@community"]
+license: "CC-BY-4.0"
+---
+
+Delegation is the role most people arrive at first, and it is the one most often
+described wrongly. It is not staking. It is not lending. It is not a savings
+account with a yield.
+
+## What you are actually doing.
+
+You transfer GRT into a pool attached to one indexer. From that moment you own a
+share of that pool, proportional to what you put in relative to everyone else in
+it.
+
+When that indexer earns, whether from indexing rewards or from query fees, they
+keep a cut they have set publicly. The remainder goes into the pool, and your
+share of the pool is your claim on it. You are not paid per query, and there is no
+schedule. The pool grows and your share of it is worth more.
+
+Two consequences follow directly, and they surprise people:
+
+- Your return depends on your indexer's behaviour, not the network's average. A
+  network doing well overall does you no good if you are behind an operator who is
+  not allocating stake.
+- Other delegators arriving after you dilute nothing by arriving, since they buy
+  their own share, but they do change how the indexer's capacity is used. That
+  matters more than it sounds, and the next entry explains why.
+
+<Model>
+Think of it as buying shares in one operator's earnings, not as depositing money
+somewhere. You have picked a business, not a rate.
+</Model>
+
+## What you are not doing.
+
+**You are not securing the network directly.** The indexer's own self-stake is
+what is at risk for misbehaviour. Your delegated stake currently is not:
+<Param name="delegated_stake_slashable" />. Horizon added the technical capability
+for delegated stake to be slashed and it is switched off for the Subgraph Service.
+That is a real distinction from proof-of-stake networks where delegators share
+slashing directly, and it is a distinction that could be removed by a future
+governance decision rather than by a rewrite.
+
+**You are not running anything.** You have no operational duties, no keys to
+manage beyond your own wallet, and no uptime obligation.
+
+**You are not free to leave.** Undelegating takes
+<Param name="undelegation_period_days" />, during which you earn nothing and
+cannot move the capital. This is the constraint that dominates delegation
+economics and it gets an entry of its own.
+
+## The two costs, one of which is gone.
+
+Entering used to cost you a delegation tax on deposit. Under Horizon that is
+<Param name="delegation_tax_pct" />: the parameter was removed from the protocol
+entirely.
+
+<Disputed>
+The Graph's own tokenomics page, read on 2026-08-30, still states that "there is a
+0.5% delegation tax which is burned whenever a Delegator delegates GRT on the
+network." The Horizon pages state it has been completely removed. The Horizon
+pages are the current ones.
+
+This site records the contradiction rather than quietly picking a side, because
+knowing that two official pages disagree is more useful to you than a confident
+answer would be. It is also a fair warning that anything you read about this
+protocol, here included, has a shelf life. See
+[the parameters page](/parameters/#delegation_tax_pct).
+</Disputed>
+
+The cost that remains is the one nobody itemises: the
+<Param name="undelegation_period_days" /> of capital doing nothing when you leave.
+It is not charged as a fee, so it never appears in an advertised return, and for
+anyone who moves between indexers it is by far the larger of the two.
+
+## Capacity: the constraint that shapes everything.
+
+An indexer can accept delegated stake up to <Param name="max_delegation_ratio" />
+their own self-stake. That ceiling is the whole reason indexer selection is a real
+decision rather than a formality.
+
+If an indexer is at or above its capacity, the excess delegated GRT cannot be used
+by the protocol, and per the official documentation "rewards for all Delegators
+become diluted because the excess delegated GRT cannot be used effectively within
+the protocol."
+
+Read that carefully, because it is the trap. The dilution does not fall only on
+the delegator who arrived last and pushed the indexer over. It falls on everyone
+in the pool, including you, whether or not you were there first. An indexer that
+was a good choice on Monday can be a mediocre one by Friday without doing anything
+wrong, purely because other people delegated to them.
+
+<Reveal question="Before reading on: what should you check about an indexer that a headline APR figure will never tell you?">
+How much room is left under their delegation capacity, and whether they are
+actually allocating the stake they already have.
+
+An indexer with plenty of self-stake and modest delegation has room, so your
+arrival does not push anyone over the ceiling. An indexer already at capacity is
+advertising a return that the pool cannot deliver to all of its members.
+
+Separately, stake that sits unallocated earns no indexing rewards at all. An
+operator holding a large pool and allocating a fraction of it is a worse
+proposition than the headline suggests, and this is visible on a dashboard if you
+go and look.
+</Reveal>
+
+## What to take from this.
+
+Delegation is a bet on one operator, priced in a currency that is difficult to
+withdraw. The next two entries make that concrete: how the split is calculated,
+and how to look at an indexer properly.

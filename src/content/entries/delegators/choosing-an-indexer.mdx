@@ -1,0 +1,128 @@
+---
+title: "Choosing an indexer"
+role: delegator
+path: "Delegator"
+module: "The economics"
+order: 2
+difficulty: intermediate
+time_minutes: 14
+summary: "The headline rate is the least informative number on the page. Here is what to look at instead, and the specific trap that makes a bad indexer look excellent."
+protocol_version_verified: "Graph Horizon (2025-12-11)"
+last_verified: 2026-08-30
+verify_before: 2026-11-30
+sources:
+  - name: "The Graph Docs: delegating"
+    url: "https://thegraph.com/docs/en/resources/roles/delegating/delegating/"
+  - name: "Graph Explorer"
+    url: "https://thegraph.com/explorer"
+parameters_used: ["max_delegation_ratio", "undelegation_period_days", "min_indexer_self_stake"]
+authors: ["@community"]
+license: "CC-BY-4.0"
+---
+
+You are choosing an operator you cannot cheaply leave. Spend accordingly. Thirty
+minutes here is worth more than any amount of optimisation afterwards, because
+afterwards costs you <Param name="undelegation_period_days" /> per change of mind.
+
+## The trap first, because it catches people repeatedly.
+
+A newly created indexer, or one that has just had its stake move, can display an
+enormous apparent rate. The mechanism is arithmetic rather than deception: a rate
+computed over a very short window, or over a pool that has only just started
+accumulating, annualises into a number that has never been earned and will not be.
+
+The same shape appears around allocation closures. Rewards arrive in lumps when
+allocations are closed and rewards claimed. A dashboard measuring a narrow window
+that happens to contain a large closure reports a rate that is real for that
+window and meaningless as a forecast.
+
+<Warn title="The rule">
+Treat any rate computed over a window shorter than a couple of months as noise. If
+an indexer's advertised return is far above the field, the most likely explanation
+is a measurement artefact, and the second most likely is a parameter that is about
+to change. Neither is an opportunity.
+</Warn>
+
+## What to look at, in order.
+
+**1. Self-stake and headroom.** The protocol minimum is
+<Param name="min_indexer_self_stake" />, and capacity is
+<Param name="max_delegation_ratio" /> that self-stake. Compare the indexer's
+current delegated stake against its capacity. If it is at or over the ceiling,
+everyone in the pool is diluted and your arrival makes it worse. If it has
+headroom, your delegation can actually be put to work.
+
+Self-stake also tells you something about alignment. An operator with a large
+self-stake has more of their own money exposed to the consequences of running the
+service badly.
+
+**2. Allocated versus idle stake.** Stake that is not allocated to a subgraph
+earns no indexing rewards. An indexer holding a large pool and allocating a
+fraction of it is generating returns on that fraction only, and the cut is applied
+to the rewards that exist rather than the ones that ought to.
+
+This single ratio explains most of the difference between two indexers with
+identical published parameters.
+
+**3. Where they allocate.** Allocating to subgraphs with no curation signal means
+allocating to subgraphs that earn no indexing rewards. A long list of allocations
+is not the same as a productive one.
+
+**4. Reward cut and query fee cut, with their history.** Read the direction
+correctly: the cut is what the indexer keeps. Then look at whether it has moved.
+An operator who has held stable parameters through a couple of market cycles is
+telling you something an operator with three months of history cannot.
+
+**5. Uptime and query serving.** An indexer that is allocated but failing queries
+earns indexing rewards and no query fees, and is a candidate for disputes.
+Independent monitoring of query performance exists and is worth consulting.
+
+**6. Whether they are a person you can reach.** Indexers who post under a name in
+the community forum, answer questions, and publish their infrastructure choices
+are, empirically, a different population from anonymous entries in a list. This is
+not a protocol guarantee. It is ordinary judgement about counterparties, which is
+what you are exercising here whether you admit it or not.
+
+<Model>
+You are not picking a rate. You are picking an operator who will still be running
+their machines attentively in eight months, when leaving them will cost you
+<Param name="undelegation_period_days" /> to arrange. Weight your criteria
+accordingly.
+</Model>
+
+## Spreading across several indexers.
+
+Splitting a delegation across a handful of indexers reduces exposure to any one
+operator going quiet or changing terms. It costs you a little in attention and in
+transaction fees, both of which are modest on Arbitrum One.
+
+It does not eliminate the thaw. Exiting three positions takes the same
+<Param name="undelegation_period_days" /> as exiting one, run in parallel rather
+than in sequence, which is one of the practical benefits of Horizon allowing
+multiple undelegation requests at once.
+
+## Where to get the numbers.
+
+Deliberately not here. Nothing on this site is live, and a table of indexers
+transcribed into a static page would be wrong within a day.
+
+Go to [Graph Explorer](https://thegraph.com/explorer) for the canonical on-chain
+view of indexers and their parameters, and to
+[Lodestar's indexer comparison](https://www.lodestar-dashboard.com/delegate) for a
+view built specifically around this decision, including the delegation calculator
+and comparison tooling.
+
+<Reveal question="Before reading on: you find an indexer with a 1% reward cut, well below everyone else. What is the most likely explanation?">
+That it is about to change, or that something else is wrong.
+
+A very low cut means the operator is keeping almost nothing for running real
+infrastructure with real costs. That is not sustainable indefinitely, which leaves
+a few possibilities: it is a promotional setting that will be raised, the operator
+is subsidising growth to attract a pool, the stake is not actually being allocated
+so the cut is applied to very little, or the parameters are stale on an abandoned
+indexer.
+
+None of those is fraud. All of them mean the number in front of you is not a
+forecast. Look at the parameter history and the allocation ratio before treating a
+generous cut as a reason rather than a question.
+</Reveal>

@@ -1,0 +1,111 @@
+---
+title: "Querying from an application"
+role: developer
+path: "Developer"
+module: "Subgraphs"
+order: 3
+difficulty: intermediate
+time_minutes: 11
+summary: "An API key, a gateway endpoint, and a set of assumptions about latency and freshness that will bite you if you leave them implicit."
+protocol_version_verified: "Graph Horizon (2025-12-11)"
+last_verified: 2026-08-30
+verify_before: 2026-11-30
+sources:
+  - name: "The Graph Docs: querying"
+    url: "https://thegraph.com/docs/en/subgraphs/querying/introduction/"
+  - name: "The Graph Docs: managing API keys"
+    url: "https://thegraph.com/docs/en/subgraphs/querying/managing-api-keys/"
+parameters_used: []
+authors: ["@community"]
+license: "CC-BY-4.0"
+---
+
+You have a published subgraph. Now an application needs to read it.
+
+## What sits between you and an indexer.
+
+You do not query an indexer directly. You query a gateway, which routes your query to
+an indexer serving that subgraph, handles the payment receipt, and returns the answer.
+
+The gateway is doing real work on your behalf:
+
+- **Selection.** Choosing among indexers serving that deployment, on price,
+  performance and reliability.
+- **Payment.** Attaching a signed receipt so the indexer can be paid, without you
+  transacting per query.
+- **Failover.** Routing elsewhere when an indexer is slow or wrong.
+
+<Flow steps={["your app", "gateway", "indexer", "response"]} hot={1} />
+
+The consequence worth internalising: **you are not talking to one machine.** Two
+identical queries can be served by different indexers. That is the property that makes
+the data source durable, and it is also the source of the surprises below.
+
+## The assumptions to make explicit.
+
+**Freshness varies.** Indexers are at slightly different chain heights. A query
+immediately after a transaction may be served by an indexer that has not seen it yet.
+If your product does read-after-write, handle it explicitly rather than assuming.
+
+**Latency is a distribution.** Most queries are fast. Some are not, because they went
+to a different indexer or hit a cold path. Set timeouts and mean them.
+
+**The subgraph can fail.** A deployment can break on a contract upgrade. Your
+application should degrade rather than crash, and you should find out from monitoring
+rather than from users.
+
+**Queries cost money.** Not much, per query. Enough that an unbounded loop or a
+runaway client is a bill.
+
+<Warn title="Never ship the API key in a client">
+An API key in a web or mobile bundle is a key anyone can extract and spend against.
+Proxy queries through your own backend, where the key lives in server configuration,
+and rate limit per user there.
+
+This is ordinary practice for any paid API. It gets skipped here surprisingly often
+because the amounts feel small, right up until they do not.
+</Warn>
+
+## Writing queries that behave.
+
+- **Always paginate.** An unbounded collection query is slow now and worse later.
+- **Ask for what you display.** Overfetching costs latency and money on every call.
+- **Do not use the graph as a cache layer.** If you need the same answer repeatedly,
+  cache it in your own application.
+- **Handle the empty case honestly.** No results and not indexed yet look identical in
+  the response, and treating an unindexed subgraph as an empty dataset produces a UI
+  that confidently shows nothing.
+
+That last point is worth dwelling on. Absent data rendering as a healthy empty state is
+one of the most persistent bugs in applications built on indexed data, precisely
+because nothing errors.
+
+## Paying for it.
+
+Query fees are paid in GRT from a balance you top up. Card payment options exist for
+topping up on Arbitrum, and the payment surfaces change more often than the protocol
+does, so check the current documentation rather than any article.
+
+Budget by measuring rather than estimating. Instrument query volume per feature in
+staging and you will find one screen making ten times the calls it needs.
+
+<Reveal question="Before reading on: your query returns an empty array. Name three different causes.">
+The three are indistinguishable in the response, which is the point.
+
+**There is genuinely no data.** The query is correct, the subgraph is healthy, no
+entity matches.
+
+**The subgraph has not indexed that far yet.** Still syncing, or lagging the chain
+head. The entity exists on chain and not yet in the index.
+
+**The subgraph is broken.** It failed on a contract upgrade and stopped at some block.
+Everything after that block is missing and will stay missing.
+
+All three return an empty array with no error. If your application treats empty as "no
+results", the third case silently becomes a permanent wrong answer displayed
+confidently.
+
+The fix is to check indexing status alongside the data: how far has this deployment
+indexed, and is it healthy. That turns a silent wrong answer into a stale-data warning
+you can show a user.
+</Reveal>

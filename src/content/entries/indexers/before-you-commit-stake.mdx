@@ -1,0 +1,61 @@
+---
+title: "Before you commit stake"
+role: indexer
+path: "Indexer"
+module: "Practicum"
+order: 1
+difficulty: advanced
+time_minutes: 16
+summary: "Test the economics rather than the trivia, then plan the monitoring you would need before you allocate anything real."
+protocol_version_verified: "Graph Horizon (2025-12-11)"
+last_verified: 2026-08-30
+verify_before: 2026-11-30
+sources:
+  - name: "The Graph Docs: indexing overview"
+    url: "https://thegraph.com/docs/en/indexing/overview/"
+  - name: "Lodestar: indexing status"
+    url: "https://www.lodestar-dashboard.com/indexing-status"
+parameters_used: []
+authors: ["@community"]
+license: "CC-BY-4.0"
+---
+
+
+Two parts. Work the decision honestly, then plan the monitoring you would need before
+committing anything.
+
+### Before you commit stake
+
+- Write down your capital and compare it against the protocol minimum. State plainly whether you can also accept delegation, and how you intend to attract any.
+- Price archive access for every chain you intend to index, monthly, as a real number.
+- Compute what the same capital would earn delegated to an existing indexer, doing nothing. That is the number you must beat.
+- Pick three subgraphs you would allocate to and write one sentence each on why, without referring to their signal rank.
+- Open a dashboard and check whether those three are already crowded with allocated stake.
+- List the four silent failure modes from this collection and say, for each, what alert you would build.
+- Decide your max_amount_willing_to_lose_grt and write down the reasoning, not just the number.
+- Name the person who covers your alerts when you are unavailable. If there is no name, that is your finding.
+
+
+## An honest closing note
+
+<Warn>
+This collection deliberately spends more effort on economics and failure modes than on
+installation, because installation is documented elsewhere and is not where operators
+lose money.
+
+If working through the checklist above produced more discomfort than enthusiasm, that
+is a useful result rather than a failure. The [delegation collection](/delegators/) covers a
+role that pays for capital without the operational burden, and you will now evaluate
+indexers far better than most people who delegate.
+</Warn>
+
+## Where next
+
+- The procedures this collection deliberately omits:
+  [official indexing documentation](https://thegraph.com/docs/en/indexing/overview/).
+- Live indexing status, POI comparison and performance data:
+  [Lodestar](https://www.lodestar-dashboard.com/indexing-status).
+- Who sets the parameters you have been reading, and how they change:
+  **[governance](/governance/)**.
+- What the people signalling on your subgraphs are thinking:
+  **[curator](/curators/)**.

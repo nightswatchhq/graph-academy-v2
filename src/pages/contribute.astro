@@ -6,7 +6,7 @@ import { SITE } from '../lib/site';
 ---
 <Base
   title="Contribute"
-  description="How to write a lesson, fix a parameter, or settle one of the contradictions this site has recorded."
+  description="How to write an entry, fix a parameter, or settle one of the contradictions this site has recorded."
 >
   <section class="wrap" style="padding-block: clamp(2.8rem, 6vw, 4.4rem) 0;">
     <p class="kicker">Contribute</p>
@@ -34,11 +34,11 @@ import { SITE } from '../lib/site';
           site honest.
         </li>
         <li>
-          <strong>Fix something wrong.</strong> If a lesson misdescribes a mechanism,
+          <strong>Fix something wrong.</strong> If an entry misdescribes a mechanism,
           say so with a source. Being corrected is the point.
         </li>
         <li>
-          <strong>Write a lesson.</strong> Useful, and the least urgent of the four.
+          <strong>Write an entry.</strong> Useful, and the least urgent of the four.
         </li>
       </ol>
 
@@ -84,20 +84,20 @@ import { SITE } from '../lib/site';
         </li>
       </ul>
 
-      <h2>Writing a lesson.</h2>
+      <h2>Writing an entry.</h2>
       <p>
-        Lessons are MDX in <code>src/content/lessons/&lt;hub&gt;/</code>. The frontmatter
+        Entries are MDX in <code>src/content/entries/&lt;hub&gt;/</code>. The frontmatter
         schema is enforced by Zod at build time, so a missing field is a build failure
-        rather than a broken page. Copy an existing lesson and change it.
+        rather than a broken page. Copy an existing entry and change it.
       </p>
-      <p>Every lesson needs, at minimum:</p>
+      <p>Every entry needs, at minimum:</p>
       <ul>
         <li>A <code>summary</code> that says what the reader will be able to do.</li>
         <li>At least one entry in <code>sources</code>, being a page you actually read.</li>
         <li><code>last_verified</code> as the date you read those sources, and
           <code>verify_before</code> as when somebody should look again. Ninety days is
           the usual choice.</li>
-        <li>A <code>Quiz</code> or a <code>Checklist</code>, because a lesson without a
+        <li>A <code>Quiz</code> or a <code>Checklist</code>, because an entry without a
           way to check yourself is an article.</li>
       </ul>
       <p>

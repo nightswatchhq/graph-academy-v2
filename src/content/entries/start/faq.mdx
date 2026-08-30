@@ -1,0 +1,105 @@
+---
+title: "Straight answers to the common questions"
+role: newcomer
+path: "Foundations"
+module: "The problem"
+order: 2
+difficulty: beginner
+time_minutes: 9
+summary: "The questions newcomers actually ask, answered without hedging, with a pointer to the entry that does the work properly."
+protocol_version_verified: "Graph Horizon (2025-12-11)"
+last_verified: 2026-08-30
+verify_before: 2026-11-30
+sources:
+  - name: "The Graph Docs: tokenomics"
+    url: "https://thegraph.com/docs/en/resources/tokenomics/"
+  - name: "The Graph Docs: delegating"
+    url: "https://thegraph.com/docs/en/resources/roles/delegating/delegating/"
+  - name: "The Graph Docs: indexing overview"
+    url: "https://thegraph.com/docs/en/indexing/overview/"
+parameters_used: ["undelegation_period_days", "min_indexer_self_stake", "annual_issuance_pct", "curation_tax_pct", "delegation_tax_pct"]
+authors: ["@community"]
+license: "CC-BY-4.0"
+---
+
+Short answers. Each one links to the entry that treats it properly.
+
+## Is delegating the same as staking?
+
+No, and the difference is not cosmetic. Staking is what an indexer does with their
+own GRT, and it is what gets slashed if they misbehave. Delegating is putting your
+GRT behind an indexer without running anything.
+
+A delegator takes a share of what their indexer earns, minus a cut the indexer
+sets. See [what delegation is](/delegators/what-is-delegation/).
+
+## How long until I can get my GRT back after delegating?
+
+<Param name="undelegation_period_days" /> after you start the undelegation, and
+you earn nothing during that period. This is the single most consequential number
+for a delegator and it is routinely left out of advertised returns. See
+[undelegation and thawing](/delegators/undelegation-and-thawing/).
+
+## Do I pay a fee to delegate?
+
+Not any more. The delegation tax was removed under Horizon and is now
+<Param name="delegation_tax_pct" />. Be aware that at least one official page has
+not caught up and still describes the old charge. See
+[the parameters page](/parameters/), which records the contradiction rather than
+quietly picking a side.
+
+## Can my delegated GRT be slashed?
+
+Not currently for the Subgraph Service. Horizon introduced the technical
+capability for delegated stake to be slashed, and it is switched off. Treat it as
+a future risk that exists in the code, not as current behaviour, and not as
+something that cannot happen. See
+[what changes for delegators](/delegators/horizon-changes-for-delegators/).
+
+## How much do I need to run an indexer?
+
+<Param name="min_indexer_self_stake" /> of your own stake as the protocol minimum,
+plus the infrastructure and the attention to operate it. The minimum is the
+cheapest part of the answer. See
+[should you index or delegate](/indexers/index-or-delegate/), which tries to talk
+you out of it honestly.
+
+## Where does the yield come from?
+
+Two places. Query fees are revenue somebody actually paid. Indexing rewards are
+new issuance, targeted at <Param name="annual_issuance_pct" /> a year. The second
+is dilution funding useful work, which is a reasonable arrangement and is not the
+same thing as revenue. See [the value loop](/start/the-value-loop/) and
+[tokenomics](/governance/tokenomics/).
+
+## Is curation risky?
+
+There is no slashing for curators. The risks are that you pay
+<Param name="curation_tax_pct" /> to enter and it is burned regardless, and that
+signal on a subgraph nobody queries earns you nothing while your capital sits
+there. Losing money slowly to opportunity cost is still losing money. See
+[curation strategy and risk](/curators/curation-strategy/).
+
+## Is this financial advice?
+
+No. Nothing on this site is financial or investment advice. The site's job is to
+explain mechanisms accurately enough that you can make your own decision, and to
+tell you the date it last checked its facts.
+
+## Why does this site keep telling me to read somewhere else?
+
+Because it is not the reference. The official documentation carries the exact
+procedures, flags and configuration, and it is maintained by the people shipping
+the code. Dashboards carry the live numbers. This site explains why the protocol
+is shaped the way it is, and links out for the rest. A learning site that
+duplicated the docs would be wrong within a quarter, which is roughly what
+happened to the last version of this one.
+
+## What happened to the old Graph Academy?
+
+It was built on WordPress, last substantially updated in 2022, and it taught
+Cobb-Douglas rebates, L1 bonding curves and the Hosted Service. All three are now
+wrong. Rather than patch it, this rebuild moved every protocol number into a
+[single registry](/parameters/) with the date somebody read the source, and made
+the build fail when a page goes past its re-verification date. See
+[about](/about/).

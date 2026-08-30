@@ -1,0 +1,118 @@
+---
+title: "What Horizon changed for delegators"
+role: delegator
+path: "Delegator"
+module: "Managing your delegation"
+order: 2
+difficulty: intermediate
+time_minutes: 12
+summary: "Delegation is now per data service rather than per indexer, the tax is gone, and slashing of delegated stake exists in the code with the switch off."
+protocol_version_verified: "Graph Horizon (2025-12-11)"
+last_verified: 2026-08-30
+verify_before: 2026-11-30
+sources:
+  - name: "The Graph Docs: what changes with Graph Horizon"
+    url: "https://thegraph.com/docs/en/graph-horizon/what-changes/"
+  - name: "The Graph Docs: delegating"
+    url: "https://thegraph.com/docs/en/resources/roles/delegating/delegating/"
+parameters_used: ["delegation_tax_pct", "delegated_stake_slashable", "max_slash_pct", "recommended_slash_pct", "undelegation_period_days"]
+authors: ["@community"]
+license: "CC-BY-4.0"
+---
+
+Graph Horizon went live on 2025-12-11. For delegators it changed three things
+that matter and one that matters a great deal more than the other two.
+
+## Provisions: stake now points at a service, not just an indexer.
+
+The structural change under Horizon is that the protocol supports several data
+services rather than one, and stake is provisioned against a specific service
+rather than pooled generally.
+
+The Subgraph Service is the first, and today the dominant one. When you delegate,
+you are backing an indexer's participation in a particular service, and an
+indexer's obligations, and its slashing exposure, are defined by that service
+rather than by the protocol as a whole.
+
+Practically, today, this is mostly a change in vocabulary for delegators. Its
+importance is in what it makes possible: as further services arrive, the choice of
+which service an indexer serves becomes part of what you are selecting when you
+select an operator, and the risk profiles of different services need not match.
+
+<Model>
+Before Horizon: you backed an indexer. After Horizon: you back an indexer's
+participation in a named service, with that service's rules. Today one service
+dominates so the distinction is quiet. It will not stay quiet.
+</Model>
+
+## The delegation tax is gone.
+
+Deposits are no longer taxed. The parameter is
+<Param name="delegation_tax_pct" /> and it was removed from the protocol, not set
+to zero pending a change of mind.
+
+This makes entering cheaper and, more subtly, makes moving between indexers
+cheaper in fees while leaving it exactly as expensive in time. The binding
+constraint on rotation was always the
+<Param name="undelegation_period_days" /> thaw, and Horizon did not touch it.
+
+## Slashing of delegated stake: the honest version.
+
+This is the one to read carefully, because it is easy to state in a way that is
+either falsely reassuring or falsely alarming.
+
+**Today:** delegated stake is <Param name="delegated_stake_slashable" /> slashable
+for the Subgraph Service. If your indexer is slashed for misbehaviour, the loss
+falls on their own stake.
+
+**In the code:** Horizon introduced the technical capability for delegated stake to
+be slashed. The documentation says so directly: the capability "is not currently
+enabled for SubgraphService, but delegators should be aware it may be activated in
+future protocol upgrades."
+
+**What that means for you:** it is a future risk that already exists in the
+mechanism, and enabling it is a governance decision rather than a rewrite. New
+data services arriving under Horizon may make different choices, since slashing
+rules belong to the service.
+
+Alongside this, slashing itself became flexible. Arbitrators determine an
+appropriate amount based on severity, capped at <Param name="max_slash_pct" /> of
+the indexer's stake, with a recommended value of
+<Param name="recommended_slash_pct" />. Previously the amount was fixed by the
+protocol rather than judged.
+
+<Warn title="Two ways to get this wrong">
+"Delegated stake cannot be slashed" is wrong, because it describes a permanent
+property when the truth is a switch that is currently off.
+
+"Delegating puts your stake at risk of slashing" is also wrong for the Subgraph
+Service today, and it will send you looking for compensation for a risk you are
+not currently carrying.
+
+The accurate statement is longer and worth using: not currently enabled for this
+service, present in the mechanism, activatable by governance, and potentially
+different for services that arrive later.
+</Warn>
+
+## What did not change.
+
+Worth stating plainly, because a large release invites the assumption that
+everything moved:
+
+- The <Param name="undelegation_period_days" /> thawing period is unchanged.
+- The delegation capacity multiplier is unchanged.
+- The direction of the reward cut is unchanged. It is still what the indexer
+  keeps.
+- Your return still depends on your indexer allocating stake attentively, and
+  that is still invisible in a headline rate.
+
+## What to actually do about it.
+
+- Check which data services your indexer participates in, and expect that list to
+  grow.
+- Stop budgeting for a deposit tax. If a tool is still deducting one, that tool is
+  stale.
+- Treat delegated-stake slashing as a governance question worth following, not as
+  a present risk and not as an impossibility.
+- Read anything written before December 2025 with the assumption that its Horizon
+  content is absent rather than wrong, and its slashing content is out of date.

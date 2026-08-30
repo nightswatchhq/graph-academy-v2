@@ -1,0 +1,99 @@
+---
+title: "The Council, the Foundation, and grants"
+role: governance
+path: "Governance"
+module: "Who decides"
+order: 1
+difficulty: intermediate
+time_minutes: 11
+summary: "Two distinct bodies with distinct jobs, which people conflate constantly. One votes on protocol changes. The other holds and deploys money."
+protocol_version_verified: "Graph Horizon (2025-12-11)"
+last_verified: 2026-08-30
+verify_before: 2026-11-30
+sources:
+  - name: "The Graph: governance"
+    url: "https://thegraph.com/ecosystem/governance/"
+  - name: "Introducing The Graph Council"
+    url: "https://thegraph.com/blog/introducing-the-graph-council/"
+parameters_used: ["innovation_allocation_pct"]
+authors: ["@community"]
+license: "CC-BY-4.0"
+---
+
+Two bodies, two jobs. Confusing them makes a great deal of ecosystem discussion
+unreadable.
+
+## The Council.
+
+The Graph Council is a six-of-ten multisig that governs the protocol. It balances five
+stakeholder groups: indexers, active token holders, the initial team, users, and
+technical domain experts.
+
+Two features of that design are worth noticing.
+
+**It is a multisig, not a token vote.** Protocol decisions are not made by whoever
+holds the most GRT. This is a deliberate choice with a real trade-off: it avoids
+plutocracy and concentrates authority in ten seats.
+
+**The seats represent groups with opposed interests.** Indexers and users want
+different things about query pricing. Token holders and the team want different things
+about issuance. Requiring six of ten across those groups means a change has to be
+tolerable to more than one constituency.
+
+<Model>
+The Council is designed so that no single interest group can pass a change alone, and
+so that the people voting are identifiable and accountable. It buys accountability at
+the cost of decentralisation, and that trade is worth understanding rather than
+assuming either way.
+</Model>
+
+## The Foundation.
+
+The Graph Foundation is a separate body. It does not vote on protocol changes. It holds
+and deploys funds: grants, ecosystem support, and work that needs paying for.
+
+Its main visible output is the grants programme, which runs in waves supporting
+protocol development, tooling, integrations, community work and research. If you are
+building something for this ecosystem, that is the door.
+
+<Warn title="Do not conflate them">
+The Council approves protocol changes. The Foundation deploys funding. A grant is not
+protocol approval, and a Council vote does not release money.
+
+The Innovation Allocation is a good example of both being involved and each doing its
+own job: the Council voted to redirect
+<Param name="innovation_allocation_pct" /> of protocol issuance, and the Foundation
+treasury is what receives it.
+</Warn>
+
+## On naming individuals.
+
+This site deliberately does not name current officeholders, and the omission is
+considered rather than lazy.
+
+People move. A learning page that names a Foundation director or a Council member is
+correct for a while and then quietly wrong, and the reader has no way to tell which
+state it is in. Structures change more slowly than the people occupying them, so this
+page teaches the structure and links to the source for the current membership.
+
+That is a general principle worth borrowing: in evergreen material, describe the role,
+link for the occupant.
+
+## What you can actually do.
+
+Governance here is more open to participation than it first appears:
+
+- **Read the GIP repository.** Nothing is required to do this and it is the best
+  documentation available.
+- **Comment on the forum.** GIP discussion is public and substantive comments from
+  people running infrastructure carry weight, because Council members are not
+  operating everything themselves.
+- **Write a GIP.** The process is permissionless. The bar is that it must be a real
+  argument.
+- **Apply for a grant.** If you are building tooling the ecosystem needs, that is what
+  the programme is for.
+- **Watch the Council votes.** They are on Snapshot and they are public.
+
+The realistic path to influence for most people is the second one. Being the person who
+points out a mechanism flaw during discussion is worth more than any amount of
+commentary afterwards.

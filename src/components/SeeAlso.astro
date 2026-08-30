@@ -1,0 +1,23 @@
+---
+import type { Entry } from '../lib/paths';
+import { collectionOf, hubOf } from '../lib/paths';
+
+interface Props { entries: Entry[] }
+const { entries } = Astro.props;
+---
+{entries.length > 0 && (
+  <aside class="see-also">
+    <p class="kicker">See also</p>
+    <ul>
+      {entries.map((e) => (
+        <li>
+          <a href={`/${e.id}/`}>
+            <span class="sa-title">{e.data.title}</span>
+            <span class="sa-where">{collectionOf(hubOf(e)).title}</span>
+          </a>
+          <span class="sa-summary">{e.data.summary}</span>
+        </li>
+      ))}
+    </ul>
+  </aside>
+)}

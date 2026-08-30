@@ -1,0 +1,96 @@
+---
+title: "The Token API"
+role: developer
+path: "Developer"
+module: "The other lanes"
+order: 3
+difficulty: beginner
+time_minutes: 9
+summary: "Balances, transfers, prices and NFTs over REST, across several chains, with no subgraph to author. The right first answer more often than developers expect."
+protocol_version_verified: "Graph Horizon (2025-12-11)"
+last_verified: 2026-08-30
+verify_before: 2026-11-30
+sources:
+  - name: "The Graph Docs: Token API quick start"
+    url: "https://thegraph.com/docs/en/token-api/quick-start/"
+  - name: "The Graph Docs: Token API"
+    url: "https://thegraph.com/docs/en/token-api/"
+parameters_used: []
+authors: ["@community"]
+license: "CC-BY-4.0"
+---
+
+A large share of the questions developers ask of chain data are the same questions. What
+does this address hold. What moved, and when. What is it worth. Which NFTs does it own.
+
+Authoring a subgraph per chain to answer questions everybody has is repeated work with
+no product in it. The Token API exists so you do not.
+
+## What it is.
+
+A REST API covering token balances, transfers, prices and NFT ownership across several
+chains. Built on Substreams underneath, so the data path is the same one the rest of the
+ecosystem uses. You get an endpoint and a key.
+
+Notice the shape: **REST, not GraphQL**. That is a deliberate signal. GraphQL exists so
+you can ask for a model somebody defined. REST here reflects that the questions are
+already known, and there is no schema for you to design.
+
+## Why it is often the right answer.
+
+The instinct among developers who have learned about subgraphs is to write one. For
+token questions this is usually wrong, for reasons that have nothing to do with capability:
+
+- **No authoring.** No schema, no mappings, no manifest, no deployment.
+- **No signal to post.** You are not asking the network to index anything new, so there
+  is no curation cost and no waiting to see whether anyone serves you.
+- **No maintenance.** No proxy upgrade breaks your mapping, because there is no mapping.
+- **Multiple chains at once.** One integration rather than one per chain.
+
+Against a subgraph you would otherwise write, maintain and curate, that is a very large
+saving for a question you did not need to answer originally.
+
+<Model>
+Pick the highest layer that answers your question. Drop a layer only when it does not.
+Most developers start at the lowest layer they have heard of and work up, which costs
+weeks.
+</Model>
+
+## What you give up.
+
+- **You cannot model anything it does not model.** Protocol-specific state, custom
+  events, your own domain logic. If your question is about your protocol rather than
+  about tokens, this is not the tool.
+- **The shape is fixed.** No custom queries, no joins you define.
+- **Chain coverage is what it is.** Check the current list rather than assuming, since
+  it grows.
+
+## How to decide in one question.
+
+Ask: **is my question about tokens, or about my protocol?**
+
+Balances, transfers, prices, NFT ownership: tokens. Use the Token API.
+
+Positions in your lending market, the state of your auction, the history of your
+governance contract: your protocol. Write a subgraph.
+
+Both, which is common: use the Token API for the token half and a subgraph for yours,
+and join them in your application. There is no prize for doing it all one way.
+
+<Reveal question="Before reading on: why offer this at all, when anyone could write the subgraph themselves?">
+Because thousands of people writing the same subgraph is waste, and the waste has second
+order effects.
+
+Every duplicate token subgraph is separate indexing capacity consumed to derive data
+somebody else has already derived, separate signal spent, and separate maintenance.
+Network capacity is finite, and spending it re-answering solved questions leaves less for
+the ones that are not solved.
+
+There is an adoption argument too. A developer who has to author, deploy, publish and
+curate a subgraph before displaying a token balance may simply not bother. Lowering that
+floor brings people in, and some of them go on to write the protocol-specific subgraphs
+only they can write.
+
+The Token API is best read as the ecosystem noticing which work was repeated and
+absorbing it, so authoring effort goes where it is actually needed.
+</Reveal>

@@ -54,7 +54,7 @@ npm run reconcile     # registry against chain, needs a gateway key
 
 ```
 data/parameters.toml          the registry: every protocol number, sourced and dated
-src/content/lessons/<hub>/    lessons as MDX, validated by a Zod schema
+src/content/entries/<hub>/    lessons as MDX, validated by a Zod schema
 src/lib/paths.ts              paths, modules and ordering
 src/lib/params.ts             registry loader and lookup
 src/lib/glossary.ts           glossary terms

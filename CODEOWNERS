@@ -11,12 +11,12 @@
 
 *                                   @cargopete
 
-/src/content/lessons/indexers/      @cargopete   # intended: @nightswatchhq/indexer-sme
-/src/content/lessons/delegators/    @cargopete   # intended: @nightswatchhq/delegation-sme
-/src/content/lessons/curators/      @cargopete   # intended: @nightswatchhq/curation-sme
-/src/content/lessons/developers/    @cargopete   # intended: @nightswatchhq/devtooling-sme
-/src/content/lessons/consumers/     @cargopete   # intended: @nightswatchhq/devtooling-sme
-/src/content/lessons/governance/    @cargopete   # intended: @nightswatchhq/governance-sme
+/src/content/entries/indexers/      @cargopete   # intended: @nightswatchhq/indexer-sme
+/src/content/entries/delegators/    @cargopete   # intended: @nightswatchhq/delegation-sme
+/src/content/entries/curators/      @cargopete   # intended: @nightswatchhq/curation-sme
+/src/content/entries/developers/    @cargopete   # intended: @nightswatchhq/devtooling-sme
+/src/content/entries/consumers/     @cargopete   # intended: @nightswatchhq/devtooling-sme
+/src/content/entries/governance/    @cargopete   # intended: @nightswatchhq/governance-sme
 
 # The registry is the single source of every number on the site. A change here
 # moves every page at once.

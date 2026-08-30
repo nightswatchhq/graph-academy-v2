@@ -1,0 +1,115 @@
+---
+title: "What curation is for"
+role: curator
+path: "Curator"
+module: "What signal does"
+order: 1
+difficulty: intermediate
+time_minutes: 11
+summary: "Signal is the protocol's answer to a scheduling problem: which of thousands of subgraphs should scarce indexing capacity be pointed at, before anyone has queried them?"
+protocol_version_verified: "Graph Horizon (2025-12-11)"
+last_verified: 2026-08-30
+verify_before: 2026-11-30
+sources:
+  - name: "The Graph Docs: curating"
+    url: "https://thegraph.com/docs/en/resources/roles/curating/"
+  - name: "The Graph Docs: tokenomics"
+    url: "https://thegraph.com/docs/en/resources/tokenomics/"
+parameters_used: ["curation_tax_pct", "recommended_dev_signal"]
+authors: ["@community"]
+license: "CC-BY-4.0"
+---
+
+Curation is the role people find hardest to place, because unlike the others it
+does not map onto anything familiar. An indexer is an operator. A delegator is a
+backer. A curator is neither, and calling it "staking on subgraphs" obscures what
+it actually does.
+
+## The problem curation solves.
+
+Indexing capacity is finite. Every indexer has a limited amount of stake, a limited
+number of machines, and a finite amount of attention. The network has thousands of
+published subgraphs.
+
+So: which ones get indexed? Not "which ones are popular", because a newly published
+subgraph has no queries yet and needs to be indexed before it can have any. Not
+"all of them", because the capacity does not exist. And not "whichever ones the
+Foundation picks", because then you have a committee deciding what data the world
+can read quickly, which is the arrangement the protocol exists to avoid.
+
+Curation is the mechanism that answers it without a committee. Anyone can deposit
+GRT against a subgraph they believe will be queried. That deposit is public, and
+indexers use it to decide where to point their capacity.
+
+<Model>
+Signal is a forecast with money behind it. You are not rating quality and you are
+not voting. You are saying "this data will be queried, and I will put capital
+behind that claim so that indexers act on it now."
+</Model>
+
+## Why a forecast has to cost something.
+
+If signalling were free, it would carry no information. Everyone would signal
+everything, indexers would learn nothing from it, and the protocol would be back to
+having no way to allocate capacity.
+
+Making it cost capital makes it selective. You will not signal on a subgraph you do
+not believe in, because that capital could have been signalling something you do
+believe in. The cost is what makes the number mean something.
+
+On top of that there is a deposit charge. Entering costs
+<Param name="curation_tax_pct" />, and it is burned rather than paid to anyone.
+Nobody profits from your entry, which removes the obvious way to game the mechanism
+by cycling in and out.
+
+## What a curator gets back.
+
+Curators receive a share of the query fees generated on the subgraph they signalled.
+
+Note carefully which pot that is. Curators are paid from **query fees**, which are
+real revenue from real demand, not from **indexing rewards**, which are issuance. So
+a curator's return is directly tied to whether the forecast was right. Signal on a
+subgraph that turns out to be heavily queried and you earn. Signal on one nobody
+touches and you earn nothing, however elegant the subgraph.
+
+This is a cleaner alignment than the other roles get, and it is worth appreciating.
+A delegator can earn from an indexer allocating to subgraphs nobody queries, because
+indexing rewards do not require queries. A curator cannot.
+
+## The consequence indexers care about.
+
+The relationship runs the other way too, and this is the part that surprises
+developers. A subgraph with no signal is generally not worth an indexer's stake,
+because allocation towards it earns no indexing rewards.
+
+Publishing a subgraph and waiting is therefore not a strategy. If nothing signals
+on it, nothing indexes it, and it does not get served. This is why the documentation
+suggests that developers curate their own subgraph, with
+<Param name="recommended_dev_signal" /> given as a starting figure, noting that the
+right number moves with network activity.
+
+<Reveal question="Before reading on: why can a developer not simply pay an indexer directly to index their subgraph?">
+They can, in the sense that direct arrangements exist and there is protocol work
+aimed squarely at this. But signal solves something a bilateral deal does not.
+
+A private arrangement with one indexer gets you one indexer. If that operator has an
+outage, changes their mind or leaves, your application loses its data source and you
+start negotiating again. You have reproduced the single-provider dependency the
+protocol exists to remove, with extra steps.
+
+Signal is public and impersonal. It tells every indexer at once that this subgraph
+is worth capacity, and any of them can act on it without asking you. What you are
+buying with signal is not one indexer's attention. It is the ongoing possibility of
+several, which is the property that makes the data source durable.
+</Reveal>
+
+## What curation is not.
+
+- **Not governance.** Signal does not vote on anything.
+- **Not a quality rating.** You are forecasting demand. A poorly written subgraph
+  with heavy usage is a better signal target than an elegant one nobody queries.
+- **Not slashable.** There is no curator misbehaviour to punish. The risks are
+  entirely about being wrong, which the strategy entry covers.
+- **Not a lock-up with a timer.** You can unsignal, and on Arbitrum the cost of
+  doing so is not path-dependent. The next two entries explain why that sentence
+  needs saying at all.

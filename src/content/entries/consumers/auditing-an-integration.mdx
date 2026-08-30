@@ -1,0 +1,45 @@
+---
+title: "Auditing an integration"
+role: consumer
+path: "App builder"
+module: "Practicum"
+order: 1
+difficulty: beginner
+time_minutes: 10
+summary: "Audit one real integration against the failure modes that do not raise errors."
+protocol_version_verified: "Graph Horizon (2025-12-11)"
+last_verified: 2026-08-30
+verify_before: 2026-11-30
+sources:
+  - name: "Graph Explorer"
+    url: "https://thegraph.com/explorer"
+  - name: "Subgraph Studio"
+    url: "https://thegraph.com/studio/"
+parameters_used: []
+authors: ["@community"]
+license: "CC-BY-4.0"
+---
+
+
+Audit something real. If you have no integration yet, audit one you are planning.
+
+### Audit one integration
+
+- Name the subgraph you depend on and find who maintains it.
+- Check whether indexers are currently allocated to it, and whether it is indexing healthily.
+- Confirm your API key is not present in any client bundle. Actually search the build output.
+- Add indexing status to your most important query, and decide what the UI shows for behind and for failed.
+- Find every query without a timeout and give it one.
+- Find your highest-volume screen and count the queries it makes per view.
+- Work out queries per user session, and multiply by your expected users.
+- Decide what your application renders when the data source is unavailable, and check that it does that.
+
+
+## Where next
+
+- Understanding the subgraph you depend on, and maybe writing your own:
+  **[developer](/developers/)**.
+- Why your subgraph is or is not being served:
+  **[curator](/curators/)**.
+- Who serves your queries and what they are dealing with:
+  **[indexer](/indexers/)**.

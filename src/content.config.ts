@@ -36,6 +36,8 @@ const lesson = z.object({
   verify_before: z.coerce.date(),
   sources: z.array(source).min(1),
   parameters_used: z.array(z.string()).default([]),
+  /** Explicit cross-references, as absolute paths. Ranked above computed ones. */
+  see_also: z.array(z.string()).default([]),
   authors: z.array(z.string()).default(['@community']),
   reviewers: z.array(z.string()).default([]),
   license: z.string().default('CC-BY-4.0'),
@@ -43,8 +45,8 @@ const lesson = z.object({
 });
 
 export const collections = {
-  lessons: defineCollection({
-    loader: glob({ pattern: '**/*.mdx', base: './src/content/lessons' }),
+  entries: defineCollection({
+    loader: glob({ pattern: '**/*.mdx', base: './src/content/entries' }),
     schema: lesson,
   }),
 };

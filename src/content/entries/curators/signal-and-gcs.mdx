@@ -1,0 +1,113 @@
+---
+title: "Signal, shares, and the deposit that is burned"
+role: curator
+path: "Curator"
+module: "The mechanics"
+order: 1
+difficulty: intermediate
+time_minutes: 12
+summary: "What you actually hold when you signal, how your claim is calculated, and where the deposit charge goes."
+protocol_version_verified: "Graph Horizon (2025-12-11)"
+last_verified: 2026-08-30
+verify_before: 2026-11-30
+sources:
+  - name: "The Graph Docs: tokenomics"
+    url: "https://thegraph.com/docs/en/resources/tokenomics/"
+  - name: "The Graph Docs: curating"
+    url: "https://thegraph.com/docs/en/resources/roles/curating/"
+parameters_used: ["curation_tax_pct", "query_fee_burn_pct"]
+authors: ["@community"]
+license: "CC-BY-4.0"
+---
+
+Signalling is not a deposit that sits with your name on it. You are exchanging GRT
+for shares in a pool attached to one subgraph.
+
+## What you hold.
+
+Deposit GRT against a subgraph and you receive Graph Curation Shares in return. Your
+claim on the pool is proportional to the shares you hold relative to all shares
+issued for that subgraph.
+
+Query fees flowing to that subgraph's curators accrue to the pool. Your shares are
+then worth more GRT than you paid for them. To exit, you burn your shares and
+receive GRT back at whatever the pool is worth at that moment.
+
+<Flow steps={["deposit GRT", "burn the tax", "receive shares", "fees accrue to pool", "burn shares to exit"]} hot={3} />
+
+Two things follow from the share model that catch people out.
+
+**Your holding is denominated in shares, not GRT.** The GRT figure you see against
+your position is the current redemption value, not a balance. It moves.
+
+**Other curators arriving does not dilute your claim.** They buy their own shares
+at the current rate. What their arrival does is change how thinly the subgraph's
+future fees are spread, which is a different thing and matters just as much.
+
+## The deposit charge.
+
+Entering costs <Param name="curation_tax_pct" />, and this is the detail worth
+being precise about: **it is burned**. It does not go to the indexer, the
+developer, the Foundation, or to earlier curators. It leaves the supply.
+
+That design choice does real work. If the entry charge were paid to existing
+curators, early positions would be paid by later arrivals, which produces exactly
+the incentive structure you would expect and would not want. Burning it means
+nobody in the system profits from your entry, so nobody in the system benefits from
+encouraging churn.
+
+For you it is straightforwardly a cost. Deposit some amount and slightly less than
+that amount becomes shares. You have to be right by more than the charge before you
+are ahead.
+
+<Warn title="The charge is per entry, not per year">
+Because it is charged on entry rather than held against time, moving signal between
+subgraphs is what costs you, not leaving it in place. A curator who reshuffles
+positions monthly pays that charge twelve times a year. A curator who researches
+once and leaves it alone pays it once.
+
+The mechanism, like delegation's thawing period, quietly rewards patience. That is
+not an accident in either case.
+</Warn>
+
+## Where the fees come from.
+
+A subgraph's curators share in the query fees generated on it. That flow depends on
+three things, none of which you control:
+
+1. **Whether anyone queries it.** Your entire forecast.
+2. **Whether indexers actually serve it.** Signal makes it attractive, it does not
+   compel anyone. A subgraph with signal and no indexer allocated to it generates no
+   fees.
+3. **What the network takes.** <Param name="query_fee_burn_pct" /> of query fees are
+   burned, and indexers take their share subject to the rebate mechanism.
+
+Point two is the one people miss. Signal is necessary for a subgraph to be served
+and it is not sufficient. If you are checking a position, check that somebody is
+actually allocated to it, not merely that you have signalled.
+
+## What your shares are not.
+
+- **Not a claim on the subgraph.** You do not own it, cannot change it, and cannot
+  stop the developer changing it.
+- **Not a claim on indexing rewards.** Those go to indexers and their delegators.
+  Curators are paid from query fees only.
+- **Not transferable in the way a token position usually is.** Your exit is by
+  burning shares back to the pool.
+- **Not protected against the subgraph being deprecated.** If the developer stops
+  maintaining it and queries move to a replacement, your signal is attached to the
+  old one.
+
+<Reveal question="Before reading on: why burn the deposit charge instead of paying it to existing curators?">
+Because paying it to earlier curators would turn curation into a mechanism where
+early positions are funded by later arrivals.
+
+Everybody's incentive would shift from forecasting query demand towards recruiting
+the next curator, since that is where the reliable money would be. The signal would
+stop being information about demand and start being information about promotion,
+and indexers would be back to having no useful guide.
+
+Burning it means the only way to profit from curation is for the subgraph to
+actually be queried. Every route to a return runs through the forecast being
+correct, which is the only property that makes signal worth reading.
+</Reveal>

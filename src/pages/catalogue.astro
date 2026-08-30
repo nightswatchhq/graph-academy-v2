@@ -1,0 +1,81 @@
+---
+import Base from '../layouts/Base.astro';
+import { COLLECTIONS, entriesInCollection, collectionReadingTime, allEntries } from '../lib/paths';
+import { GLOSSARY } from '../lib/glossary';
+import { params } from '../lib/params';
+
+const shelves = await Promise.all(
+  COLLECTIONS.map(async (c) => ({
+    meta: c,
+    entries: await entriesInCollection(c.hub),
+    minutes: await collectionReadingTime(c.hub),
+  })),
+);
+const total = (await allEntries()).length;
+const minutes = shelves.reduce((n, s) => n + s.minutes, 0);
+---
+<Base
+  title="Catalogue"
+  description="Everything held here, listed in full: every collection, every entry, and what each one covers."
+>
+  <section class="wrap" style="padding-block: clamp(3rem, 7vw, 5rem) 0;">
+    <p class="kicker">The catalogue</p>
+    <h1 class="display">Everything held <em>here</em>.</h1>
+    <p class="section-lede lede-lg">
+      {total} entries across {shelves.length} collections, {Math.round(minutes / 60)} hours end to
+      end, plus {GLOSSARY.length} glossary terms and {Object.keys(params).length} sourced protocol
+      parameters. Read a collection through, or arrive at one entry from a search and leave through a
+      cross-reference. Both are intended.
+    </p>
+  </section>
+
+  <hr class="divider" style="margin-top: clamp(2.6rem, 5vw, 3.6rem);" />
+
+  <section class="wrap" style="padding-block: clamp(2.4rem, 5vw, 3.4rem) 0;">
+    <div class="shelves">
+      {shelves.map((s) => (
+        <div class="shelf">
+          <div class="shelf-head">
+            <span class="shelf-num">{s.entries.length} entries</span>
+            <h2><a href={`/${s.meta.hub}/`} class="shelf-link">{s.meta.title}</a></h2>
+            <span class="shelf-note">{s.meta.blurb}</span>
+          </div>
+          <ol class="entry-list">
+            {s.entries.map((e) => (
+              <li>
+                <a class="entry-row" href={`/${e.id}/`}>
+                  <span class="rtitle">{e.data.title}</span>
+                  <span class="rsummary">{e.data.summary}</span>
+                  <span class="rmeta"><b>{e.data.time_minutes}</b> min</span>
+                </a>
+              </li>
+            ))}
+          </ol>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <section class="wrap">
+    <p class="kicker">Also held</p>
+    <h2 class="display-sm">Three references that cut across every collection.</h2>
+    <div class="cta-row" style="margin-top: 1.8rem;">
+      <a class="cta-card" href="/glossary/">
+        <span class="cta-label">{GLOSSARY.length} terms</span>
+        <span>Glossary</span>
+        <span class="cta-text">
+          Every term the protocol uses, including the obsolete ones, labelled as obsolete so you know
+          what you are reading when you meet them elsewhere.
+        </span>
+      </a>
+      <a class="cta-card" href="/parameters/">
+        <span class="cta-label">{Object.keys(params).length} parameters</span>
+        <span>The registry</span>
+        <span class="cta-text">
+          Every protocol number with its source, a verbatim quote, and the date somebody read it.
+          Including the places where two official pages disagree.
+        </span>
+      </a>
+    </div>
+  </section>
+</Base>

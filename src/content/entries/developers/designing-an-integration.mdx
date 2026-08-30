@@ -1,0 +1,57 @@
+---
+title: "Designing an integration"
+role: developer
+path: "Developer"
+module: "Practicum"
+order: 1
+difficulty: intermediate
+time_minutes: 13
+summary: "Pick the right service for a real requirement, then design a schema before writing any handler."
+protocol_version_verified: "Graph Horizon (2025-12-11)"
+last_verified: 2026-08-30
+verify_before: 2026-11-30
+sources:
+  - name: "Subgraph Studio"
+    url: "https://thegraph.com/studio/"
+  - name: "The Graph Docs: subgraph quick start"
+    url: "https://thegraph.com/docs/en/subgraphs/quick-start/"
+parameters_used: []
+authors: ["@community"]
+license: "CC-BY-4.0"
+---
+
+
+Design before you build. This is the exercise that saves the most time later, and it
+requires no code.
+
+### Design one real integration
+
+- Write down, in one sentence, the question your application needs answered from chain data.
+- Run it through the decision order. Say which service you land on and why the layer above it does not suffice.
+- If the answer is a subgraph: list your entities and, for each, say what its ID is and why that ID is stable across every event that touches it.
+- Write the GraphQL query your most important screen will make. Check that your schema actually supports it.
+- Identify the contracts you will watch. Check whether any is a proxy, and note what happens to your mapping if it is upgraded.
+- Estimate how much history you need and be honest about whether a handler loop can cover it in acceptable time.
+- Budget the curation signal you will post so that somebody actually indexes it.
+- Write down what your application does when a query returns empty, distinguishing no data from not indexed yet from broken.
+
+
+## Then build it
+
+<Warn>
+The commands, flags and scaffolding live in the
+[official quick start](https://thegraph.com/docs/en/subgraphs/quick-start/) and in
+[Subgraph Studio](https://thegraph.com/studio/), where they are maintained. This site
+deliberately does not repeat them, because a static copy of a CLI interface ages into
+a source of confusing errors.
+
+Sync fully in Studio before publishing. Most defects only appear well into history.
+</Warn>
+
+## Where next
+
+- Making sure somebody actually indexes your work: **[curator](/curators/)**.
+- What the operators serving your subgraph are dealing with:
+  **[indexer](/indexers/)**.
+- Getting an endpoint into production and paying for it:
+  **[app builders](/consumers/)**.

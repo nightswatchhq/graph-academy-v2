@@ -41,7 +41,7 @@ that a number is still true.
 
 ## Writing a lesson
 
-Lessons are MDX under `src/content/lessons/<hub>/`. Frontmatter is validated by
+Lessons are MDX under `src/content/entries/<hub>/`. Frontmatter is validated by
 Zod at build time, so a missing or malformed field is a build failure rather than
 a broken page. Copy an existing lesson.
 

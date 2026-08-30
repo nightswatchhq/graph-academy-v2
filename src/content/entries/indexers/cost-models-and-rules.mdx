@@ -1,0 +1,125 @@
+---
+title: "Cost models and indexing rules"
+role: indexer
+path: "Indexer"
+module: "Operations"
+order: 2
+difficulty: advanced
+time_minutes: 12
+summary: "Two configuration surfaces that decide most of your revenue: what you charge for a query, and what you agree to index at all."
+protocol_version_verified: "Graph Horizon (2025-12-11)"
+last_verified: 2026-08-30
+verify_before: 2026-11-30
+sources:
+  - name: "The Graph Docs: indexing overview"
+    url: "https://thegraph.com/docs/en/indexing/overview/"
+  - name: "Agora cost model language"
+    url: "https://github.com/graphprotocol/agora"
+parameters_used: ["innovation_allocation_pct"]
+authors: ["@community"]
+license: "CC-BY-4.0"
+---
+
+Two things you configure decide more of your revenue than your hardware does. Both
+are usually left at defaults, and leaving them at defaults is a decision with a price.
+
+## Indexing rules: what you agree to index.
+
+Rules tell indexer-agent which subgraphs to allocate to and how much. They can be
+global, per network, or per deployment, and the modes are the interesting part:
+
+- **always**: index this, regardless of the economics.
+- **never**: do not, regardless.
+- **rules**: decide by thresholds you set, on signal, on stake, on fee expectations.
+- **offchain**: index it without allocating stake, so you can serve it without
+  earning indexing rewards on it.
+
+Most operators run threshold-based rules with a handful of explicit overrides, and
+that is a sensible shape. The overrides are where your judgement lives.
+
+<Model>
+Rules are a policy you are writing, not a setting you are toggling. "Allocate to
+anything above this much signal" is a strategy, and it is the same strategy everyone
+else running defaults is following, which is worth knowing before you rely on it.
+</Model>
+
+## The competition problem with following signal.
+
+If your rule is "allocate to the highest-signal subgraphs", you will be allocated
+alongside everyone else running that rule. Indexing rewards on a subgraph are shared
+across the stake allocated to it, so crowding reduces what each allocation earns.
+
+The counter-position is not automatically better. Allocating to low-signal subgraphs
+because they are uncrowded is allocating to subgraphs the market thinks are not worth
+much, and it may be right.
+
+The genuine edge is in disagreeing with the market for a reason you can state: a
+subgraph you know is about to carry an application's traffic, a network you have
+specific competence in, a deployment you can serve at lower cost than others.
+Everything else is following.
+
+## Cost models: what you charge.
+
+You publish a cost model written in Agora. It maps query shapes to prices, and it is
+how the gateway knows what serving your answer costs.
+
+The structure is a set of predicates and prices. Match a query shape, apply a price,
+otherwise fall through to a default.
+
+Two ways to lose money here, and they are symmetric:
+
+**Priced too high.** The gateway routes elsewhere. You have capacity, you index
+correctly, and you serve nothing. From your side this is indistinguishable from there
+being no demand, which is why it can persist for months.
+
+**Priced too low.** You serve expensive queries at a loss. A query that walks a large
+result set costs you real resources, and a flat cheap price on everything means the
+worst queries are the ones you attract most.
+
+The second is why a flat model is a poor idea even though it is the easy one. Query
+cost is not uniform, and a single price is either too high for the cheap ones or too
+low for the expensive ones.
+
+<Warn title="A default cost model is a price you did not choose">
+Every indexer running defaults is quoting the same price for the same work. That is
+not equilibrium, it is an absence of pricing.
+
+Look at what you actually serve, find which query shapes are expensive for you
+specifically, and price those differently. This is ordinary business practice and
+almost nobody does it, which is precisely why it is worth doing.
+</Warn>
+
+## How the two interact.
+
+Rules decide where your stake goes. Cost models decide whether queries come to it.
+They fail together in a specific and common way:
+
+You allocate to a high-signal subgraph, so you have stake committed and you are
+earning indexing rewards. Your cost model prices you above the field for that
+subgraph's typical query shape, so you serve none of its queries. You are earning
+issuance and no revenue, on a subgraph you chose because it looked valuable.
+
+Nothing is broken. Half the point of the allocation is simply not happening, and no
+metric you would naturally watch says so.
+
+Compare query volume against your allocated stake, per subgraph. Where the ratio is
+poor, the cost model is the first place to look.
+
+<Reveal question="Before reading on: why not just price everything at zero and collect indexing rewards?">
+Because query fees are not the only thing you lose.
+
+Serving queries at zero means real resource cost with no revenue, and the queries you
+attract at zero are disproportionately the expensive ones, since anyone with a costly
+query will find the cheapest server for it. You have volunteered to specialise in the
+least profitable work available.
+
+There is a stake consequence too. The rebate function ties fee collection to your
+stake ratio, so collecting no fees means that mechanism does nothing for you either
+way, and you have given up the revenue side of the business to keep the issuance
+side.
+
+More broadly it is a bet that issuance will keep funding you, at a moment when
+<Param name="innovation_allocation_pct" /> of issuance has just been redirected
+elsewhere. An indexer with no query revenue is entirely exposed to governance
+decisions about issuance, which is a thin position to hold deliberately.
+</Reveal>

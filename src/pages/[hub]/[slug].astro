@@ -1,22 +1,32 @@
 ---
-import LessonLayout from '../../layouts/LessonLayout.astro';
+import EntryLayout from '../../layouts/EntryLayout.astro';
 import { getCollection, render } from 'astro:content';
-import { pathByHub, neighbours, hubOf } from '../../lib/paths';
+import { collectionOf, neighbours, hubOf, relatedEntries } from '../../lib/paths';
 import * as MDX from '../../components/mdx';
 
 export async function getStaticPaths() {
-  const lessons = await getCollection('lessons', ({ data }) => !data.draft);
-  return lessons.map((lesson) => {
-    const [hub, slug] = lesson.id.split('/');
-    return { params: { hub, slug }, props: { lesson } };
+  const entries = await getCollection('entries', ({ data }) => !data.draft);
+  return entries.map((entry) => {
+    const [hub, slug] = entry.id.split('/');
+    return { params: { hub, slug }, props: { entry } };
   });
 }
 
-const { lesson } = Astro.props;
-const { Content, headings } = await render(lesson);
-const meta = pathByHub(hubOf(lesson));
-const { prev, next, index, total } = await neighbours(lesson);
+const { entry } = Astro.props;
+const { Content, headings } = await render(entry);
+const meta = collectionOf(hubOf(entry));
+const { prev, next, index, total } = await neighbours(entry);
+const related = await relatedEntries(entry);
 ---
-<LessonLayout lesson={lesson} meta={meta} headings={headings} prev={prev} next={next} index={index} total={total}>
+<EntryLayout
+  entry={entry}
+  meta={meta}
+  headings={headings}
+  prev={prev}
+  next={next}
+  index={index}
+  total={total}
+  related={related}
+>
   <Content components={MDX} />
-</LessonLayout>
+</EntryLayout>
