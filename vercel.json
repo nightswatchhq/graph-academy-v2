@@ -9,21 +9,36 @@
     {
       "source": "/fonts/(.*)",
       "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
       ]
     },
     {
       "source": "/_astro/(.*)",
       "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
       ]
     },
     {
       "source": "/(.*)",
       "headers": [
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
-        { "key": "X-Frame-Options", "value": "SAMEORIGIN" },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "SAMEORIGIN"
+        },
         {
           "key": "Content-Security-Policy",
           "value": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-ancestors 'self'; base-uri 'self'; form-action 'self'"
@@ -32,31 +47,150 @@
     }
   ],
   "redirects": [
-    { "source": "/delegators/28-day-delegation-unbonding-period", "destination": "/delegators/undelegation-and-thawing/", "permanent": true },
-    { "source": "/delegators/undelegating-and-withdrawing", "destination": "/delegators/undelegation-and-thawing/", "permanent": true },
-    { "source": "/certificates", "destination": "/paths/", "permanent": true },
-    { "source": "/courses", "destination": "/paths/", "permanent": true },
-    { "source": "/courses/:slug*", "destination": "/paths/", "permanent": true },
-    { "source": "/docs-sub/faq-about-the-graph", "destination": "/start/faq/", "permanent": true },
-    { "source": "/docs-sub/index", "destination": "/paths/", "permanent": true },
-    { "source": "/docs-sub/:slug*", "destination": "/paths/", "permanent": true },
-    { "source": "/ecosystem/ecosystem-participants", "destination": "/ecosystem/", "permanent": true },
-    { "source": "/grants", "destination": "/governance/council-and-foundation/", "permanent": true },
-    { "source": "/blog", "destination": "/changelog/", "permanent": true },
-    { "source": "/blog/:slug*", "destination": "/changelog/", "permanent": true },
-    { "source": "/videos", "destination": "/paths/", "permanent": true },
-    { "source": "/video-guides", "destination": "/paths/", "permanent": true },
-    { "source": "/video-guides/:slug*", "destination": "/paths/", "permanent": true },
-    { "source": "/podcasts", "destination": "/ecosystem/", "permanent": true },
-    { "source": "/podcasts/:slug*", "destination": "/ecosystem/", "permanent": true },
-    { "source": "/events", "destination": "/ecosystem/", "permanent": true },
-    { "source": "/events/:slug*", "destination": "/ecosystem/", "permanent": true },
-    { "source": "/official-docs/:slug*", "destination": "/paths/", "permanent": true },
-    { "source": "/the-graph-ecosystem/organizational-structure/:slug*", "destination": "/governance/council-and-foundation/", "permanent": true },
-    { "source": "/technical-documentation/testnet/:slug*", "destination": "/gone/", "permanent": true },
-    { "source": "/technical-documentation/baremetal/:slug*", "destination": "/gone/", "permanent": true },
-    { "source": "/hosted-service/:slug*", "destination": "/gone/", "permanent": true },
-    { "source": "/contact", "destination": "/contribute/", "permanent": true },
-    { "source": "/office-hours", "destination": "/ecosystem/", "permanent": true }
+    {
+      "source": "/delegators/28-day-delegation-unbonding-period/",
+      "destination": "/delegators/undelegation-and-thawing/",
+      "permanent": true
+    },
+    {
+      "source": "/delegators/undelegating-and-withdrawing/",
+      "destination": "/delegators/undelegation-and-thawing/",
+      "permanent": true
+    },
+    {
+      "source": "/certificates/",
+      "destination": "/paths/",
+      "permanent": true
+    },
+    {
+      "source": "/courses/",
+      "destination": "/paths/",
+      "permanent": true
+    },
+    {
+      "source": "/docs-sub/faq-about-the-graph/",
+      "destination": "/start/faq/",
+      "permanent": true
+    },
+    {
+      "source": "/docs-sub/index/",
+      "destination": "/paths/",
+      "permanent": true
+    },
+    {
+      "source": "/docs-sub/",
+      "destination": "/paths/",
+      "permanent": true
+    },
+    {
+      "source": "/ecosystem/ecosystem-participants/",
+      "destination": "/ecosystem/",
+      "permanent": true
+    },
+    {
+      "source": "/grants/",
+      "destination": "/governance/council-and-foundation/",
+      "permanent": true
+    },
+    {
+      "source": "/blog/",
+      "destination": "/changelog/",
+      "permanent": true
+    },
+    {
+      "source": "/videos/",
+      "destination": "/paths/",
+      "permanent": true
+    },
+    {
+      "source": "/video-guides/",
+      "destination": "/paths/",
+      "permanent": true
+    },
+    {
+      "source": "/podcasts/",
+      "destination": "/ecosystem/",
+      "permanent": true
+    },
+    {
+      "source": "/events/",
+      "destination": "/ecosystem/",
+      "permanent": true
+    },
+    {
+      "source": "/official-docs/",
+      "destination": "/paths/",
+      "permanent": true
+    },
+    {
+      "source": "/contact/",
+      "destination": "/contribute/",
+      "permanent": true
+    },
+    {
+      "source": "/office-hours/",
+      "destination": "/ecosystem/",
+      "permanent": true
+    },
+    {
+      "source": "/courses/:slug+/",
+      "destination": "/paths/",
+      "permanent": true
+    },
+    {
+      "source": "/docs-sub/:slug+/",
+      "destination": "/paths/",
+      "permanent": true
+    },
+    {
+      "source": "/blog/:slug+/",
+      "destination": "/changelog/",
+      "permanent": true
+    },
+    {
+      "source": "/video-guides/:slug+/",
+      "destination": "/paths/",
+      "permanent": true
+    },
+    {
+      "source": "/videos/:slug+/",
+      "destination": "/paths/",
+      "permanent": true
+    },
+    {
+      "source": "/podcasts/:slug+/",
+      "destination": "/ecosystem/",
+      "permanent": true
+    },
+    {
+      "source": "/events/:slug+/",
+      "destination": "/ecosystem/",
+      "permanent": true
+    },
+    {
+      "source": "/official-docs/:slug+/",
+      "destination": "/paths/",
+      "permanent": true
+    },
+    {
+      "source": "/the-graph-ecosystem/organizational-structure/:slug+/",
+      "destination": "/governance/council-and-foundation/",
+      "permanent": true
+    },
+    {
+      "source": "/technical-documentation/testnet/:slug+/",
+      "destination": "/gone/",
+      "permanent": true
+    },
+    {
+      "source": "/technical-documentation/baremetal/:slug+/",
+      "destination": "/gone/",
+      "permanent": true
+    },
+    {
+      "source": "/hosted-service/:slug+/",
+      "destination": "/gone/",
+      "permanent": true
+    }
   ]
 }
