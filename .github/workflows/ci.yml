@@ -26,6 +26,10 @@ jobs:
         run: node scripts/check-links.mjs
       - name: Design system audit
         run: npm run audit:style
+      - name: graph-support citations still exist
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node scripts/check-support-links.mjs
 
   lighthouse:
     # Runs against a local preview of the real build. Blocking on accessibility

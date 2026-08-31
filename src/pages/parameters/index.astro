@@ -82,7 +82,6 @@ const changes = parameterChanges();
   {paramGroups.map((group) => (
     <section class="wrap" style="padding-block: 3.4rem 0;">
       <p class="kicker">{group.title}</p>
-      <div style="overflow-x: auto;">
       <div class="ptable-scroll">
       <table class="ptable" style="min-width: 34rem;">
         <thead>
@@ -115,7 +114,6 @@ const changes = parameterChanges();
           })}
         </tbody>
       </table>
-      </div>
       </div>
       {group.keys.map((key) => {
         const p = params[key];

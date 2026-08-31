@@ -14,6 +14,36 @@ that a number is still true.
 3. **Fix something wrong.** With a source.
 4. **Write a lesson.** Useful, and the least urgent of the four.
 
+## The other half of this, in graph-support
+
+[graph-support](https://github.com/nightswatchhq/graph-support) is where people
+turn up with something broken and the Night's Watch works out why, in public,
+closing every issue with a stated outcome. This site and that repository are one
+loop, and each is worth less without the other.
+
+An entry here explains why a failure mode exists. A graph-support issue is one
+occasion it happened to somebody, with the deployment ID, the commands run and
+the answer. `/diagnose/` carries both: the causes, and the threads where they
+actually bit.
+
+The loop runs both ways.
+
+- **Coming from an issue.** When a graph-support issue closes on a failure mode
+  `src/lib/diagnostics.ts` does not carry, add it, and cite the issue in
+  `worked`. [Their TRIAGE.md](https://github.com/nightswatchhq/graph-support/blob/main/TRIAGE.md)
+  makes this part of closing rather than a favour.
+- **Coming from here.** If you hit something the symptom index misses, file it
+  [there](https://github.com/nightswatchhq/graph-support/issues/new?template=06-symptom.yml)
+  rather than here. You get triaged, and if the diagnosis holds the symptom lands
+  in the index with your issue attached.
+
+Two rules for a `worked` citation, both learned the hard way. **Read the thread
+before attaching it**, because a title that sounds right is not evidence and an
+index that cites the wrong thread is worse than one that cites nothing. And what
+the index needs, which a good issue often buries, is **the check**: the command,
+query or comparison that tells this cause apart from the others that look
+identical. A cause without a check is a guess with a confident tone.
+
 ## House rules
 
 - **Never hard-code a protocol number.** Add it to `data/parameters.toml` with a
@@ -102,17 +132,42 @@ the lesson's `reviewers` field, and the site renders it in the verification stam
 ## Before opening a pull request
 
 ```bash
-npm run params        # registry integrity and parameter usage
-npm run build         # the site
-node scripts/check-links.mjs
-npm run audit:style   # design system conformance
-npm run contrast      # colour contrast, blocking
-npm run staleness     # freshness report
+npm run verify
 ```
 
-All of these run in CI. `contrast` blocks a merge: an accessibility regression is
-not a matter of taste. `staleness` is advisory on a pull request and strict on the
-nightly run, so a contributor is not punished for somebody else's page going off.
+That is the whole list. It runs every check CI runs, in CI's order, serving a
+local preview for the two that need a browser, and it prints `Safe to push` or
+names what failed. Run one on its own with `npm run verify params`, or
+`npm run verify mobile chain`.
+
+It exists because two commits once went to production over a red CI. Nothing was
+missing that day: the mobile check caught the regression on the exact commit that
+introduced it. The full list simply lived only in `ci.yml` and had to be
+reassembled by hand before every push, so it got reassembled wrong.
+
+**Read the run afterwards anyway.** `gh run watch` takes a few seconds and is the
+difference between finding out from CI and finding out from a reader.
+
+What the checks are for, since the names are terse:
+
+| check | what it protects |
+| --- | --- |
+| `params` | every number comes from the registry, with a source and a date |
+| `chain` | the deployed contracts still say what the registry claims |
+| `citations` | every graph-support issue the symptom index cites still exists |
+| `links` | no broken internal link or anchor |
+| `contrast` | colour contrast in both themes. Blocking, and not a matter of taste |
+| `mobile` | no horizontal overflow, nothing clipped, tap targets big enough |
+| `lighthouse` | accessibility and best practices, against a local preview |
+| `staleness` | what is past its re-verification date |
+
+`staleness` is advisory on a pull request and strict on the nightly run, so a
+contributor is not punished for somebody else's page going off.
+
+Point `lighthouse` and `mobile` at the local preview, which `npm run verify`
+does for you. Aimed at production they trip Vercel's automatic bot mitigation
+after a hundred or so requests, and a challenged page is not a low score, it is
+no measurement at all.
 
 ## Design
 

@@ -149,12 +149,16 @@ header.site {
 
 /* the outbound marker. every link that leaves the Academy carries it. */
 .out::after {
-  content: '\2197';
+  content: '\00a0\2197';
   font-family: var(--mono);
   font-size: 0.78em;
   color: var(--rust);
-  margin-left: 0.22em;
   vertical-align: baseline;
+  /* A no-break space rather than a margin, so the marker travels with the last
+     word. With a margin it wraps alone onto the next line and right-aligns
+     itself, which reads as a stray character rather than as a marker on a
+     link. Visible at 390px in the verify stamp's source list. */
+  white-space: nowrap;
 }
 
 .section-head { margin-bottom: 44px; max-width: 720px; }

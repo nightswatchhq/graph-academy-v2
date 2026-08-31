@@ -39,6 +39,7 @@ const STEPS = [
   { name: 'types', cmd: ['npx', 'astro', 'check'] },
   { name: 'staleness', cmd: ['node', 'scripts/staleness.mjs'] },
   { name: 'chain', cmd: ['node', 'scripts/reconcile-rpc.mjs'] },
+  { name: 'citations', cmd: ['node', 'scripts/check-support-links.mjs'] },
   { name: 'lighthouse', cmd: ['node', 'scripts/lighthouse-check.mjs'], served: true },
   { name: 'mobile', cmd: ['node', 'scripts/mobile-check.mjs'], served: true },
 ];

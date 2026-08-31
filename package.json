@@ -21,7 +21,8 @@
     "links": "node scripts/check-links.mjs",
     "links:external": "node scripts/check-links.mjs --external",
     "verify": "node scripts/check-all.mjs",
-    "chain": "node scripts/reconcile-rpc.mjs"
+    "chain": "node scripts/reconcile-rpc.mjs",
+    "citations": "node scripts/check-support-links.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.122.0",
