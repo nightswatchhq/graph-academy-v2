@@ -1,0 +1,193 @@
+---
+title: "Project Catalyst: the eight workstreams"
+role: governance
+path: "Governance"
+module: "The money"
+order: 3
+difficulty: intermediate
+time_minutes: 14
+prerequisites: ["The new mandate, and what the issuance buys"]
+summary: "The work the redirected issuance is meant to fund, item by item, and the pattern in what is actually blocking each one."
+protocol_version_verified: "Graph Horizon (2025-12-11)"
+last_verified: 2026-08-31
+verify_before: 2026-11-30
+sources:
+  - name: "A New Mandate for The Graph Foundation"
+    url: "https://thegraph.com/blog/new-foundation-mandate/"
+  - name: "The Graph Roadmap"
+    url: "https://thegraph.com/roadmap/"
+  - name: "On the Catalyst roadmap"
+    url: "https://forum.thegraph.com/t/on-the-catalyst-roadmap/7037"
+  - name: "GIP-0087 and GIP-0088: on-chain indexing agreements and issuance allocation"
+    url: "https://forum.thegraph.com/t/on-chain-indexing-agreements-and-issuance-allocation-gip-0087-gip-0088/6869"
+parameters_used: ["innovation_allocation_pct"]
+see_also:
+  - "/governance/the-new-mandate/"
+  - "/governance/tokenomics/"
+  - "/ecosystem/horizon-data-services/"
+authors: ["@community"]
+license: "CC-BY-4.0"
+---
+
+Project Catalyst is the name given to the programme of work the Foundation set out
+after [its change of mandate](/governance/the-new-mandate/), and it is what
+<Param name="innovation_allocation_pct" /> of protocol issuance is meant to fund. It
+is usually described as eight workstreams.
+
+This entry takes each in turn: what it is in protocol terms, and what is actually
+standing in the way. That second question turns out to be the interesting one.
+
+<Note title="Where this list comes from">
+The eight items were presented on an Indexer Office Hours call and recorded afterwards
+in community write-ups. As of 2026-08-31 the name and the list appear in no Foundation
+publication: not in *A New Mandate for The Graph Foundation*, which names five
+priorities in different words, and not on [the roadmap page](https://thegraph.com/roadmap/),
+which is organised by product across quarters. The wording below is therefore
+community-transcribed, and [the mandate entry](/governance/the-new-mandate/) argues
+why that matters. Treat the items as accurate in substance and unofficial in phrasing.
+</Note>
+
+## 1. Make Subgraph Studio fully network-powered
+
+Studio subgraphs are today served by the upgrade indexer, a role Edge & Node operates
+so that a newly published subgraph has somebody serving it. The workstream is to
+retire that dependency by making ordinary network indexers earn for serving Studio
+subgraphs.
+
+The mechanism is **Direct Indexer Payments**, GIP-0081: an agreement between a payer
+and an indexer to index a specific deployment for a recurring fee, settled on chain,
+rather than the indexer being paid out of issuance for allocating to whatever carries
+signal. GIP-0087 and GIP-0088 bring those agreements on chain and route issuance to
+them.
+
+**What is in the way** is not the agreements, which exist. It is that the issuance
+share directed to them is currently zero, and moving it is a governance decision.
+
+## 2. Onboard new gateway operators
+
+Almost all query traffic reaches indexers through one gateway. That is a single point
+of policy, not just of failure: the gateway decides which indexer serves a query, and
+[that policy belongs to whoever runs it](/ecosystem/gateways/) rather than to the
+protocol. More gateways is the structural fix.
+
+**What is in the way** is a coordination problem rather than software. A gateway pays
+indexers with GraphTally receipts, and an indexer only accepts receipts from a sender
+it has configured itself to trust. So a new gateway operator must persuade indexers,
+one at a time, to add them. Nobody outside that social process can solve it, and it is
+the reason this item stalls even where the software works.
+
+## 3. Memory for AI
+
+Persistent, user-owned memory for agents, reachable over MCP and served by the
+network. The pitch is that an agent's state is exactly the kind of thing you would
+rather not hand to a single provider.
+
+**What is in the way** is design rather than plumbing. Encryption that is genuinely
+user-owned fights semantic search: if the service cannot read the data, it cannot
+index it for meaning, and the workarounds trade away one property or the other.
+
+## 4. Finish the Substreams data service
+
+Substreams is [a lane of its own](/developers/substreams/) and is not currently a
+Horizon data service, which means it does not settle through the protocol's payment
+machinery. Making it one puts Substreams packages behind the same receipts, escrow and
+provisioned stake as everything else.
+
+**What is in the way** is the ordinary cost of shipping a data service that handles
+money: an external audit, and at least one provider willing to run it.
+
+## 5. The RPC data service
+
+Plain JSON-RPC access, metered and settled through the protocol. It is the least
+Graph-shaped item on the list and arguably the largest market: every application needs
+RPC, and almost none of it is paid for through anything resembling this.
+
+**What is in the way** is the same pair as Substreams, an audit and an operator, and
+one thing more. RPC is a commodity with entrenched incumbents and thin margins, so the
+question is not whether it can be built but whether anyone will serve it here.
+
+## 6. A multi-product Studio experience
+
+One surface for subgraphs, Substreams, the Token API and whatever comes next, rather
+than a product per thing.
+
+**What is in the way** is mostly not engineering. Subscription billing needs a legal
+entity that can invoice and be invoiced, and running managed indexing pipelines is an
+operating commitment rather than a feature.
+
+## 7. Chain integrations data service
+
+Turning chain integration into a metered service, so that the work of supporting a new
+chain is paid for through the protocol rather than absorbed.
+
+**What is in the way** is honestly stated in its own risk note as a business-model and
+governance problem rather than an engineering one. Somebody has to decide what an
+integration is worth and who pays, and no amount of contract code answers that.
+
+## 8. Institutional audit layer
+
+Selective disclosure over signed receipts: letting a counterparty verify that a
+particular transfer happened without publishing the whole history around it. The
+target is institutions with regulatory reporting duties.
+
+**What is in the way** is entirely institutional. SOC 2, a design partner willing to
+be first, and a legal entity that can hold attestation authority and be sued if the
+attestation is wrong.
+
+## The pattern worth noticing
+
+Read the eight blockers together rather than one at a time.
+
+<Flow steps={["governance decision", "social coordination", "audit and an operator", "a legal entity"]} sep="·" />
+
+Barely any of them is "the code does not exist yet". They are a governance vote that
+has not happened, indexers who have not been persuaded, audits nobody has paid for,
+providers who have not volunteered, a value-capture policy nobody has set, and
+company formation. Even Memory for AI, the most research-shaped item, is blocked on a
+design tradeoff rather than on implementation effort.
+
+<Model>
+When a roadmap's obstacles are mostly not engineering, more engineers is not the
+lever, and a plan that reads as a build schedule is describing the easy half. Ask of
+any roadmap item: if the software were finished tomorrow, would this ship? Where the
+answer is no, the real project is the other thing.
+</Model>
+
+That observation cuts in more than one direction, and it is worth being even-handed
+about. It is a caution against assuming issuance converts straight into delivery. It
+is equally a caution against assuming that working software from any quarter converts
+straight into adoption: a data service nobody provisions and a gateway no indexer
+trusts are both complete and both inert.
+
+## Independent assessments
+
+There is at least one public attempt to score how much of this the community has
+already built, published by
+[The Night's Watch](https://forum.thegraph.com/t/on-the-catalyst-roadmap/7037) on
+2026-08-28 with an offer to collaborate, alongside repositories that are public and
+MIT or Apache licensed.
+
+It is worth reading and worth reading for what it is: an argument by a party with an
+interest in the answer, about their own software, scored by a method they chose and
+describe as editorial. The repositories are checkable, which is more than most claims
+in this ecosystem offer. The scoring is a position. This site does not carry either
+side's numbers, because a coverage percentage is a judgement dressed as a
+measurement, and the same test applies to a Foundation progress report.
+
+<Reveal question="Before reading on: if the code mostly exists, why is so little of it in production?">
+Because a data service is not a program, it is a market with a program in it.
+
+Every item on this list needs at least two parties who do not report to each other.
+A gateway needs indexers who trust its receipts. A data service needs providers
+willing to provision stake against it and consumers willing to pay. An audit layer
+needs an institution prepared to be the first to rely on it. None of those are things
+the author of the software can supply, and all of them are slower than writing the
+software was.
+
+This is the recurring shape of the whole protocol rather than a quirk of this
+roadmap. Indexing rewards exist because somebody had to be paid to show up before
+there was demand. Curation exists because somebody had to signal what was worth
+serving before queries proved it. The protocol is largely a set of answers to
+"how do you get the second party to arrive", and Catalyst is the current instance of
+that question rather than an exception to it.
+</Reveal>
