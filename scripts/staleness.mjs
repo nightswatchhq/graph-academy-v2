@@ -44,7 +44,29 @@ if (staleParams.length === 0) {
 console.log(`${c.dim}note${c.reset}  ${disputed.length} parameters where official sources contradict each other, recorded not hidden`);
 for (const [k] of disputed) console.log(`      ${k}`);
 
-const failures = overdue.length + staleParams.length;
+// The share card quotes these same three numbers and is a static PNG, so it
+// goes quietly wrong every time the library grows. It had been claiming 44
+// lessons and 3 contradictions against a real 61 and 5.
+let cardDrift = [];
+try {
+  const { readFileSync } = await import('node:fs');
+  const card = JSON.parse(readFileSync(join(ROOT, 'tools/og/rendered.json'), 'utf8'));
+  const live = { entries: entries.length, stale: overdue.length + staleParams.length, conflicts: disputed.length };
+  for (const k of ['entries', 'stale', 'conflicts']) {
+    if (card[k] !== live[k]) cardDrift.push(`${k}: card says ${card[k]}, actual ${live[k]}`);
+  }
+  if (cardDrift.length) {
+    console.log(
+      `\n${c.yellow}card${c.reset}  public/og.png is out of date (rendered ${card.rendered}). ` +
+        `Run npm run og.\n      ${cardDrift.join('\n      ')}`,
+    );
+  }
+} catch {
+  console.log(`\n${c.yellow}card${c.reset}  tools/og/rendered.json is missing. Run npm run og.`);
+  cardDrift.push('no record of what the share card claims');
+}
+
+const failures = overdue.length + staleParams.length + (strict ? cardDrift.length : 0);
 if (failures > 0 && strict) {
   console.log(`\n${c.red}fail${c.reset}  ${failures} items need re-verification`);
   process.exit(1);

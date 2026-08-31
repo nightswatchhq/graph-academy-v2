@@ -1,5 +1,12 @@
 <!doctype html>
-<html lang="en" data-theme-note="the card is always dark: a share preview sits on someone else's timeline, not on our page">
+<!--
+  Placeholders below are substituted by scripts/make-og.mjs from the same data
+  the site and the staleness report read. They were hard-coded once and went
+  stale by seventeen entries and two contradictions without anybody noticing,
+  which is the failure this whole site exists to argue against. Do not put a
+  literal number in here.
+-->
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <!-- The palette comes from the mandated token file. No colour is defined here. -->
@@ -17,6 +24,9 @@
   }
   html, body { margin: 0; padding: 0; }
   body { width: 1200px; height: 630px; background: var(--bg); overflow: hidden; }
+  /* The share card is now light, matching the site's default theme rather
+     than contradicting it. A reader who follows the link should arrive
+     somewhere that looks like where they came from. */
 
   .card {
     position: absolute; inset: 20px;
@@ -87,7 +97,7 @@
     <div class="strip">
       <span class="dots"><i></i><i></i><i></i></span>
       <span><span class="prompt">$</span> <span class="cmd">npm run staleness</span></span>
-      <span class="out">44 lessons &middot; 0 stale &middot; 3 contradictions recorded</span>
+      <span class="out">{{ENTRIES}} lessons &middot; {{STALE}} stale &middot; {{CONFLICTS}} contradictions recorded</span>
     </div>
   </div>
 </body>
