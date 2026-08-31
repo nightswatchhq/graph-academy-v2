@@ -1,0 +1,166 @@
+---
+title: "The new mandate, and what the issuance buys"
+role: governance
+path: "Governance"
+module: "The money"
+order: 2
+difficulty: intermediate
+time_minutes: 11
+prerequisites: ["Tokenomics: issuance, burns, and where it just moved"]
+summary: "A fifth of protocol issuance is being redirected to fund a change in what the Foundation does. What was published, what was only presented, and how to tell."
+protocol_version_verified: "Graph Horizon (2025-12-11)"
+last_verified: 2026-08-31
+verify_before: 2026-11-30
+sources:
+  - name: "A New Mandate for The Graph Foundation"
+    url: "https://thegraph.com/blog/new-foundation-mandate/"
+  - name: "The Graph Roadmap"
+    url: "https://thegraph.com/roadmap/"
+  - name: "Council approval of GIP-0089, the Innovation Allocation"
+    url: "https://forum.thegraph.com/t/the-graph-council-has-approved-gip-0089-the-innovation-allocation/7035"
+  - name: "On the Catalyst roadmap"
+    url: "https://forum.thegraph.com/t/on-the-catalyst-roadmap/7037"
+parameters_used: ["innovation_allocation_pct", "subgraph_service_issuance_per_block"]
+see_also:
+  - "/governance/tokenomics/"
+  - "/governance/council-and-foundation/"
+  - "/governance/gips-and-ggps/"
+authors: ["@community"]
+license: "CC-BY-4.0"
+---
+
+[Tokenomics](/governance/tokenomics/) records that
+<Param name="innovation_allocation_pct" /> of protocol issuance is being redirected
+away from indexing rewards. It does not say what the money is for. This entry does,
+and it is a good exercise in a skill this ecosystem demands constantly: telling what
+an organisation has published from what it has merely said.
+
+## What changed
+
+On 2026-08-19 the Foundation published *A New Mandate for The Graph Foundation*,
+updated on 2026-08-25. The change it describes is one of role rather than degree.
+Instead of "coordinating and underwriting third-party roadmaps from a distance", the
+post argues the Foundation "must take direct responsibility for executing The Graph's
+long-term vision", which requires "organizational evolution, in-house technical
+capabilities, and dedicated resourcing".
+
+Read that as an org chart change with a budget attached, because that is what it is.
+The Foundation has historically held and deployed money while others built. It is now
+proposing to build.
+
+The published priorities are five:
+
+<Flow steps={["Operational continuity", "Product acceleration", "Data service providers", "Chain coverage", "Verticals"]} sep="·" />
+
+- **Operational continuity**, meaning in-house technical capacity for core infrastructure.
+- **Product acceleration**, meaning Subgraph Studio becoming a unified platform.
+- **Enabling data service providers**, meaning recruiting people to run them.
+- **Chain coverage and integration**, taken into direct ownership.
+- **Vertical priorities**: DeFi, institutional and enterprise, and AI and agentic applications.
+
+## What it costs, and who pays
+
+The mandate post is unusually direct about the funding, and the sentence is worth
+having in front of you: "An active governance proposal from the Foundation seeks to
+redirect 20% of protocol issuance to support these expanded responsibilities."
+
+That proposal is GIP-0089, and it is the same <Param name="innovation_allocation_pct" />
+that reduces what reaches indexers, and through them delegators. So the mandate and
+the reward cut are one decision, not two, and anyone forming a view on either should
+be looking at both.
+
+Two things to keep straight, because they are routinely merged.
+
+**Approved is not flowing.** The Council approved GIP-0089 on 2026-08-26. At the last
+contract reading the Rewards Manager was still receiving
+<Param name="subgraph_service_issuance_per_block" />, with the second allocator target
+holding nothing. [The tokenomics entry](/governance/tokenomics/) carries the calls.
+
+**A mandate is not a specification.** GIP-0089 moves money. It does not bind anyone to
+deliver a particular thing with it, and there is no clause in it that returns the
+issuance if the work does not land. That is not an accusation, it is the shape of the
+instrument: the accountability here is reputational and governmental rather than
+mechanical.
+
+## The roadmap most people are discussing is not the one that was published
+
+Here is the part worth slowing down for.
+
+The programme is widely called **Project Catalyst**, and is usually described as eight
+numbered workstreams. Search the Foundation's own publications for that name and you
+will not find it.
+
+<Disputed title="A name and a list that no published source carries">
+As of 2026-08-31, "Project Catalyst" appears in neither *A New Mandate for The Graph
+Foundation* nor the [public roadmap](https://thegraph.com/roadmap/). The mandate post
+names five priorities and three verticals, using different words from the eight items
+usually attributed to Catalyst. The roadmap page is organised by product (Amp, Tycho,
+Substreams, JSON-RPC, Subgraphs) across quarters, and does not use the name either.
+
+The eight-item list comes from a walkthrough given on an Indexer Office Hours call,
+recorded afterwards in community write-ups. A call is a real event and the items are
+probably accurate. But a list that lives only in a recording and in other people's
+notes cannot be cited, cannot be diffed when it changes, and cannot be held to.
+
+If you have found a Foundation page that publishes the name and the eight items,
+that resolves this and the entry should be corrected. It would be a good
+[contribution](/contribute/).
+</Disputed>
+
+This is not a small distinction for anyone trying to follow the programme. Progress
+against a published roadmap is checkable by anyone. Progress against a list somebody
+transcribed from a call is checkable only by people who were on the call, and quietly
+becomes whatever the next call says it is.
+
+<Model>
+When a programme's scope lives in a meeting rather than a document, notice it and say
+so. It is rarely deception and it is always a governance weakness: you cannot audit,
+diff or dispute something that was never written down. The remedy is boring and
+effective, which is to ask for the page.
+</Model>
+
+## Where independent assessments sit
+
+There is at least one public attempt to score how much of the Catalyst roadmap
+existing community software already covers, published by
+[The Night's Watch](https://forum.thegraph.com/t/on-the-catalyst-roadmap/7037) on
+2026-08-28 alongside an offer to collaborate.
+
+Read it, and read it knowing what it is. It is an argument made by a party with an
+interest in the answer, about their own repositories, using a scoring method they
+chose and describe as editorial. That does not make it wrong, and the underlying
+repositories are public and MIT or Apache licensed so the claims are checkable. It
+does mean it is a position rather than a measurement, and this site is not the place
+that decides which. The same test applies to any coverage claim, including one from
+the Foundation.
+
+The mandate change is also being argued about in the community on its merits,
+including whether the situation that produced it was avoidable. That discussion is
+[on the forum](https://forum.thegraph.com/t/on-the-catalyst-roadmap/7037) and is not
+something this entry adjudicates.
+
+## What to watch, concretely
+
+- **Whether the redirect activates**, which is a contract reading rather than an
+  announcement. [Tokenomics](/governance/tokenomics/) carries the calls.
+- **Whether the eight items get published** under a name and a URL. That is the
+  single cheapest improvement available to this programme.
+- **Whether delivery is reported against them**, on a cadence, in a place with a date
+  on it.
+
+<Reveal question="Before reading on: why does it matter whether the roadmap is a page rather than a call?">
+Because issuance is now attached to it.
+
+While the Foundation was underwriting other people's roadmaps, its own plans were its
+own business and a call was a perfectly reasonable place for them. GIP-0089 changes
+that relationship: a fifth of protocol issuance funds this work, which means every
+indexer and every delegator is paying for it whether they follow it or not.
+
+Money from a governance vote comes with an expectation of legibility that money from
+a treasury does not. Not a contractual one, since the GIP contains no such clause,
+but a practical one: the people funding it should be able to read what it is, notice
+when it changes, and form a view without having attended anything.
+
+The fix is cheap, which is the frustrating part. A page with the eight items, a date,
+and a status against each would cost an afternoon and would close the whole question.
+</Reveal>
