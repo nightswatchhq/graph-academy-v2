@@ -23,6 +23,9 @@ import lighthouse from 'lighthouse';
 import * as chromeLauncher from 'chrome-launcher';
 import { c } from './lib.mjs';
 
+// Point this at a local preview, not production. Vercel's automatic system
+// mitigations challenge a burst of automated page loads from one IP, and a
+// challenged request is an ERRORED_DOCUMENT_REQUEST rather than a low score.
 const BASE = process.env.LH_BASE ?? 'http://localhost:4321';
 const PAGES = [
   ['home', '/'],
@@ -39,8 +42,21 @@ const chrome = await chromeLauncher.launch({
 });
 
 const failures = [];
+let notAudited = 0;
 for (const [label, path] of PAGES) {
   const res = await lighthouse(`${BASE}${path}`, { port: chrome.port, output: 'json', logLevel: 'error' });
+
+  // A run that could not load the page returns null scores, and `?? 0` turned
+  // that into "accessibility 0", which reads as a catastrophic regression and
+  // is not a measurement at all. This is the site's own recurring lesson:
+  // absent data must not render as a number. Say the run failed instead.
+  if (res.lhr.runtimeError) {
+    notAudited += 1;
+    failures.push(`${label} (${path}): NOT AUDITED, ${res.lhr.runtimeError.code}`);
+    console.log(`  ${label.padEnd(14)} ${c.yellow}not audited${c.reset}  ${res.lhr.runtimeError.code}`);
+    continue;
+  }
+
   const cats = res.lhr.categories;
   const scores = Object.fromEntries(
     Object.entries(cats).map(([k, v]) => [k, Math.round((v.score ?? 0) * 100)]),
@@ -69,7 +85,8 @@ await chrome.kill();
 for (const f of failures) console.log(`${c.red}fail${c.reset}  ${f}`);
 console.log(
   `\n${failures.length === 0 ? c.green + 'ok' + c.reset : c.red + 'fail' + c.reset}` +
-    `    ${PAGES.length} pages audited. accessibility and best-practices gated; ` +
-      `performance and seo reported.`,
+    `    ${PAGES.length - notAudited} of ${PAGES.length} pages audited` +
+      `${notAudited ? `, ${notAudited} could not be loaded` : ''}. ` +
+      `accessibility and best-practices gated; performance and seo reported.`,
 );
 process.exit(failures.length > 0 ? 1 : 0);
