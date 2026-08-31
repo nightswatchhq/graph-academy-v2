@@ -11,6 +11,8 @@ protocol_version_verified: "Graph Horizon (2025-12-11)"
 last_verified: 2026-08-30
 verify_before: 2026-11-30
 sources:
+  - name: "graph-support #17: how the gateway actually routes queries"
+    url: "https://github.com/nightswatchhq/graph-support/issues/17"
   - name: "edgeandnode/gateway"
     url: "https://github.com/edgeandnode/gateway"
   - name: "gib, Gateway-in-a-Box"
@@ -70,6 +72,41 @@ one, which is the entire argument.
 the selection library with runtime-configurable weights. Worth knowing about because it
 makes explicit something the reference implementation keeps implicit: *how* a gateway
 ranks indexers is a policy, and policies can differ.
+
+## How it picks, and what removes you
+
+Selection is the gateway's most consequential behaviour and the least documented. What
+follows was measured against the gateway's own `candidate-selection` crate and
+`client_query.rs`, read at v27.6.0 on 2026-08-12, so treat it as the shape of the
+policy rather than a promise: it belongs to the gateway operator and can change without
+a GIP.
+
+**It picks up to three, and pays all three.** The query fans out concurrently and each
+selected indexer gets its own receipt. Selection is a deterministic greedy argmax on
+marginal score divided by fee. No randomness, no fairness term, no exploration.
+
+**Two things remove you from the set outright.** Being roughly ten seconds or more
+further behind chainhead than the incumbent, and carrying too little total stake, where
+50,000 to 100,000 GRT was dropped and 200,000 and above was selected. Note that is your
+*total* stake, not what you allocated to that subgraph.
+
+**Success rate does not remove you.** It reorders you, hard, since it is raised to the
+seventh power, but even a run down at 0.80 stays in the set. This is the correction to
+the theory everybody reaches for first.
+
+**Fee is a straight divisor**, which makes it the strongest single lever anybody has. A
+measurably worse indexer takes first pick from a better one once its fee halves.
+
+<Model>
+The lever most operators reach for is performance, and the two that actually decide
+query share are coverage and price. A gateway can only route you a query for a
+deployment you are allocated to, so the number of deployments you cover bounds your
+volume before any scoring happens. In one worked comparison an 8.4x gap in allocations
+produced a 7.3x gap in query volume, and no scoring effect was needed to explain it.
+</Model>
+
+The estimator also does not trap newcomers: an untested indexer starts at the optimistic
+cap, and both counters decay, so an old bad week fades rather than condemning you.
 
 ## What a second gateway actually buys
 

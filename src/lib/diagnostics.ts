@@ -386,6 +386,29 @@ export const SYMPTOMS: Symptom[] = [
     worked: [{ n: 6, was: 'both CIDs resolved by hand while one entity stayed null' }],
   },
   {
+    id: 'cost-polled-no-queries',
+    symptom: 'The gateway polls my cost endpoint every few seconds and sends me no queries',
+    who: 'indexer',
+    causes: [
+      {
+        cause: 'You are not allocated to the deployments carrying the demand',
+        check: 'The polling is the good news: it proves you are discovered and reachable, so the fault is not the network path. But cost is fetched globally while queries route per deployment, and a gateway can only send you a query for something you are allocated to. Count allocations on deployments with real traffic, not allocations.',
+        more: '/indexers/allocations-and-pois/',
+      },
+      {
+        cause: 'Your price loses the argmax',
+        check: 'Selection is score divided by fee, so fee is a straight divisor and the strongest single lever. A measurably worse indexer takes first pick once its fee halves. Compare your model against what the deployment actually pays.',
+        more: '/indexers/cost-models-and-rules/',
+      },
+      {
+        cause: 'You are dropped from the candidate set before scoring',
+        check: 'Two things remove you outright: roughly ten seconds or more further behind chainhead than the incumbent, and too little total stake. Neither shows up as an error and both look exactly like no demand.',
+        more: '/ecosystem/gateways/',
+      },
+    ],
+    worked: [{ n: 17, was: 'selection measured against the compiled gateway crate, with the thresholds' }],
+  },
+  {
     id: 'still-unqualified',
     symptom: 'I fixed the problem days ago and the oracle still says Unqualified',
     who: 'indexer',
