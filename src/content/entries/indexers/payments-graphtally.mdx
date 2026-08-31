@@ -96,6 +96,30 @@ an order of magnitude.
 Failure here is quiet, which is what makes it dangerous. Queries keep being served
 and the money simply does not arrive.
 
+There is one exception worth taking first, because it fails in the opposite direction
+and is routinely misdiagnosed.
+
+**Receipts rejected at validation.** A receipt is checked before the query is served,
+so a receipt your indexer-service will not accept is a query it never answers. Nothing
+reaches graph-node, your query metrics stay flat, and from outside it is
+indistinguishable from the gateway having stopped sending you work. Under Horizon a
+receipt names the data service it settles under, and `[blockchain]` in the
+indexer-service config carries `subgraph_service_address` and
+`receipts_verifier_address_v2` for exactly that check. Neither existed before Horizon,
+so a config carried across from the old stack is missing them rather than wrong.
+
+<Warn title="A rejected receipt is a failed query, and it costs more than the fee">
+The gateway records a non-200, which feeds indexer selection and means the query cannot
+count toward [rewards eligibility](/indexers/rewards-eligibility/). So an indexer in
+this state loses the query fee, loses standing with the gateway, and accrues no
+qualifying days, while every dashboard it owns shows a quiet network rather than a
+fault.
+
+The indexer-service log is the only place it is visible. Alert on rejected receipts
+directly, not on served-query volume, because the thing you want to notice is precisely
+the thing that stops served-query volume from existing.
+</Warn>
+
 - **tap-agent is not running or has crashed.** Receipts accumulate and never
   aggregate. Everything looks healthy from the query side.
 - **The aggregator endpoint is unreachable.** RAVs cannot be signed, so nothing can

@@ -386,13 +386,35 @@ export const SYMPTOMS: Symptom[] = [
     worked: [{ n: 6, was: 'both CIDs resolved by hand while one entity stayed null' }],
   },
   {
+    id: 'receipt-data-service-rejected',
+    symptom: 'Every query is rejected with "Invalid data_service: ... is not allowed for this indexer"',
+    who: 'indexer',
+    causes: [
+      {
+        cause: 'indexer-service does not recognise the data service paying you',
+        check: 'A Horizon receipt names the data service it settles under. If the address in the error is 0xb2Bb92d0DE618878E438b55D5846cfecD9301105 on Arbitrum One, that is the SubgraphService proxy, which is the data service for subgraph queries: the gateway is paying you correctly and your side does not recognise the payer. Set subgraph_service_address under [blockchain] in the indexer-service config, and check receipts_verifier_address_v2 beside it. Both are required Horizon addresses.',
+        more: '/indexers/payments-graphtally/',
+      },
+      {
+        cause: 'The config predates the Horizon migration',
+        check: 'The two addresses above did not exist before Horizon, so a config carried across from the pre-Horizon stack is missing them rather than wrong about them. Check whether they are absent rather than incorrect.',
+        more: '/indexers/horizon-provisions/',
+      },
+    ],
+  },
+  {
     id: 'cost-polled-no-queries',
     symptom: 'The gateway polls my cost endpoint every few seconds and sends me no queries',
     who: 'indexer',
     causes: [
       {
+        cause: 'The queries are arriving and your indexer-service is rejecting them',
+        check: 'Check this first, because it looks identical to never being selected and it is the one cause where the gateway is already doing its job. Receipt validation runs before the query reaches graph-node, so a rejected receipt is loud in the indexer-service log and invisible in every metric you own. Look for IndexerServiceError there before theorising about selection.',
+        more: '/indexers/payments-graphtally/',
+      },
+      {
         cause: 'You are not allocated to the deployments carrying the demand',
-        check: 'The polling is the good news: it proves you are discovered and reachable, so the fault is not the network path. But cost is fetched globally while queries route per deployment, and a gateway can only send you a query for something you are allocated to. Count allocations on deployments with real traffic, not allocations.',
+        check: 'The polling proves you are discovered and reachable, so the fault is not the network path. But cost is fetched globally while queries route per deployment, and a gateway can only send you a query for something you are allocated to. Count allocations on deployments with real traffic, not allocations.',
         more: '/indexers/allocations-and-pois/',
       },
       {
@@ -419,9 +441,14 @@ export const SYMPTOMS: Symptom[] = [
         more: '/indexers/rewards-eligibility/',
       },
       {
-        cause: 'The gateway has not resumed routing to you',
-        check: 'Decisive and quick: if your indexer-service query counter is flat, the gateway is sending you nothing and no qualifying day can accrue. Your counter is a superset of gateway traffic, so zero on it is conclusive even though a non-zero value proves nothing.',
-        more: '/indexers/cost-models-and-rules/',
+        cause: 'Queries arrive and are rejected before they are served',
+        check: 'A rejected receipt is a failed query, so it is a non-200 to the gateway and produces no qualifying day, while your own counter stays flat because it sits after receipt validation. Read the indexer-service log: this is indistinguishable from silence everywhere else.',
+        more: '/indexers/payments-graphtally/',
+      },
+      {
+        cause: 'The gateway is not routing to you',
+        check: 'A flat query counter narrows it to this or the rejection above, and only the indexer-service log separates them. If nothing is being rejected either, the question becomes coverage, price and the candidate-set thresholds.',
+        more: '/ecosystem/gateways/',
       },
       {
         cause: 'Traffic arrives but does not qualify',

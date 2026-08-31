@@ -242,20 +242,38 @@ That is the answer, not a view of it. What it will not give you is a history: th
 no public getter for when you last renewed or which days counted, so the contract tells
 you where you stand and not how you got there.
 
-**Your own metrics, for one decisive negative.** An indexer-service query counter
-cannot prove you are eligible, because it counts traffic the oracle never sees. But the
-relationship runs one way and that is useful:
+**Your own metrics, for a fast negative, read carefully.** An indexer-service query
+counter cannot prove you are eligible, because it counts traffic the oracle never sees.
+A flat counter does tell you something, but less than it appears to, and getting this
+wrong sends people chasing the wrong half of the system.
 
-<Flow steps={["gateway query", "reaches your indexer-service", "your counter increments"]} sep="⊂" />
+A query has to clear receipt validation before it is served, and the query counter sits
+after that gate:
 
-Every gateway query that reaches you is in your counter, so your counter is a superset
-of what the oracle reads. Which means a flat zero is conclusive in the direction that
-matters. **If your counter is not moving, the gateway is sending you nothing, and you
-cannot possibly be accruing qualifying days.** No amount of waiting fixes that, and it
-is the single fastest check available to somebody sitting at Unqualified.
+<Flow steps={["gateway routes to you", "receipt validated", "query served", "counter increments"]} hot={1} />
 
-Break it down per deployment. Total traffic hides the case where one busy deployment
-carries you and the rest get nothing.
+So a flat counter means **no query was served**. It does not tell you which of the two
+reasons applies, and they need opposite responses:
+
+- **Nothing was routed to you.** Then the question is coverage, price and the
+  [candidate-set thresholds](/ecosystem/gateways/), and it is about how you look to the
+  gateway.
+- **Everything was routed and rejected.** Then the gateway is doing its job, the queries
+  are arriving, and something in your own receipt configuration is throwing them away
+  before they reach graph-node.
+
+<Warn title="Read the indexer-service log before concluding anything">
+The two cases are indistinguishable from every dashboard you own. They separate
+instantly in the indexer-service log: rejection is loud there and silent everywhere
+else, and it is the only place the difference shows up.
+
+A rejected receipt is also a **failed** query from the gateway's side, so it is a
+non-200 and cannot produce a qualifying day. An indexer in this state accrues nothing
+while every metric it watches says the network has forgotten it exists.
+</Warn>
+
+Break the counter down per deployment either way. Total traffic hides the case where one
+busy deployment carries you and the rest get nothing.
 
 **Somebody else's view, for the population that counts.** The oracle reads gateway
 records, so gateway-side query volume attributed to you is the closest public proxy for

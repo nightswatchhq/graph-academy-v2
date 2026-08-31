@@ -770,6 +770,10 @@ a.entry-row:hover .rtitle { color: var(--rust); }
   font-family: var(--mono); font-size: 0.68rem; color: var(--rust);
   flex-shrink: 0; padding-top: 2px;
 }
+/* A cause or its check may name a contract address, which is 42 characters
+   with nowhere to break. Prose here wraps mid-token rather than escaping the
+   column, on the same reasoning as inline code. */
+.cause-what, .cause-check { overflow-wrap: anywhere; }
 .cause-what { color: var(--text); font-weight: 600; font-size: 0.99rem; }
 .cause-check { color: var(--text-muted); font-size: 0.94rem; margin-top: 4px; max-width: 64ch; line-height: 1.55; }
 .cause-more { margin-top: 5px; font-size: 0.86rem; }
