@@ -22,9 +22,18 @@ for (const f of [...styleFiles, ...astroFiles]) {
   const src = readFileSync(f, 'utf8')
     .replace(/\/\*[\s\S]*?\*\//g, ' ')
     .replace(/^\s*\/\/.*$/gm, ' ');
+  // Prose is not CSS. "Council Meeting #118" and "graph-support #404" are valid
+  // three-digit hex shorthands and are obviously not colours, and this check
+  // cried wolf on the first one it met. In an .mdx file only the unambiguous
+  // six and eight digit forms count; nobody writes #abc as a colour in prose,
+  // and every issue number past 99 would otherwise be an error.
+  const prose = f.endsWith('.mdx');
+  const isColour = prose
+    ? /^#[0-9a-fA-F]{6}$|^#[0-9a-fA-F]{8}$/
+    : /^#[0-9a-fA-F]{3}$|^#[0-9a-fA-F]{4}$|^#[0-9a-fA-F]{6}$|^#[0-9a-fA-F]{8}$/;
   for (const m of src.match(HEX) ?? []) {
     // an id selector or a URL fragment is not a colour
-    if (/^#[0-9a-fA-F]{3}$|^#[0-9a-fA-F]{4}$|^#[0-9a-fA-F]{6}$|^#[0-9a-fA-F]{8}$/.test(m)) {
+    if (isColour.test(m)) {
       errors.push(`${rel(f)}: raw colour ${m}. The palette is mandated; use a token.`);
     }
   }

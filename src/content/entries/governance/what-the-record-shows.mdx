@@ -1,0 +1,147 @@
+---
+title: "What the governance record does and does not show"
+role: governance
+path: "Governance"
+module: "Who decides"
+order: 2
+difficulty: intermediate
+time_minutes: 10
+prerequisites: ["The Council, the Foundation, and grants"]
+summary: "Two routes a decision can take, and only one of them leaves something you can read afterwards. Which route is chosen before anybody knows the outcome."
+protocol_version_verified: "Graph Horizon (2025-12-11)"
+last_verified: 2026-08-31
+verify_before: 2026-11-30
+sources:
+  - name: "GIP-0001: the GIP process"
+    url: "https://github.com/graphprotocol/graph-improvement-proposals/blob/main/gips/0001-gip-process.md"
+  - name: "The Graph governance overview"
+    url: "https://thegraph.com/governance/"
+  - name: "Graph Council Meeting #118, a representative minute"
+    url: "https://forum.thegraph.com/t/graph-council-meeting-118/6896"
+  - name: "graph-improvement-proposals"
+    url: "https://github.com/graphprotocol/graph-improvement-proposals"
+see_also:
+  - "/governance/gips-and-ggps/"
+  - "/governance/the-withdrawn-proposal/"
+  - "/governance/council-and-foundation/"
+authors: ["@community"]
+license: "CC-BY-4.0"
+---
+
+People regularly ask why the Council decided one way on a proposal and another way on
+something that looked similar. The answer is often that the public record does not
+contain it, and that this is a property of the process rather than an oversight.
+
+Worth understanding before you conclude anything from a silence, because the silence is
+frequently structural.
+
+## Two routes, one of which leaves an artefact
+
+A change can reach the Council along two quite different paths.
+
+**Through a GIP.** The proposal is written up, numbered, given a stage and an author,
+and merged into
+[a public repository](https://github.com/graphprotocol/graph-improvement-proposals).
+It stays there permanently, including the ones that failed. Anyone can read the
+specification, the motivation and the argument, years later, without asking permission.
+
+**Through a meeting.** Someone presents to the Council directly. What survives is the
+minute, and the minutes are deliberately thin.
+
+<Flow steps={["a GIP: numbered, staged, public, permanent", "a presentation: a roster and one line"]} sep="vs" />
+
+## What a Council minute actually contains
+
+This is the part people have not usually looked at. A published Council meeting minute
+carries a roster of who attended, who presented, who observed and took notes, and a
+section called Council Business that is frequently a single sentence.
+
+It does not carry the vote, the count, who voted which way, or any rationale. That is
+not an accident of note-taking. The minutes state that Council members follow
+**Chatham House Rules**, under which what was said may be used but who said it may not
+be revealed.
+
+<Note title="What Chatham House Rules buy, and what they cost">
+The case for them is real: people negotiate more freely when their individual position
+is not going to be quoted back at them, and a body that has to deliberate in public
+tends to stop deliberating and start performing.
+
+The cost is equally real and falls entirely on everybody outside the room. A decision
+taken this way cannot be examined afterwards, cannot be distinguished from a decision
+taken for a bad reason, and cannot be learned from by the next proposer. Both of those
+things are true at once, and neither cancels the other.
+</Note>
+
+## The consequence, stated plainly
+
+Whether a decision can be examined later is settled by **which route it took**, and
+that is chosen before anybody knows the outcome.
+
+Where both proposals left GIPs, you can read them side by side and form your own view.
+Where one did not, no amount of inference from chat logs recovers what is missing. The
+honest position is that the record does not contain it, and saying so is more useful
+than filling the gap with a theory that cannot be checked either way.
+
+<Model>
+Before drawing a conclusion from a governance outcome, find the artefact. If there is
+one, read it rather than the commentary about it. If there is not, notice that you are
+reasoning about an absence, and that an absence is consistent with a great many
+explanations, including the dull ones.
+</Model>
+
+## Why the withdrawn proposal is the good example
+
+[GIP-0058](/governance/the-withdrawn-proposal/) proposed abolishing curation. It was
+written, argued over, amended and withdrawn, and every step of that is still readable.
+Nobody had to be there.
+
+That is what the process looks like when it works, and it is why this site has an entry
+about a proposal that never shipped. The instructive thing was never the outcome, it
+was the argument, and the argument survived because somebody wrote it down before they
+knew how it would end.
+
+## What to ask for, if you want this better
+
+Constructive requests are more use than a grievance, and these are the ones that would
+actually change what future readers can see.
+
+- **Publish proposals as GIPs before the vote**, including the ones expected to fail.
+  A rejected GIP is a public good; a rejected presentation is nothing at all.
+- **Publish outcomes with the reasoning**, even where Chatham House Rules keep
+  individual positions private. "The Council declined this because of X" reveals no
+  member's vote.
+- **Ask in the forum rather than in chat.** A forum thread is indexed, quotable and
+  still there in a year. Discord is none of those, and answers given there are lost
+  by the following week.
+
+<Warn title="What this entry is not">
+It does not take a position on any live disagreement between the Foundation, Edge &
+Node, or anybody else, and it does not tell you what the Council should have decided.
+Those are arguments for [the forum](https://forum.thegraph.com), where the parties can
+speak for themselves and be quoted accurately.
+
+The claim here is narrower and checkable: some decisions leave a readable artefact and
+some do not, the difference is decided in advance, and knowing which you are looking at
+tells you how much weight your conclusion can carry.
+</Warn>
+
+<Reveal question="Before reading on: is a governance process that deliberates privately less legitimate than one that does not?">
+Not automatically, and it is worth resisting the reflex.
+
+Almost every functioning governance body deliberates privately and publishes decisions.
+Courts confer in private and publish judgments. Boards minute conclusions rather than
+arguments. The reason is not secrecy for its own sake: a body that must perform its
+reasoning live tends to optimise for how the reasoning looks rather than for the
+decision.
+
+What separates the credible ones from the rest is not whether they deliberate in
+private, it is **what they publish afterwards and how reliably**. A court that
+deliberates privately and publishes a reasoned judgment is accountable. One that
+deliberates privately and publishes only the verdict is not, whatever the quality of
+the thinking behind it.
+
+So the useful question is never "why was that meeting private". It is "what was
+published afterwards, was it enough to tell a good decision from a bad one, and does it
+arrive every time or only when the outcome is popular". That question has an answer you
+can check, and it does not require assuming anything about anyone's motives.
+</Reveal>
