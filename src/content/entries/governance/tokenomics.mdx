@@ -59,14 +59,28 @@ saying it depends on whether the network is being used.
 
 ## What changed this month.
 
-GIP-0089, the Innovation Allocation, was approved by Council on 2026-08-26 and took
-effect on 2026-08-31. It redirects <Param name="innovation_allocation_pct" /> of
-protocol issuance to the Foundation treasury.
+GIP-0089, the Innovation Allocation, was approved by Council on 2026-08-26, with an
+effective date given as 2026-08-31. It redirects
+<Param name="innovation_allocation_pct" /> of protocol issuance to the Foundation
+treasury, and the difference is routed through an existing DirectAllocation contract via
+the Issuance Allocator, so no new contract code was required.
 
-Concretely: the Subgraph Service rewards manager now receives
-<Param name="subgraph_service_issuance_per_block" />, down by 24.146 GRT per block. The
-difference is routed through an existing DirectAllocation contract via the Issuance
-Allocator, so no new contract code was required.
+{/* param-lint-allow: 96.584 (the approved figure, deliberately set against the deployed one the registry holds) */}
+<Disputed title="Approved is not the same as flowing, and right now they differ">
+The approved figure for the Subgraph Service rewards manager is 96.584 GRT per block.
+The deployed figure is <Param name="subgraph_service_issuance_per_block" />.
+
+Read from Arbitrum One at block 500226907 on 2026-08-31: `issuancePerBlock()` on the
+Rewards Manager returns the full 120.73 GRT per block, the Rewards Manager still holds
+the minter role, and the Issuance Allocator holds two targets of which the Rewards
+Manager is allocated the whole 120.73 and the other is allocated nothing. The redirect
+is configured and carries no value.
+
+That may well change today or tomorrow. The point is not that the change is wrong, it is
+that a reader planning around a number should be able to tell the difference between a
+vote and a contract, and should re-read the contract rather than this page. Every call
+above is one `cast` command against any public Arbitrum One RPC.
+</Disputed>
 
 The stated argument is that a share of issuance was reaching participants providing no
 value, with the forum post citing that 15.2% of indexing rewards went to underperforming

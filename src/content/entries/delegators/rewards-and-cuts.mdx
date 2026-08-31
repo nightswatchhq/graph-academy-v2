@@ -87,11 +87,14 @@ position, and you have to compute the second one yourself.
 ## The pot itself just got smaller.
 
 Indexing rewards come from issuance, targeted at
-<Param name="annual_issuance_pct" /> a year. As of 2026-08-31, GIP-0089 redirects
+{/* param-lint-allow: 96.584 (the approved figure, deliberately set against the deployed one the registry holds) */}
+<Param name="annual_issuance_pct" /> a year. GIP-0089 redirects
 <Param name="innovation_allocation_pct" /> of protocol issuance to the Foundation
-treasury. The Subgraph Service rewards manager now receives
-<Param name="subgraph_service_issuance_per_block" />, reduced by 24.146 GRT per
-block.
+treasury, taking the Subgraph Service rewards manager to 96.584 GRT per block. It was
+approved on 2026-08-26 and is not yet flowing: the rewards manager was still receiving
+<Param name="subgraph_service_issuance_per_block" /> when the contract was last read.
+[What that gap means](/governance/tokenomics/) is worth understanding before you plan
+around either number.
 
 The consequence for you is direct and mechanical. Indexing rewards are the larger
 part of most delegators' return, and 20% less is arriving at the source. Any
