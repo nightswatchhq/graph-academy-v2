@@ -31,7 +31,8 @@ display = "100,000 GRT"
 status = "current"
 source = "https://thegraph.com/docs/en/indexing/overview/"
 quote = "The minimum stake for an Indexer is currently set to 100K GRT."
-onchain_ref = "HorizonStaking.minimumIndexerStake"
+onchain_ref = "SubgraphService.getProvisionTokensRange"
+onchain_expect = 100000
 verified = "2026-08-30"
 
 [max_delegation_ratio]
@@ -42,6 +43,8 @@ display = "16x"
 status = "current"
 source = "https://thegraph.com/docs/en/resources/roles/delegating/delegating/"
 quote = "The Graph Network includes a delegation ratio of 16, meaning an Indexer can accept up to 16 times their Self-Stake in delegated GRT."
+onchain_ref = "SubgraphService.getDelegationRatio"
+onchain_expect = 16
 verified = "2026-08-30"
 
 [max_poi_staleness_days]
@@ -53,6 +56,7 @@ status = "current"
 source = "https://thegraph.com/docs/en/indexing/overview/"
 quote = "The maxPOIStaleness parameter is currently set to 28 days."
 onchain_ref = "SubgraphService.maxPOIStaleness"
+onchain_expect = 28
 verified = "2026-08-30"
 
 [allocation_lifetime]
@@ -83,6 +87,8 @@ display = "10%"
 status = "current"
 source = "https://thegraph.com/docs/en/graph-horizon/what-changes/"
 quote = "Arbitrators now have the flexibility to determine appropriate slash amounts based on the severity and context of infractions, up to a cap of 10% of the indexer's stake."
+onchain_ref = "DisputeManager.maxSlashingCut"
+onchain_expect = 10
 verified = "2026-08-30"
 
 [recommended_slash_pct]
@@ -103,6 +109,8 @@ display = "10,000 GRT"
 status = "current"
 source = "https://thegraph.com/docs/en/indexing/overview/"
 quote = "A deposit of a minimum of 10,000 GRT is required by the Fishermen."
+onchain_ref = "DisputeManager.disputeDeposit"
+onchain_expect = 10000
 verified = "2026-08-30"
 
 # --------------------------------------------------------------------------
@@ -156,7 +164,9 @@ practice, but the registry records the conflict rather than picking a winner. Re
 requires reading MAX_THAW_REQUESTS on the deployed HorizonStaking contract.\
 """
 note_source = "https://thegraph.com/docs/en/graph-horizon/what-changes/"
-onchain_ref = "HorizonStaking.MAX_THAW_REQUESTS"
+# No onchain_ref. HorizonStaking.MAX_THAW_REQUESTS was recorded here and reverts
+# on the deployed proxy at 0x00669A4CF01450B64E8A2A20E9b1FCB71E61eF03, along with
+# every other name tried for it. Left unreferenced rather than referenced wrongly.
 verified = "2026-08-30"
 
 [delegated_stake_slashable]
@@ -237,6 +247,8 @@ display = "1%"
 status = "current"
 source = "https://thegraph.com/docs/en/resources/tokenomics/"
 quote = "1% of the query fees paid to the network are burned."
+onchain_ref = "GraphPayments.PROTOCOL_PAYMENT_CUT"
+onchain_expect = 1
 verified = "2026-08-30"
 
 [settlement_layer]
@@ -268,7 +280,8 @@ GIP number. The GIP's own worked figures reproduce exactly at lambda 0.6 and alp
 a stake ratio of 4 returns 90.9% of fees, 6 returns 97.3%, 8 returns 99.2%. Anyone \
 sizing real stake should read the contract rather than this page.\
 """
-onchain_ref = "HorizonStaking.lambdaNumerator / lambdaDenominator"
+# No onchain_ref. Recorded as HorizonStaking.lambdaNumerator, which reverts, and
+# not found on SubgraphService or GraphPayments either. Needs the deployed ABI.
 verified = "2026-08-30"
 
 [rebate_alpha]
@@ -279,7 +292,7 @@ display = "1"
 status = "current"
 source = "https://github.com/graphprotocol/graph-improvement-proposals/blob/main/gips/0051-exponential-rebates.md"
 quote = "Where 0 <= alpha <= 1 and lambda > 0 are protocol parameters."
-onchain_ref = "HorizonStaking.alphaNumerator / alphaDenominator"
+# No onchain_ref. Same as rebate_lambda: the recorded name reverts.
 verified = "2026-08-30"
 
 [cobb_douglas_burn_pct]
@@ -307,6 +320,10 @@ status = "disputed"
 source = "https://forum.thegraph.com/t/the-graph-council-has-approved-gip-0089-the-innovation-allocation/7035"
 quote = "The Graph Council has approved GIP-0089, directing 20% of protocol issuance to the Innovation Allocation."
 onchain_ref = "IssuanceAllocator.getTargetAllocation"
+# The site teaches the 20% governance approved. The contract allocates none of
+# it yet, so that is what the reconciler expects to read. When this goes red the
+# redirect has activated.
+onchain_expect = 0
 note = """
 Approved by Council on 2026-08-26, with an effective date given as 2026-08-31 in one \
 place in the forum post and 2026-09-01 in another. As of Arbitrum One block 500226907 on \
@@ -331,6 +348,7 @@ status = "disputed"
 source = "https://forum.thegraph.com/t/the-graph-council-has-approved-gip-0089-the-innovation-allocation/7035"
 quote = "The SubgraphService Rewards Manager receives 96.584 GRT per block, a reduction of 24.146 GRT per block from 120.73."
 onchain_ref = "RewardsManager.issuancePerBlock"
+onchain_expect = 120.73
 note = """
 The approved figure is 96.584 GRT per block. The deployed figure is 120.73. Read from \
 Arbitrum One at block 500226907 on 2026-08-31: issuancePerBlock() on the Rewards Manager \
@@ -384,6 +402,7 @@ status = "current"
 source = "https://github.com/graphprotocol/rewards-eligibility-oracle/blob/main/ELIGIBILITY_CRITERIA.md"
 quote = "can continue claiming indexing rewards from the protocol for the duration of the qualification period (default is 14 days)"
 onchain_ref = "RewardsEligibilityOracle.getEligibilityPeriod"
+onchain_expect = 14
 note = "Confirmed on chain rather than taken from the document: getEligibilityPeriod() on the oracle at 0x02753BaE61C08AbD4351Bce7F48524935C2Cc78E returned 1209600 seconds, exactly 14 days, at Arbitrum One block 500226907 on 2026-08-31. It is a governable default, so read it again rather than planning around this line."
 note_source = "https://github.com/graphprotocol/rewards-eligibility-oracle"
 verified = "2026-08-31"

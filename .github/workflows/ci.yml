@@ -77,9 +77,26 @@ jobs:
           npm run build
           node scripts/check-links.mjs --external
 
+  chain:
+    # Reads the deployed contracts on Arbitrum One over a public RPC and
+    # compares them against the registry. No secrets, so unlike `reconcile`
+    # below it actually runs, and it runs on every push rather than nightly.
+    # This is the job that would have caught the GIP-0089 figures being wrong.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Reconcile against Arbitrum One
+        run: node scripts/reconcile-rpc.mjs
+
   reconcile:
-    # Reads the network subgraph and reports parameters that have drifted from
-    # chain. Skips with a clear message when no gateway key is configured.
+    # Reads the network subgraph for the values a contract call cannot give,
+    # and reports drift. Needs a gateway key, so it skips more often than not;
+    # `chain` above is the tier underneath it that always runs.
     if: github.event_name == 'schedule'
     runs-on: ubuntu-latest
     continue-on-error: true
