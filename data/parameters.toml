@@ -125,6 +125,13 @@ display = "28 days"
 status = "current"
 source = "https://thegraph.com/docs/en/resources/roles/delegating/delegating/"
 quote = "When a Delegator chooses to undelegate, their tokens are subject to a 28-day undelegation period."
+onchain_ref = "SubgraphService.getThawingPeriodRange"
+# The delegator's wait is the provision's thawing period for the data service they
+# delegated to, not a global constant. For the Subgraph Service the range is pinned
+# to a single value at both ends, so there is exactly one answer. HorizonStaking
+# .getMaxThawingPeriod() independently returns the same 2419200 seconds as the
+# protocol-wide ceiling.
+onchain_expect = 28
 verified = "2026-08-30"
 
 [delegation_tax_pct]
@@ -164,9 +171,13 @@ practice, but the registry records the conflict rather than picking a winner. Re
 requires reading MAX_THAW_REQUESTS on the deployed HorizonStaking contract.\
 """
 note_source = "https://thegraph.com/docs/en/graph-horizon/what-changes/"
-# No onchain_ref. HorizonStaking.MAX_THAW_REQUESTS was recorded here and reverts
-# on the deployed proxy at 0x00669A4CF01450B64E8A2A20E9b1FCB71E61eF03, along with
-# every other name tried for it. Left unreferenced rather than referenced wrongly.
+# No onchain_ref, and not for want of looking. MAX_THAW_REQUESTS was recorded here
+# and reverts. Every PUSH4 selector in the deployed HorizonStaking, SubgraphService,
+# GraphPayments and DisputeManager implementations was extracted and matched against
+# twelve spellings of this getter (MAX_THAW_REQUESTS, getMaxThawRequests,
+# maxThawRequests, the ..._PER_PROVISION variants, getThawRequestListSize). None is
+# present in 364 selectors. The value is real; it is a compile-time constant with no
+# getter, so it can be confirmed by reading source and never by calling.
 verified = "2026-08-30"
 
 [delegated_stake_slashable]
@@ -280,8 +291,10 @@ GIP number. The GIP's own worked figures reproduce exactly at lambda 0.6 and alp
 a stake ratio of 4 returns 90.9% of fees, 6 returns 97.3%, 8 returns 99.2%. Anyone \
 sizing real stake should read the contract rather than this page.\
 """
-# No onchain_ref. Recorded as HorizonStaking.lambdaNumerator, which reverts, and
-# not found on SubgraphService or GraphPayments either. Needs the deployed ABI.
+# No onchain_ref. Recorded as HorizonStaking.lambdaNumerator, which reverts.
+# lambdaNumerator, lambdaDenominator, getLambda, rebateParameters and
+# getRebateParameters are all absent from the 364 selectors across the four deployed
+# implementations. Not readable by eth_call at all, on any of them.
 verified = "2026-08-30"
 
 [rebate_alpha]
@@ -292,7 +305,8 @@ display = "1"
 status = "current"
 source = "https://github.com/graphprotocol/graph-improvement-proposals/blob/main/gips/0051-exponential-rebates.md"
 quote = "Where 0 <= alpha <= 1 and lambda > 0 are protocol parameters."
-# No onchain_ref. Same as rebate_lambda: the recorded name reverts.
+# No onchain_ref. Same as rebate_lambda: alphaNumerator, alphaDenominator and
+# getAlpha are absent from every deployed implementation checked.
 verified = "2026-08-30"
 
 [cobb_douglas_burn_pct]

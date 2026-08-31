@@ -54,6 +54,12 @@ const CHECKS = [
     read: (v) => Number(v) / 86400,
   },
   {
+    key: 'undelegation_period_days',
+    at: 'SubgraphService', sig: 'getThawingPeriodRange()(uint64,uint64)',
+    selector: '0x71ce020a', word: 0,
+    read: (v) => Number(v) / 86400,
+  },
+  {
     key: 'fisherman_dispute_deposit',
     at: 'DisputeManager', sig: 'disputeDeposit()(uint256)',
     selector: '0x29e03ff1', word: 0,
@@ -203,6 +209,7 @@ try {
 // onchain_ref carries an implication of verification that it has not earned.
 const covered = new Set([...CHECKS.map((c) => c.key), 'innovation_allocation_pct']);
 const claimed = paramEntries.filter(([k, p]) => p.onchain_ref && !covered.has(k)).map(([k]) => k);
+const uncovered = paramEntries.length - covered.size;
 
 console.log();
 for (const u of unread) console.log(`${c.yellow}unread${c.reset}  ${u}`);
@@ -213,6 +220,15 @@ if (claimed.length) {
       claimed.join(', '),
   );
 }
+// Coverage stated out loud. Ten of twenty-eight sounds thin until you notice
+// what the rest are: documented recommendations, historical values kept for
+// teaching, and a handful that are compile-time constants with no getter. The
+// number is here so nobody mistakes a green run for the whole registry having
+// been checked against the chain.
+console.log(
+  `${c.dim}        ${covered.size} of ${paramEntries.length} registry parameters are readable by eth_call. ` +
+    `The other ${uncovered} are not on chain, or are on chain with no getter.${c.reset}`,
+);
 
 const bad = moved.length + unread.length;
 console.log(
