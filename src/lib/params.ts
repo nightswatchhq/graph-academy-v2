@@ -114,6 +114,16 @@ export const paramGroups: { title: string; keys: string[] }[] = [
     title: 'Issuance routing',
     keys: ['innovation_allocation_pct', 'subgraph_service_issuance_per_block'],
   },
+  {
+    title: 'Rewards eligibility',
+    keys: [
+      'reo_active_days_required',
+      'reo_evaluation_window_days',
+      'reo_eligibility_period_days',
+      'reo_query_latency_ms',
+      'reo_query_blocks_behind',
+    ],
+  },
 ];
 
 /**

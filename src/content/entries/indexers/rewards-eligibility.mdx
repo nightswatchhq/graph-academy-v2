@@ -1,0 +1,238 @@
+---
+title: "Rewards eligibility: the gate nobody told you about"
+role: indexer
+path: "Indexer"
+module: "Operations"
+order: 4
+difficulty: advanced
+time_minutes: 11
+prerequisites: ["Running the stack, conceptually"]
+summary: "Since GIP-0079 indexing rewards are gated on serving real gateway traffic. The criterion is smaller than people assume, and it is measured somewhere you cannot see."
+protocol_version_verified: "Graph Horizon (2025-12-11)"
+last_verified: 2026-08-31
+verify_before: 2026-11-30
+sources:
+  - name: "GIP-0079: Indexer Rewards Eligibility Oracle"
+    url: "https://github.com/graphprotocol/graph-improvement-proposals/blob/main/gips/0079.md"
+  - name: "Eligibility criteria, the file the oracle reads"
+    url: "https://github.com/graphprotocol/rewards-eligibility-oracle/blob/main/ELIGIBILITY_CRITERIA.md"
+  - name: "Rewards Eligibility Oracle, live status"
+    url: "https://hub.thegraph.foundation/reo/"
+  - name: "rewards-eligibility-oracle"
+    url: "https://github.com/graphprotocol/rewards-eligibility-oracle"
+parameters_used:
+  - "reo_active_days_required"
+  - "reo_evaluation_window_days"
+  - "reo_eligibility_period_days"
+  - "reo_query_latency_ms"
+  - "reo_query_blocks_behind"
+see_also:
+  - "/ecosystem/oracles-and-observability/"
+  - "/indexers/cost-models-and-rules/"
+  - "/indexers/allocations-and-pois/"
+authors: ["@community"]
+license: "CC-BY-4.0"
+---
+
+Allocating stake and submitting a valid POI used to be the whole of what indexing
+rewards required. Since GIP-0079 it is not. There is a second gate, asserted by an
+oracle, and an indexer who fails it earns nothing on allocations that are otherwise
+perfectly healthy.
+
+The argument for the change was that rewards were reaching indexers who were not
+serving anybody. The gate is the answer to that: to collect issuance you must be
+demonstrably answering real queries from real users.
+
+## The criterion, in full.
+
+It is one sentence, and it is worth reading slowly because almost every
+misunderstanding comes from reading it fast.
+
+You must be **active on <Param name="reo_active_days_required"/>** within a rolling
+window of <Param name="reo_evaluation_window_days"/>. A day counts as active if you
+served **at least one qualifying query** that day. A query qualifies only if it
+satisfies all three of these at once, on the same query:
+
+<Flow steps={["HTTP 200 OK", "fast enough", "near chainhead"]} sep="+" />
+
+- The response status was **200 OK**.
+- The response took less than <Param name="reo_query_latency_ms"/>.
+- The data served was less than <Param name="reo_query_blocks_behind"/> behind
+  chainhead.
+
+A query that returns quickly but from a deployment three hundred thousand blocks
+behind is not a qualifying query. Neither is a fresh, correct answer that took six
+seconds. The three conditions are a conjunction, not a score.
+
+## What it is not.
+
+This is the part people get wrong, and the error is expensive because it is an error
+in the direction of complacency.
+
+**It is not a rate.** There is no queries-per-second threshold anywhere in the
+criterion, and no percentage of network traffic you have to capture. One qualifying
+query on <Param name="reo_active_days_required"/> is sufficient. A million queries a
+day on four days is not. The measurement is a daily boolean, and the count of true
+days is the only thing that matters.
+
+**It is not an uptime measure.** GIP-0079 describes
+<Param name="reo_active_days_required"/> out of
+<Param name="reo_evaluation_window_days"/> as roughly 18% uptime and says the initial
+thresholds were "intentionally set conservatively". The bar is deliberately low. It
+is there to exclude indexers serving nobody, not to rank the ones who are.
+
+**It is not a competition.** Nothing about your eligibility depends on how any other
+indexer performed. Every indexer who clears the bar clears it.
+
+<Model>
+Read it as a liveness check, not a performance score. It asks whether real query
+traffic reached you and came back acceptable, on a handful of separate days. It does
+not ask how much, how fast on average, or how you compare.
+</Model>
+
+## Where the number actually comes from.
+
+Here is the part that costs people money.
+
+The oracle does not read your indexer. GIP-0079 states that "the initial
+implementation of Oracle Nodes builds upon pre-existing data pipelines (from our
+geographically distributed gateways into Google BigQuery) and queries that data
+directly". The input is the **gateway's** record of what it routed to you and how
+that went.
+
+Your own telemetry is a different measurement of a different population. An
+indexer-service query counter increments for everything that reaches your endpoint,
+including traffic that never came through a gateway and therefore never entered the
+pipeline the oracle reads. The two numbers are not the same number, and they can
+disagree in the one direction that hurts:
+
+<Flow steps={["your metrics: healthy", "gateway routed you nothing", "oracle: unqualified", "rewards: zero"]} hot={3} />
+
+Two consequences worth internalising.
+
+You cannot self-test eligibility by generating load against your own stack. Traffic
+you send yourself is invisible to the oracle by construction.
+
+And a green local dashboard is not evidence of eligibility. If the gateway is not
+routing to you, every counter you own can look correct while the criterion is being
+failed continuously. The usual reasons the gateway routes you nothing are
+[a cost model priced above the field](/indexers/cost-models-and-rules/) and the
+gateway's own performance policy, neither of which raises anything on your side.
+
+<Warn title="The instrument determines the answer">
+When somebody quotes a figure about your query performance, ask which instrument
+produced it. Gateway telemetry knows what was routed and what the user experienced,
+and cannot see whether the data was right. Your own metrics know everything that
+reached you, and cannot see what never got sent. The oracle uses the first.
+</Warn>
+
+## Status, periods and renewal.
+
+The oracle runs daily and publishes to a contract on Arbitrum One. Every registered
+indexer has a status from the moment the oracle runs, so the answer to "does my status
+only appear after I have been active for
+<Param name="reo_active_days_required"/>" is no. Before you qualify you are not blank,
+you are **Unqualified**, which is a stated result rather than an absence of one.
+
+The statuses on the live dashboard read as follows.
+
+- **Eligible.** You cleared the bar and are inside a current period.
+- **Grace.** Eligible, with the end of the period approaching.
+- **Unqualified.** Never renewed, or did not meet the criteria.
+- **Expired.** A period ended and was not renewed.
+
+Qualifying does not grant eligibility permanently and does not grant it for a single
+day. It grants a **period**, <Param name="reo_eligibility_period_days"/> by default,
+and the criteria document is explicit that you keep earning for the whole of that
+period even if the criteria change afterwards. The default is worth checking rather
+than assuming: the oracle repository states the live value is readable from the
+contract.
+
+Because evaluation is daily and the window rolls, there is no cliff to plan around.
+There is a continuous requirement that some real traffic reached you recently, and a
+buffer of roughly a fortnight behind it.
+
+## Is it actually enforced?
+
+Worth asking rather than assuming, because until recently the answer was no. On
+2026-08-20 the deployed Rewards Manager had none of the machinery to act on a verdict:
+`getProviderEligibilityOracle()` reverted, along with every other function GIP-0086 adds.
+The oracle published and nothing consumed it.
+
+That changed at some point in the eleven days after. Read from Arbitrum One at block
+500226907 on 2026-08-31, the Rewards Manager at
+`0x971B9d3d0Ae3ECa029CAB5eA1fB0F72c85e6a525` answers:
+
+<Terminal
+  title="cast --rpc-url $ARB1"
+  label="Three calls against the deployed Rewards Manager on Arbitrum One, showing the eligibility oracle address is set, that the contract reverts on an ineligible indexer, and that a reclaim address is configured."
+  lines={[
+    { kind: 'cmd', text: 'cast call $RM "getProviderEligibilityOracle()(address)"' },
+    { kind: 'ok', text: '0x02753BaE61C08AbD4351Bce7F48524935C2Cc78E' },
+    { kind: 'cmd', text: 'cast call $RM "getRevertOnIneligible()(bool)"' },
+    { kind: 'ok', text: 'true' },
+    { kind: 'cmd', text: 'cast call $RM "getDefaultReclaimAddress()(address)"' },
+    { kind: 'ok', text: '0xe26cDC4Ef915D12551ea67a7cBB838E91a24bB37' },
+  ]}
+/>
+
+An oracle address is set, a reclaim address is set, and `getRevertOnIneligible()` is
+`true`. That last one is the operationally interesting flag: the contract is configured to
+**revert** on an ineligible indexer rather than quietly return zero. A reverting
+transaction is at least a loud failure, which is a mercy on a site whose recurring theme is
+that nothing here fails loudly.
+
+The 2026-08-20 reading is [graph-support #23](https://github.com/nightswatchhq/graph-support/issues/23),
+which carries the reverting calls in full. Neither this page nor that issue has established
+the block at which the upgrade landed.
+
+Two honest limits on the current reading. It is a point in time, and these values are governable,
+so re-run the calls rather than trusting this paragraph. And a configured flag is evidence
+that the path exists, not a measurement of it firing on a real ineligible indexer, which is
+not something this page has observed.
+
+## Where the trust sits.
+
+Eligibility is an **oracle assertion**, and that puts it in a different category from
+everything else that determines what you are paid.
+
+A POI is a claim you make, and the protocol's answer to a wrong claim is a dispute
+with staked capital behind it. An eligibility verdict is not a claim you make. It is
+an assertion about you, derived from data you do not hold, published by an oracle
+appointed through governance. There is no arbitration path for it in the way there is
+for [a disputed POI](/indexers/disputes-and-slashing/).
+
+That is not an accusation. Some facts genuinely cannot be computed on chain and this
+is one of them. But it does mean the recourse for a wrong verdict is
+[governance rather than adjudication](/ecosystem/oracles-and-observability/), and it
+is worth knowing which of the two you are in before you need one.
+
+## What to monitor.
+
+The failure is silent in the usual way. Allocations stay open, POIs keep being
+accepted, nothing errors, and the rewards are simply not there.
+
+- **Your status on the oracle, directly.** It is the only measurement that counts, and
+  it is published. Do not infer it from your own metrics.
+- **Whether the gateway is routing to you at all**, per deployment. Zero routed
+  traffic is the actual failure mode behind most ineligibility, and it looks exactly
+  like an absence of demand.
+- **Latency and chainhead distance as a pair.** Each is fine alone and the criterion
+  needs both at once. A deployment falling behind stops producing qualifying queries
+  while continuing to answer every one of them with a 200.
+
+<Reveal question="Before reading on: why does the criterion count days rather than queries?">
+Because a query count is trivially gameable and a day count is not, at least not
+cheaply.
+
+Query volume can be manufactured. If the bar were a total, the cheapest way to clear
+it would be to arrange for the traffic rather than to earn it. Spreading the
+requirement across separate days changes what is being tested: not "did enough queries
+happen" but "were you a working member of the network on several distinct occasions".
+
+It also makes the bar honest about what it can see. The oracle is reading routing
+records, and routing is not under your control. A volume threshold would punish a
+well-run indexer that the gateway happened not to favour that week. A handful of
+separate days asks only that you were there and answering when something did arrive,
+which is the most the instrument can actually support.
+</Reveal>

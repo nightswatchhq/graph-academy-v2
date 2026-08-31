@@ -3,6 +3,7 @@
 //   - every parameter carries a source, a quote and a date somebody read it
 //   - every <Param name="..."/> in a lesson resolves
 //   - every key a lesson declares in parameters_used is actually used
+import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { ROOT, registry, paramEntries, walk, frontmatter, rel, c } from './lib.mjs';
 
@@ -28,6 +29,19 @@ for (const [key, p] of paramEntries) {
 }
 
 if (!registry.protocol_version) errors.push('registry: no protocol_version');
+
+// A parameter in no group is not rendered on /parameters/ at all, so every
+// <Param/> pointing at it becomes a link to an anchor that does not exist. The
+// build stays green and the reader gets nothing, which is the exact failure
+// this registry exists to prevent. Read the groups out of params.ts rather
+// than duplicating them here, so there is still one list.
+const groupSrc = readFileSync(join(ROOT, 'src/lib/params.ts'), 'utf8');
+const grouped = new Set([...groupSrc.matchAll(/'([a-z0-9_]+)'/g)].map((m) => m[1]));
+for (const [key] of paramEntries) {
+  if (!grouped.has(key)) {
+    errors.push(`${key}: in the registry but in no paramGroups group, so /parameters/ never renders it`);
+  }
+}
 
 const entries = walk(join(ROOT, 'src/content/entries')).map(frontmatter);
 for (const l of entries) {

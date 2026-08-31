@@ -8,11 +8,13 @@ difficulty: advanced
 time_minutes: 10
 summary: "Several things the protocol treats as facts are produced by oracles rather than derived on chain. Knowing which is which tells you where the trust actually sits."
 protocol_version_verified: "Graph Horizon (2025-12-11)"
-last_verified: 2026-08-30
+last_verified: 2026-08-31
 verify_before: 2026-11-30
 sources:
   - name: "The Graph Docs: indexing overview"
     url: "https://thegraph.com/docs/en/indexing/overview/"
+  - name: "GIP-0079: Indexer Rewards Eligibility Oracle"
+    url: "https://github.com/graphprotocol/graph-improvement-proposals/blob/main/gips/0079.md"
   - name: "Rewards Eligibility Oracle nest"
     url: "https://github.com/nightswatchhq/rewards-eligibility-oracle"
   - name: "Subgraph Availability Oracle nest"
@@ -42,13 +44,16 @@ the first things to check, and it is a different failure from
 
 ## The Rewards Eligibility Oracle
 
-Introduced by GIP-0088, the REO asserts which indexers are eligible for indexing rewards.
+Introduced by GIP-0079, the REO asserts which indexers are eligible for indexing rewards.
 The intent is that rewards should follow indexers actually doing useful work, rather than
 being collectable by anyone who allocates and submits proofs.
 
 The argument for GIP-0089 cited 15.2% of indexing rewards going to underperforming indexers
 in 2025, which is the problem this class of oracle exists to address.
-[reo-doctor](https://github.com/nightswatchhq/reo-doctor) checks your own eligibility, and
+
+The criterion, what it does not measure, and why a healthy local dashboard is not evidence
+of eligibility are all in [rewards eligibility](/indexers/rewards-eligibility/).
+[reo-doctor](https://github.com/nightswatchhq/reo-doctor) checks your own status, and
 there is a [nest indexing its data](https://github.com/nightswatchhq/rewards-eligibility-oracle)
 if you want the history rather than the current answer.
 

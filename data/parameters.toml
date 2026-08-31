@@ -298,34 +298,115 @@ verified = "2026-08-30"
 # --------------------------------------------------------------------------
 
 [innovation_allocation_pct]
+conflict = true
 label = "Issuance redirected to the Innovation Allocation"
 value = 20
 unit = "% of protocol issuance"
 display = "20%"
-status = "current"
+status = "disputed"
 source = "https://forum.thegraph.com/t/the-graph-council-has-approved-gip-0089-the-innovation-allocation/7035"
 quote = "The Graph Council has approved GIP-0089, directing 20% of protocol issuance to the Innovation Allocation."
+onchain_ref = "IssuanceAllocator.getTargetAllocation"
 note = """
-Approved by Council on 2026-08-26 and effective 2026-08-31. This is a live change, not \
-a proposal. It reduces the issuance reaching indexers and therefore the issuance reaching \
-delegators, by 20% at the source. Any indexing APR quoted from data collected before \
-2026-08-31 is measuring a larger pie. The forum post gives the effective date as Monday \
-2026-08-31 in one place and 2026-09-01 in another. Read the Issuance Allocator contract \
-if the exact block matters to you.\
+Approved by Council on 2026-08-26, with an effective date given as 2026-08-31 in one \
+place in the forum post and 2026-09-01 in another. As of Arbitrum One block 500226907 on \
+2026-08-31 the redirect is configured but carries no value: the Issuance Allocator at \
+0xb64f29b2d81140ffc3a135e319561a1bd03b1a7e holds two targets, and getTargetAllocation \
+returns 120.73 GRT per block for the Rewards Manager and zero for the other. The Rewards \
+Manager also still holds the minter role and still reports issuancePerBlock() of 120.73. \
+So the approved figure is 20% and the flowing figure is 0%. Re-read the contract before \
+quoting either: this is expected to change, and the whole point of recording the block \
+number is that a reader can tell how stale this reading is.\
 """
-note_source = "https://thegraph.com/ecosystem/governance/"
-verified = "2026-08-30"
+note_source = "https://github.com/nightswatchhq/graph-support/issues/23"
+verified = "2026-08-31"
 
 [subgraph_service_issuance_per_block]
-label = "SubgraphService issuance after the redirect"
-value = 96.584
+conflict = true
+label = "Issuance reaching the Rewards Manager"
+value = 120.73
 unit = "GRT per block"
-display = "96.584 GRT/block"
-status = "current"
+display = "120.73 GRT/block"
+status = "disputed"
 source = "https://forum.thegraph.com/t/the-graph-council-has-approved-gip-0089-the-innovation-allocation/7035"
 quote = "The SubgraphService Rewards Manager receives 96.584 GRT per block, a reduction of 24.146 GRT per block from 120.73."
-note = "Was 120.73 GRT per block before 2026-08-31. The 24.146 GRT per block difference goes to the Foundation treasury through an existing DirectAllocation contract."
-verified = "2026-08-30"
+onchain_ref = "RewardsManager.issuancePerBlock"
+note = """
+The approved figure is 96.584 GRT per block. The deployed figure is 120.73. Read from \
+Arbitrum One at block 500226907 on 2026-08-31: issuancePerBlock() on the Rewards Manager \
+at 0x971B9d3d0Ae3ECa029CAB5eA1fB0F72c85e6a525 returns 120730000000000000000, and the \
+Issuance Allocator allocates that same 120.73 to it while allocating zero to its other \
+target. Reproduce with cast against any public Arbitrum One RPC; it takes a minute and it \
+beats trusting this file. This entry carries the deployed value because that is what \
+indexers are actually being paid from, and the approved value in the quote above so the \
+gap is visible rather than hidden.\
+"""
+note_source = "https://github.com/nightswatchhq/graph-support/issues/23"
+verified = "2026-08-31"
+
+# --------------------------------------------------------------------------
+# Rewards eligibility (GIP-0079, the Rewards Eligibility Oracle)
+#
+# These five are the whole criterion. They are read by the oracle from
+# ELIGIBILITY_CRITERIA.md in the oracle repository rather than from a contract,
+# which is why the source here is a markdown file and not an onchain_ref. The
+# Council can change them without a contract deployment.
+# --------------------------------------------------------------------------
+
+[reo_active_days_required]
+label = "Active days required for rewards eligibility"
+value = 5
+unit = "days"
+display = "5 days"
+status = "current"
+source = "https://github.com/graphprotocol/rewards-eligibility-oracle/blob/main/ELIGIBILITY_CRITERIA.md"
+quote = "Indexers must be active for 5+ days in a given 28 day period for rewards eligibility."
+verified = "2026-08-31"
+
+[reo_evaluation_window_days]
+label = "Rewards eligibility evaluation window"
+value = 28
+unit = "days"
+display = "28 days"
+status = "current"
+source = "https://github.com/graphprotocol/rewards-eligibility-oracle/blob/main/ELIGIBILITY_CRITERIA.md"
+quote = "Indexers must be active for 5+ days in a given 28 day period for rewards eligibility."
+note = "Rolling, not calendar. GIP-0079 describes it as a rolling 28-day evaluation window and notes the 5-day requirement is roughly 18% uptime across it. Numerically equal to max_poi_staleness_days and unrelated to it."
+note_source = "https://github.com/graphprotocol/graph-improvement-proposals/blob/main/gips/0079.md"
+verified = "2026-08-31"
+
+[reo_eligibility_period_days]
+label = "Rewards eligibility period"
+value = 14
+unit = "days"
+display = "14 days"
+status = "current"
+source = "https://github.com/graphprotocol/rewards-eligibility-oracle/blob/main/ELIGIBILITY_CRITERIA.md"
+quote = "can continue claiming indexing rewards from the protocol for the duration of the qualification period (default is 14 days)"
+onchain_ref = "RewardsEligibilityOracle.getEligibilityPeriod"
+note = "Confirmed on chain rather than taken from the document: getEligibilityPeriod() on the oracle at 0x02753BaE61C08AbD4351Bce7F48524935C2Cc78E returned 1209600 seconds, exactly 14 days, at Arbitrum One block 500226907 on 2026-08-31. It is a governable default, so read it again rather than planning around this line."
+note_source = "https://github.com/graphprotocol/rewards-eligibility-oracle"
+verified = "2026-08-31"
+
+[reo_query_latency_ms]
+label = "Maximum latency for a qualifying query"
+value = 5000
+unit = "ms"
+display = "5,000 ms"
+status = "current"
+source = "https://github.com/graphprotocol/rewards-eligibility-oracle/blob/main/ELIGIBILITY_CRITERIA.md"
+quote = "Query Response Latency: < 5,000 ms"
+verified = "2026-08-31"
+
+[reo_query_blocks_behind]
+label = "Maximum chainhead distance for a qualifying query"
+value = 50000
+unit = "blocks"
+display = "50,000 blocks"
+status = "current"
+source = "https://github.com/graphprotocol/rewards-eligibility-oracle/blob/main/ELIGIBILITY_CRITERIA.md"
+quote = "Query Freshness: < 50,000 blocks behind chainhead"
+verified = "2026-08-31"
 
 # ==========================================================================
 # Parameter history
@@ -396,17 +477,17 @@ note = "The size of that gap is the argument the GIP makes for the change. Exact
 source = "https://github.com/graphprotocol/graph-improvement-proposals/blob/main/gips/0051-exponential-rebates.md"
 
 [[innovation_allocation_pct.history]]
-date = "2026-08-31"
+date = "2026-08-26"
 from = "0%"
-to = "20%"
+to = "20% approved"
 via = "GIP-0089"
-note = "Approved by Council on 2026-08-26. Redirects a fifth of protocol issuance to the Foundation treasury."
+note = "Approved by Council on 2026-08-26, stated effective 2026-08-31. Approval is not activation: at Arbitrum One block 500226907 on 2026-08-31 the Issuance Allocator still allocates the whole 120.73 GRT per block to the Rewards Manager and zero to its other target. This row records the vote. A second row goes here when the contract changes, and not before."
 source = "https://forum.thegraph.com/t/the-graph-council-has-approved-gip-0089-the-innovation-allocation/7035"
 
 [[subgraph_service_issuance_per_block.history]]
-date = "2026-08-31"
+date = "2026-08-26"
 from = "120.73 GRT/block"
-to = "96.584 GRT/block"
+to = "96.584 GRT/block approved"
 via = "GIP-0089"
-note = "A reduction of 24.146 GRT per block. Any indexing reward rate measured before this date is describing a larger pot."
+note = "A reduction of 24.146 GRT per block, approved but not yet observed on chain. issuancePerBlock() read 120.73 at block 500226907 on 2026-08-31. When it reads 96.584, add the row and say which block."
 source = "https://forum.thegraph.com/t/the-graph-council-has-approved-gip-0089-the-innovation-allocation/7035"
