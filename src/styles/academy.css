@@ -67,6 +67,15 @@ h1 em, h2 em { font-style: italic; font-weight: 500; color: var(--accent); }
    Scaffolding: nav, footer, section grammar
    -------------------------------------------------------------------------- */
 
+/* Present to assistive technology, absent from the page. Referenced by the
+   search label and by a table header a sighted reader infers from the column,
+   and defined nowhere, so both were rendering as visible text. */
+.visually-hidden {
+  position: absolute; width: 1px; height: 1px;
+  margin: -1px; padding: 0; border: 0;
+  clip-path: inset(50%); overflow: hidden; white-space: nowrap;
+}
+
 header.site {
   /* One source of truth for the header height: the phone menu sheet hangs off
      it, and a second copy of 72 would drift the moment either changed. */
@@ -925,7 +934,15 @@ a.cta-card:hover { border-color: var(--border-hi); transform: translateY(-2px); 
      menus existed this never came up because the links were simply hidden.
      The mark alone still identifies the site and still goes home, so the
      wordmark is what gives way. */
-  .brand-name { display: none; }
+  /* Not display: none. The wordmark is the only accessible name the brand
+     link has, the mark itself being aria-hidden, so hiding it outright leaves
+     a screen reader with an unnamed link to the homepage. Lighthouse caught
+     this as link-name on every page at its 360px viewport. */
+  .brand-name {
+    position: absolute; width: 1px; height: 1px;
+    margin: -1px; padding: 0; border: 0;
+    clip-path: inset(50%); overflow: hidden; white-space: nowrap;
+  }
   .nav { gap: 14px; padding-inline: 16px; }
   .nav-links { gap: 18px; }
   .nav-tools { gap: 6px; margin-left: 0; }
