@@ -191,6 +191,86 @@ so re-run the calls rather than trusting this paragraph. And a configured flag i
 that the path exists, not a measurement of it firing on a real ineligible indexer, which is
 not something this page has observed.
 
+## What "rolling" actually means, and the mistake it causes
+
+The window is the last <Param name="reo_evaluation_window_days" />, counted backwards
+from today, and it moves forward a day at a time. Nothing resets it and nothing starts
+it. There is no enrolment.
+
+Two consequences follow, and the second one catches people.
+
+**A bad day costs you nothing except itself.** Days you did not serve do not subtract,
+they simply fail to count. A month of silence followed by five good days qualifies you.
+
+**Fixing the cause does not start a five-day clock.** This is the mistake, and it is an
+easy one to make. The counter advances only on days you actually served a qualifying
+query, and serving one requires the gateway to route you a query in the first place.
+Those are different events, days apart, and repairing your side only enables the
+second.
+
+<Flow steps={["you fix the fault", "the gateway starts routing to you", "a qualifying query lands", "day 1 of 5"]} hot={3} />
+
+So "I fixed it more than five days ago and I am still Unqualified" is not a
+contradiction and usually is not a bug. It means fewer than
+<Param name="reo_active_days_required" /> of those days produced a qualifying query,
+and the reason is almost always that the gateway was not sending you any. An indexer
+it has recently found unreachable does not get traffic back the instant the firewall
+changes, and nothing announces when it resumes.
+
+Count qualifying days, not days since the repair. They are rarely the same number.
+
+## How to check while you are still Unqualified
+
+Three instruments, and it is worth being precise about what each can and cannot see.
+
+**The contract, for the verdict.** Eligibility is published on chain and you can read
+your own without a dashboard. The oracle proxy is
+`0x02753BaE61C08AbD4351Bce7F48524935C2Cc78E` on Arbitrum One:
+
+<Terminal
+  title="cast --rpc-url $ARB1"
+  label="Reading an indexer's eligibility and the eligibility period directly from the oracle contract on Arbitrum One."
+  lines={[
+    { kind: 'cmd', text: 'cast call $REO "isEligible(address)(bool)" $MY_INDEXER' },
+    { kind: 'ok', text: 'true' },
+    { kind: 'cmd', text: 'cast call $REO "getEligibilityPeriod()(uint256)"' },
+    { kind: 'ok', text: '1209600      # 14 days, in seconds' },
+  ]}
+/>
+
+That is the answer, not a view of it. What it will not give you is a history: there is
+no public getter for when you last renewed or which days counted, so the contract tells
+you where you stand and not how you got there.
+
+**Your own metrics, for one decisive negative.** An indexer-service query counter
+cannot prove you are eligible, because it counts traffic the oracle never sees. But the
+relationship runs one way and that is useful:
+
+<Flow steps={["gateway query", "reaches your indexer-service", "your counter increments"]} sep="⊂" />
+
+Every gateway query that reaches you is in your counter, so your counter is a superset
+of what the oracle reads. Which means a flat zero is conclusive in the direction that
+matters. **If your counter is not moving, the gateway is sending you nothing, and you
+cannot possibly be accruing qualifying days.** No amount of waiting fixes that, and it
+is the single fastest check available to somebody sitting at Unqualified.
+
+Break it down per deployment. Total traffic hides the case where one busy deployment
+carries you and the rest get nothing.
+
+**Somebody else's view, for the population that counts.** The oracle reads gateway
+records, so gateway-side query volume attributed to you is the closest public proxy for
+its input. Graph Explorer and
+[Lodestar](https://www.lodestar-dashboard.com/indexing) both surface it. Neither is the
+oracle's own pipeline, so treat agreement as reassurance and disagreement as a question
+rather than either as proof.
+
+<Warn title="You cannot test this yourself">
+Traffic you generate against your own endpoint increments your counter and is invisible
+to the oracle by construction, because it never went through a gateway. A load test
+that makes your dashboards look healthy moves you no closer to eligible, and it will
+convince you that you have fixed something you have not.
+</Warn>
+
 ## Where the trust sits.
 
 Eligibility is an **oracle assertion**, and that puts it in a different category from
@@ -216,7 +296,8 @@ accepted, nothing errors, and the rewards are simply not there.
   it is published. Do not infer it from your own metrics.
 - **Whether the gateway is routing to you at all**, per deployment. Zero routed
   traffic is the actual failure mode behind most ineligibility, and it looks exactly
-  like an absence of demand.
+  like an absence of demand. Alert on a query counter that stops moving, not only on
+  one that errors.
 - **Latency and chainhead distance as a pair.** Each is fine alone and the criterion
   needs both at once. A deployment falling behind stops producing qualifying queries
   while continuing to answer every one of them with a 200.

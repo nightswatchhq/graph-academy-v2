@@ -386,6 +386,33 @@ export const SYMPTOMS: Symptom[] = [
     worked: [{ n: 6, was: 'both CIDs resolved by hand while one entity stayed null' }],
   },
   {
+    id: 'still-unqualified',
+    symptom: 'I fixed the problem days ago and the oracle still says Unqualified',
+    who: 'indexer',
+    causes: [
+      {
+        cause: 'You are counting days since the repair, not qualifying days',
+        check: 'The window is rolling and nothing resets it. The counter advances only on days a qualifying query actually landed, which needs the gateway to route to you first. Fixing your side enables that; it does not schedule it. Count days with traffic, not days since the fix.',
+        more: '/indexers/rewards-eligibility/',
+      },
+      {
+        cause: 'The gateway has not resumed routing to you',
+        check: 'Decisive and quick: if your indexer-service query counter is flat, the gateway is sending you nothing and no qualifying day can accrue. Your counter is a superset of gateway traffic, so zero on it is conclusive even though a non-zero value proves nothing.',
+        more: '/indexers/cost-models-and-rules/',
+      },
+      {
+        cause: 'Traffic arrives but does not qualify',
+        check: 'All three bars have to be met by the same query: 200, under the latency limit, and near chainhead. A deployment that has fallen behind answers every request successfully and produces no qualifying days at all.',
+        more: '/indexers/rewards-eligibility/',
+      },
+      {
+        cause: 'You are testing against yourself',
+        check: 'Queries you send your own endpoint never went through a gateway, so the oracle cannot see them. They will make your dashboards healthy and change nothing.',
+        more: '/indexers/rewards-eligibility/',
+      },
+    ],
+  },
+  {
     id: 'empty-response-reverts',
     symptom: 'graph-node logs "Contract call reverted, reason: empty response" at volume',
     who: 'indexer',
