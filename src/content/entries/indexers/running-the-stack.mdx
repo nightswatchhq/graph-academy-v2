@@ -15,6 +15,10 @@ sources:
     url: "https://thegraph.com/docs/en/indexing/overview/"
   - name: "The Graph Docs: TAP and GraphTally"
     url: "https://thegraph.com/docs/en/indexing/tap/"
+  - name: "graph-node: docs/graphman.md"
+    url: "https://github.com/graphprotocol/graph-node/blob/master/docs/graphman.md"
+  - name: "graph-support #24: graphman copy, and the shard boundary"
+    url: "https://github.com/nightswatchhq/graph-support/issues/24"
 parameters_used: ["max_poi_staleness_days"]
 authors: ["@community"]
 license: "CC-BY-4.0"
@@ -88,6 +92,52 @@ unredeemed RAV, POI age per allocation, and query volume against the field. Thos
 the indexing metrics. CPU is a supporting act.
 </Model>
 
+## Shards, and the wall at the second database.
+
+One Postgres eventually stops being the answer, because every deployment you index
+grows without bound and you cannot delete your way out of it. graph-node's answer is
+**shards**: several Postgres databases, with each deployment living entirely inside
+one of them.
+
+That makes shard placement a decision rather than a detail, and the thing worth
+knowing before you make it is what changing your mind later costs. There are two
+answers and the gap between them is large.
+
+**Moving a deployment between shards of the same database** is supported.
+`graphman copy` does it, and it is the tool for this job rather than a workaround.
+
+**Moving to a different database entirely** is a different problem, and
+`graphman copy` does not cover it. This is the boundary operators meet unprepared,
+because nothing signposts it: the command that solved the first case simply does not
+address the second. Decommissioning a server, or moving between hosting providers,
+lands you here.
+
+<Warn title="This path is real and it is not in the documentation">
+`docs/graphman.md` in graph-node documents Info, Remove, Unassign, Unused Record,
+Unused Remove, Drop, Check Blocks and Chain Call Cache Remove. It does not document
+`copy`, which is why an operator asking this question gets pointed to Discord rather
+than to a page.
+
+A pull request adding it was open and unmerged when this was last checked on
+2026-08-31, so check whether the documentation has caught up before assuming it has
+not. `graphman dump` and `restore` also exist, are recent, are labelled experimental,
+and work one deployment at a time.
+</Warn>
+
+For the cross-database case the working answer at the time of writing is community
+tooling rather than graph-node itself.
+[subgraph-migration](https://github.com/vincenttaglia/subgraph-migration) exists for
+exactly this, and its interesting design choice is that it streams `pg_dump` into
+`pg_restore` over SSH, so you do not need a disk anywhere large enough to hold the
+dump. That constraint is the one that catches people planning a migration on paper:
+the intermediate file is frequently larger than any spare volume you have.
+
+<Model>
+Ask of any capacity decision not just "can I change this later" but "what does
+changing it cost on each side of the boundary". Here the boundary is one database.
+Inside it, a supported command. Outside it, a project.
+</Model>
+
 ## What to build before you scale.
 
 In order, and the order matters:
@@ -101,6 +151,9 @@ In order, and the order matters:
    after.
 5. **Postgres backups you have actually restored from.** An untested backup is a
    belief, not a backup.
+6. **A shard layout you have thought about**, and a written answer to where a
+   deployment goes when the current database fills. Deciding that under pressure is
+   how an operator discovers the boundary above at the worst moment.
 
 Only then add another chain.
 
