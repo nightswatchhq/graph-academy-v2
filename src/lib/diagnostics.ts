@@ -1,3 +1,4 @@
+import type { Worked } from './support';
 export interface Cause {
   /** What is actually wrong. */
   cause: string;
@@ -14,6 +15,13 @@ export interface Symptom {
   who: 'developer' | 'consumer' | 'indexer' | 'delegator' | 'curator';
   /** Most likely first. */
   causes: Cause[];
+  /**
+   * Times this actually happened to somebody, in the graph-support archive.
+   * A cause explains the shape of a failure; a worked case is one occasion of
+   * it, with the deployment, the commands and a stated outcome. Add one only
+   * after reading the thread: a title that sounds right is not evidence.
+   */
+  worked?: Worked[];
 }
 
 /**
@@ -39,11 +47,17 @@ export const SYMPTOMS: Symptom[] = [
         more: '/consumers/getting-data/',
       },
       {
+        cause: 'One indexer has diverged and is serving an empty result',
+        check: 'Intermittent, because the gateway routes to a different indexer each time. Same query, same subgraph, rows sometimes and nothing others, with no error anywhere. Query two indexers directly and compare.',
+        more: '/indexers/allocations-and-pois/',
+      },
+      {
         cause: 'There is genuinely no matching data',
         check: 'The only benign case, and it is indistinguishable from the other two in the response. That is why the status check is not optional.',
         more: '/developers/query-from-an-app/',
       },
     ],
+    worked: [{ n: 5, was: 'one indexer diverged, serving [] intermittently with no error' }],
   },
   {
     id: 'data-is-stale',
@@ -56,10 +70,25 @@ export const SYMPTOMS: Symptom[] = [
         more: '/developers/what-is-a-subgraph/',
       },
       {
+        cause: 'The source contract went quiet',
+        check: 'The subgraph is at chain head, has no errors, and has been indexing the whole time. There is nothing to index, because the protocol you are watching migrated to a new contract. Check the contract address for activity before you blame the subgraph.',
+        more: '/developers/what-is-a-subgraph/',
+      },
+      {
+        cause: 'The chain halted, or the chain client behind the indexer froze',
+        check: 'The most convincing lie in the ecosystem. graph-node reports synced, hasIndexingErrors is false, _meta returns a real block, and the gateway routes happily, because the indexer has genuinely indexed every block it can see. Compare _meta against a block explorer, not against the indexer.',
+        more: '/ecosystem/oracles-and-observability/',
+      },
+      {
         cause: 'Nobody maintains that subgraph any more',
         check: 'Find who published it in Graph Explorer and when it was last updated.',
         more: '/consumers/getting-data/',
       },
+    ],
+    worked: [
+      { n: 7, was: 'the source contract migrated, the subgraph was healthy the whole time' },
+      { n: 13, was: 'the sole indexer reported 99.98% synced against a chain head frozen 85 hours' },
+      { n: 15, was: 'why a halted chain is indistinguishable from health in every tool' },
     ],
   },
   {
@@ -78,6 +107,7 @@ export const SYMPTOMS: Symptom[] = [
         more: '/curators/what-is-curation/',
       },
     ],
+    worked: [{ n: 21, was: 'the upgrade indexer itself was wedged on a store error and allocated to nothing' }],
   },
   {
     id: 'sync-is-slow',
@@ -133,6 +163,11 @@ export const SYMPTOMS: Symptom[] = [
         check: 'Past the staleness limit the allocation stops paying. Nothing is confiscated and no alarm sounds. Alert on POI age directly.',
         more: '/indexers/allocations-and-pois/',
       },
+      {
+        cause: 'You are not eligible for indexing rewards',
+        check: 'Since GIP-0079 rewards are gated on real gateway traffic reaching you on several separate days. The oracle reads gateway logs, not your metrics, so your own dashboards can be entirely green while the verdict is Unqualified. Check the oracle, not Prometheus.',
+        more: '/indexers/rewards-eligibility/',
+      },
     ],
   },
   {
@@ -168,6 +203,10 @@ export const SYMPTOMS: Symptom[] = [
         more: '/ecosystem/gateways/',
       },
     ],
+    worked: [
+      { n: 17, was: 'how the gateway actually picks, and why coverage beats latency' },
+      { n: 18, was: 'TooFarBehind from half the allocations, one indexer holding all the history' },
+    ],
   },
   {
     id: 'rewards-dropped',
@@ -190,6 +229,7 @@ export const SYMPTOMS: Symptom[] = [
         more: '/delegators/choosing-an-indexer/',
       },
     ],
+    worked: [{ n: 23, was: 'GIP-0089 read off the contracts, including what had and had not activated' }],
   },
   {
     id: 'cannot-withdraw',

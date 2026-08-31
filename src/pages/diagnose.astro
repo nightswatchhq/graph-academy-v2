@@ -1,7 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 import { SYMPTOMS } from '../lib/diagnostics';
-import { COLLECTIONS } from '../lib/paths';
+import { SUPPORT, archiveUrl, issueUrl, reportSymptomUrl } from '../lib/support';
 
 const roles = ['consumer', 'developer', 'indexer', 'delegator', 'curator'] as const;
 const label: Record<string, string> = {
@@ -16,6 +16,7 @@ const grouped = roles
   .filter((g) => g.items.length > 0);
 const total = SYMPTOMS.length;
 const causes = SYMPTOMS.reduce((n, s) => n + s.causes.length, 0);
+const worked = SYMPTOMS.reduce((n, s) => n + (s.worked?.length ?? 0), 0);
 ---
 <Base
   title="Something is wrong"
@@ -71,6 +72,19 @@ const causes = SYMPTOMS.reduce((n, s) => n + s.causes.length, 0);
                     </li>
                   ))}
                 </ol>
+                {s.worked && (
+                  <div class="worked">
+                    <p class="worked-label">Times this happened</p>
+                    <ul>
+                      {s.worked.map((w) => (
+                        <li>
+                          <a class="out" href={issueUrl(w.n)} rel="external noopener">#{w.n}</a>
+                          <span>{w.was}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -87,8 +101,18 @@ const causes = SYMPTOMS.reduce((n, s) => n + s.causes.length, 0);
       quiet ones: a process that crashes gets restarted by something you already have, and a
       subgraph that silently stopped three months ago does not.
     </p>
+    <p class="section-lede" style="margin-top: 1rem;">
+      It grows from <a class="out" href={SUPPORT.repo} rel="external noopener">graph-support</a>,
+      where the Night&rsquo;s Watch triages this sort of thing in public and closes every issue
+      with a stated outcome. Nothing here was invented: {worked} of the entries below carry a
+      link to the occasion somebody actually hit it. If yours is missing, filing it there is
+      what puts it here, and you get an answer on the way.
+    </p>
     <div class="btn-row" style="margin-top: 1.8rem;">
-      <a class="btn btn-primary" href="/contribute/">Report a missing symptom</a>
+      <a class="btn btn-primary out" href={reportSymptomUrl()} rel="external noopener">
+        Report a missing symptom
+      </a>
+      <a class="btn btn-ghost out" href={archiveUrl} rel="external noopener">Search past answers</a>
       <a class="btn btn-ghost" href="/catalogue/">Browse the catalogue</a>
     </div>
   </section>
