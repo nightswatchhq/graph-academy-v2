@@ -89,6 +89,8 @@ export const SYMPTOMS: Symptom[] = [
       { n: 7, was: 'the source contract migrated, the subgraph was healthy the whole time' },
       { n: 13, was: 'the sole indexer reported 99.98% synced against a chain head frozen 85 hours' },
       { n: 15, was: 'why a halted chain is indistinguishable from health in every tool' },
+      { n: 14, was: 'Moonbeam stopped producing blocks and nothing anywhere said so' },
+      { n: 25, was: 'a frozen chain client reporting synced while 3.68M blocks went unindexed' },
     ],
   },
   {
@@ -125,11 +127,17 @@ export const SYMPTOMS: Symptom[] = [
         more: '/developers/indexing-performance/',
       },
       {
+        cause: 'It is not actually stuck, and "99%" is not a real quantity',
+        check: 'Sync progress is shown against an estimate. A deployment is at chain head or it is not, and one sitting at 99 percent for hours is usually still working through a dense range. Compare the indexed block against chain head directly rather than reading the percentage.',
+        more: '/developers/indexing-performance/',
+      },
+      {
         cause: 'Mutable entities that never actually change',
         check: 'Every update maintains a block range on the previous version. Event-log entities can almost always be immutable.',
         more: '/developers/indexing-performance/',
       },
     ],
+    worked: [{ n: 10, was: 'reported repeatedly on different deployments, at chain head hours later every time' }],
   },
   {
     id: 'graft-fails',
@@ -264,5 +272,130 @@ export const SYMPTOMS: Symptom[] = [
         more: '/curators/curation-strategy/',
       },
     ],
+  },
+  {
+    id: 'bad-indexers',
+    symptom: 'My query fails with "bad indexers" and a map of addresses',
+    who: 'consumer',
+    causes: [
+      {
+        cause: 'One or more operators have a failed copy of the deployment',
+        check: 'Look for "no attestation: indexing_error" against an address. That copy has failed outright and is deterministic: it will not recover on its own and no amount of retrying helps. The operator has to intervene.',
+        more: '/consumers/getting-data/',
+      },
+      {
+        cause: 'The reason inside the map is actually about your query',
+        check: 'BadResponse(unattestable response: ...) usually means your query. Read the text inside the brackets rather than the wrapper around it. graph-node marks a class of errors unattestable, and the gateway wraps those so they arrive looking like an indexer fault.',
+        more: '/developers/query-from-an-app/',
+      },
+      {
+        cause: 'Every operator is behind, unreachable, or returning a bare status',
+        check: 'A mix of "too far behind", "no status: indexer not available" and bare BadResponse(400) across different addresses means the deployment is unserved rather than your query being wrong. When the failures disagree with each other, stop debugging your client.',
+        more: '/ecosystem/gateways/',
+      },
+      {
+        cause: 'Nothing is allocated at all',
+        check: 'The error is then "no indexers found" rather than "bad indexers". Nothing was tried. That is a curation and allocation problem, not a serving one.',
+        more: '/curators/what-is-curation/',
+      },
+    ],
+    worked: [
+      { n: 1, was: 'what every reason in that map means, decoded against gateway source' },
+      { n: 8, was: 'six indexers, four distinct failures, no healthy candidate anywhere' },
+      { n: 4, was: 'the reason inside the map turned out to be the query, not the indexers' },
+    ],
+  },
+  {
+    id: 'new-api-key-rejected',
+    symptom: 'A brand new API key returns "auth error: API key not found"',
+    who: 'consumer',
+    causes: [
+      {
+        cause: 'The key has not propagated to the gateway yet',
+        check: 'Reported as up to an hour, and regenerating the key does not help because the new one has the same problem. Nothing is wrong with the key. Wait, and do not build a workaround around it.',
+        more: '/consumers/paying-for-queries/',
+      },
+    ],
+    worked: [{ n: 22, was: 'traced to the gateway auth path, read at a named commit' }],
+  },
+  {
+    id: 'pagination-stopped',
+    symptom: 'Pagination that worked for months started failing',
+    who: 'developer',
+    causes: [
+      {
+        cause: 'An operator lowered their skip ceiling',
+        check: 'The message is "The skip argument must be between 0 and 20000". GRAPH_GRAPHQL_MAX_SKIP is a per-operator graph-node setting, so your query was always at the mercy of a value you cannot see. You noticed the day somebody tightened it.',
+        more: '/developers/query-from-an-app/',
+      },
+      {
+        cause: 'You are using skip at all',
+        check: 'Order by id and filter on the last id you saw. Cursor pagination has no ceiling and does not degrade on a large subgraph, and it removes the dependency on every operator\u2019s private configuration.',
+        more: '/developers/query-from-an-app/',
+      },
+    ],
+    worked: [{ n: 4, was: 'a 1TB subgraph, an operator at 20000, and a query unchanged for months' }],
+  },
+  {
+    id: 'deploy-fails',
+    symptom: 'My subgraph will not deploy, with a connection error',
+    who: 'developer',
+    causes: [
+      {
+        cause: 'The hosted service failed internally, and told you its private address',
+        check: 'A 10.x.x.x, 172.16-31.x.x or 192.168.x.x address in the error is inside somebody else\u2019s network. Your machine has never routed to it and never could. Nothing on your side is involved: not the manifest, not your CLI version, not your deploy key. Recognise the shape and stop debugging.',
+        more: '/developers/build-a-subgraph/',
+      },
+      {
+        cause: 'The manifest or the build is genuinely wrong',
+        check: 'The distinguishing test is the address. A public host or a schema complaint is yours; a private address is not.',
+        more: '/developers/build-a-subgraph/',
+      },
+    ],
+    worked: [{ n: 3, was: 'ECONNREFUSED on an RFC 1918 address, fixed by the operator forty minutes later' }],
+  },
+  {
+    id: 'studio-serves-old-version',
+    symptom: 'Studio keeps serving an old version of my subgraph',
+    who: 'developer',
+    causes: [
+      {
+        cause: 'version/latest means the latest published version, not the newest deployment',
+        check: 'Deploying is not publishing. Address the version label explicitly and drop version/ from the path. If that returns the new data, this was it.',
+        more: '/developers/build-a-subgraph/',
+      },
+    ],
+    worked: [{ n: 2, was: 'v3.0.0 deployed, v2.1.0 served, fixed by naming the version in the URL' }],
+  },
+  {
+    id: 'ipfs-field-null',
+    symptom: 'A field derived from IPFS is null and never fills in',
+    who: 'developer',
+    causes: [
+      {
+        cause: 'The fetch missed once at index time and is never retried',
+        check: 'graph-node does not retry ipfs.cat. A CID that was slow to propagate when the handler ran stays null for that entity forever, even though fetching the CID by hand now works perfectly. Test the CID directly: if it resolves and the entity is still null, the fetch is not being retried.',
+        more: '/developers/what-is-a-subgraph/',
+      },
+      {
+        cause: 'The content genuinely is not retrievable',
+        check: 'Fetch the CID from more than one gateway. The two cases look identical in the data and only the direct fetch separates them.',
+        more: '/ecosystem/oracles-and-observability/',
+      },
+    ],
+    worked: [{ n: 6, was: 'both CIDs resolved by hand while one entity stayed null' }],
+  },
+  {
+    id: 'empty-response-reverts',
+    symptom: 'graph-node logs "Contract call reverted, reason: empty response" at volume',
+    who: 'indexer',
+    causes: [
+      {
+        cause: 'The archive node behind it is not serving historical state',
+        check: 'Seen after moving Base to a base-reth-node storage v2 snapshot, on two independent operators. The chain client answers, so nothing reports unhealthy, but eth_call at a historical block comes back empty and the mapping records a revert that did not happen. Compare the same eth_call against a second provider at the same block.',
+        more: '/indexers/running-the-stack/',
+      },
+    ],
+    worked: [{ n: 11, was: 'open and unresolved, recorded early so nobody migrates blind' }],
   },
 ];
