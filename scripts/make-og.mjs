@@ -5,6 +5,7 @@
 // the card uses the site's own tokens and its own self-hosted faces. Anything
 // else would drift from the site it is advertising.
 import { execFileSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import { existsSync, statSync, readFileSync, writeFileSync, unlinkSync } from 'node:fs';
 import { join } from 'node:path';
 import { ROOT, c, paramEntries, walk, frontmatter, days } from './lib.mjs';
@@ -77,11 +78,24 @@ if (!existsSync(out)) {
   console.log(`${c.red}fail${c.reset}  no image produced`);
   process.exit(1);
 }
+// The share card is served from one unversioned path, /og.png, and every
+// scraper that renders a link preview caches it by that URL. Discord proxies it
+// through media.discordapp.net and keys the proxy on the source URL, so when
+// the card changed from dark to light on 2026-08-31 the path did not, and every
+// page on the domain kept showing the old black card - including URLs published
+// afterwards, which had never been scraped before. Two months of previews
+// advertising a design the site no longer had.
+//
+// So the meta tags carry ?v=<hash of the bytes>. Derived, not typed: a manual
+// version is a number somebody has to remember to bump, which is the same
+// failure as the hard-coded lesson count this script already exists to prevent.
+const hash = createHash('sha256').update(readFileSync(out)).digest('hex').slice(0, 12);
+
 // Record what the image claims, so something can notice when it stops being
 // true. The card drifted from 44 lessons to 63 without a word of complaint.
 writeFileSync(
   join(ROOT, 'tools/og/rendered.json'),
-  JSON.stringify({ entries: entries.length, stale: stale + staleParams, conflicts, rendered: today.toISOString().slice(0, 10) }, null, 2) + '\n',
+  JSON.stringify({ entries: entries.length, stale: stale + staleParams, conflicts, hash, rendered: today.toISOString().slice(0, 10) }, null, 2) + '\n',
 );
 
 const { size } = statSync(out);
@@ -100,5 +114,5 @@ if (size / 1024 < FLOOR_KB) {
 console.log(
   `${c.green}ok${c.reset}    public/og.png, ${(size / 1024).toFixed(1)}KB, ` +
     `${entries.length} lessons / ${stale + staleParams} stale / ${conflicts} contradictions, ` +
-    `rendered with ${chrome.split('/').pop()}`,
+    `served as /og.png?v=${hash}, rendered with ${chrome.split('/').pop()}`,
 );
