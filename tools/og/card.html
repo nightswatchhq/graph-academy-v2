@@ -22,6 +22,26 @@
     src: url('../../public/fonts/jetbrains-mono.woff2') format('woff2');
     font-weight: 400; font-display: block;
   }
+  /* The display serif and its italic accent cut. These were missing, and the
+     omission was invisible: the card links tokens.css, whose base --display is
+     Space Grotesk, and academy.css overrides that to Fraunces on :root. The
+     card never loads academy.css, because academy.css asks for its fonts at
+     /fonts/... and this file is rendered over file://, where an absolute path
+     resolves to the filesystem root. So the headline silently set itself in the
+     wrong face and looked perfectly deliberate for two months. */
+  @font-face {
+    font-family: 'Fraunces';
+    src: url('../../public/fonts/fraunces.woff2') format('woff2');
+    font-weight: 400; font-style: normal; font-display: block;
+  }
+  @font-face {
+    font-family: 'Fraunces';
+    src: url('../../public/fonts/fraunces-italic.woff2') format('woff2');
+    font-weight: 500; font-style: italic; font-display: block;
+  }
+  /* Kept identical to the :root rule in src/styles/academy.css. make-og.mjs
+     compares the two and fails the render if they drift apart. */
+  :root { --display: 'Fraunces', 'Iowan Old Style', 'Palatino Linotype', Georgia, serif; }
   html, body { margin: 0; padding: 0; }
   body { width: 1200px; height: 630px; background: var(--bg); overflow: hidden; }
   /* The share card is now light, matching the site's default theme rather
@@ -38,21 +58,25 @@
   .top { display: flex; align-items: center; justify-content: space-between; }
   .brand { display: flex; align-items: center; gap: 16px; }
   .brand svg { width: 42px; height: 42px; color: var(--accent); }
+  /* The wordmark is not a heading. On the site .brand sets no font-family and
+     inherits --sans from body, so the serif must not reach it here either. */
   .brand span {
-    font-family: var(--display); font-weight: 700; font-size: 32px;
-    letter-spacing: -0.02em; color: var(--text);
+    font-family: var(--sans); font-weight: 700; font-size: 32px;
+    letter-spacing: -0.01em; color: var(--text);
   }
   .meta {
     font-family: var(--mono); font-size: 15px; letter-spacing: 0.06em;
     color: var(--text-muted);
   }
 
+  /* Weight, tracking and the italic accent cut all follow academy.css, which
+     runs the serif at 400 and sets the em clause in --accent, not --rust. */
   h1 {
-    font-family: var(--display); font-weight: 600; font-size: 92px;
-    line-height: 1.02; letter-spacing: -0.035em; margin: 0;
+    font-family: var(--display); font-weight: 400; font-size: 88px;
+    line-height: 1.04; letter-spacing: -0.018em; margin: 0;
     color: var(--text);
   }
-  h1 em { font-style: normal; color: var(--rust); }
+  h1 em { font-style: italic; font-weight: 500; color: var(--accent); }
   .lede {
     font-family: var(--sans); font-size: 24px; line-height: 1.45;
     color: var(--text-muted); margin: 26px 0 0; max-width: 44ch;

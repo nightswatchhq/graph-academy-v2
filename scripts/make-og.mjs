@@ -42,7 +42,26 @@ const staleParams = paramEntries.filter(
   ([, p]) => days(today, new Date(p.verified)) > 90,
 ).length;
 
-const filled = readFileSync(card, 'utf8')
+// The card cannot load academy.css (its font URLs are absolute and this renders
+// over file://), so it restates the one thing it needs from it: the display
+// face. A restated value is a value that drifts, and this one did - the site
+// moved to Fraunces and the card kept setting its headline in Space Grotesk
+// without a word of complaint. Compare them and refuse to render if they part.
+const cardSrc = readFileSync(card, 'utf8');
+const displayOf = (css) => [...css.matchAll(/--display:\s*([^;]+);/g)].pop()?.[1].trim();
+const siteDisplay = displayOf(readFileSync(join(ROOT, 'src/styles/academy.css'), 'utf8'));
+const cardDisplay = displayOf(cardSrc);
+if (!siteDisplay || !cardDisplay || siteDisplay !== cardDisplay) {
+  console.log(
+    `${c.red}fail${c.reset}  the card's display face has drifted from the site's.\n` +
+      `      academy.css: ${siteDisplay ?? '(not found)'}\n` +
+      `      card.html:   ${cardDisplay ?? '(not found)'}\n` +
+      `      Make them identical. A share card set in a face the site does not use is an advert for a different site.`,
+  );
+  process.exit(1);
+}
+
+const filled = cardSrc
   .replace('{{ENTRIES}}', String(entries.length))
   .replace('{{STALE}}', String(stale + staleParams))
   .replace('{{CONFLICTS}}', String(conflicts));
