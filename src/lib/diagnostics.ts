@@ -86,6 +86,7 @@ export const SYMPTOMS: Symptom[] = [
       },
     ],
     worked: [
+      { n: 27, was: 'a proxy upgrade changed 11 of 13 event signatures, and the subgraph had been quietly wrong for months' },
       { n: 7, was: 'the source contract migrated, the subgraph was healthy the whole time' },
       { n: 13, was: 'the sole indexer reported 99.98% synced against a chain head frozen 85 hours' },
       { n: 15, was: 'why a halted chain is indistinguishable from health in every tool' },
@@ -304,6 +305,7 @@ export const SYMPTOMS: Symptom[] = [
       { n: 1, was: 'what every reason in that map means, decoded against gateway source' },
       { n: 8, was: 'six indexers, four distinct failures, no healthy candidate anywhere' },
       { n: 4, was: 'the reason inside the map turned out to be the query, not the indexers' },
+      { n: 26, was: 'the sole allocated indexer\u2019s store was down, and there was no second candidate to fall back to' },
     ],
   },
   {
