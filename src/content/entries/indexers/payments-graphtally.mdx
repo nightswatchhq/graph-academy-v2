@@ -15,6 +15,8 @@ sources:
     url: "https://thegraph.com/docs/en/indexing/tap/"
   - name: "GIP-0054: Timeline Aggregation Protocol"
     url: "https://github.com/graphprotocol/graph-improvement-proposals/blob/main/gips/0054-timeline-aggregation-protocol.md"
+  - name: "graph-support #30: the mainnet aggregator serving a Cloudflare 526"
+    url: "https://github.com/nightswatchhq/graph-support/issues/30"
 parameters_used: []
 authors: ["@community"]
 license: "CC-BY-4.0"
@@ -127,6 +129,43 @@ the thing that stops served-query volume from existing.
 - **Redemption transactions failing.** Insufficient gas, a reorganisation not
   resubmitted, a stuck nonce.
 - **Escrow exhausted on the sender's side.** Receipts you hold are backed by nothing.
+
+### When the aggregator goes down, serving stops too.
+
+The third bullet understates itself. An unreachable aggregator does not merely delay
+the money; at ordinary volume it takes you off the network within the hour.
+
+Every failed aggregation leaves the unaggregated fees exactly where they were, and
+queries keep arriving on top of them. Once unaggregated plus invalid receipt fees reach
+`max_amount_willing_to_lose_grt`, tap-agent writes the sender into its denylist table, a
+Postgres notification carries that to indexer-service, and every subsequent receipt from
+that sender is refused with `Received a receipt from a denylisted sender`. Read that log
+line correctly: it is your own agent's decision, recorded in your own database, not a
+judgement anybody has made about you.
+
+Nothing is lost while it lasts. The receipts stay in the receipts table, and the denial
+lifts by itself as soon as one RAV succeeds. What you are losing is served queries.
+
+The lever, and it is the only one, is `max_amount_willing_to_lose_grt`, or its
+environment form `TAP_AGENT_TAP__MAX_AMOUNT_WILLING_TO_LOSE_GRT`. The prefix is
+`TAP_AGENT_` and `__` separates nested keys, so indexer-service's own settings take
+`INDEXER_SERVICE_` the same way. The value is read once at startup, so changing it needs
+a tap-agent restart, and restarting is safe even mid-outage as long as the failure sits
+behind a proxy that still completes the TLS handshake.
+
+<Warn title="Never delete the denylist row by hand">
+It is the obvious shortcut, and tap-agent shouts about it in the source: removing a
+denied sender manually exposes you to losing all of your query fee money. The denial is
+the thing stopping you from serving work you will never be paid for. Raise the ceiling
+deliberately and restart, or wait it out.
+</Warn>
+
+Diagnosing it has one trap worth knowing. A proxy erroring in front of the aggregator
+does not reach tap-agent as an HTTP failure. It arrives as an invalid gRPC compression
+flag, and the flag number is simply the first byte of whatever the proxy served: 101 for
+`error code: NNN`, 60 for an HTML page. Ignore the flag and read the HTTP status at the
+end of the message. The worked case is
+[graph-support #30](https://github.com/nightswatchhq/graph-support/issues/30).
 
 Monitor unaggregated receipt value and the age of your oldest unredeemed RAV. Both
 are early warnings, and both are invisible in the metrics you would naturally watch,
