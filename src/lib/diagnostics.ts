@@ -550,4 +550,32 @@ export const SYMPTOMS: Symptom[] = [
     ],
     worked: [{ n: 30, was: 'the mainnet aggregator serving a Cloudflare 526, reported as gRPC compression flag 101' }],
   },
+  {
+    id: 'everything-stopped-same-block',
+    symptom: 'Every subgraph stopped at the same block and none of them are failing',
+    who: 'indexer',
+    causes: [
+      {
+        cause: 'No node is running block ingestion',
+        check: 'Rule this out first after any upgrade, because it costs one grep and raises nothing anywhere else. `[chains] ingestor` must equal the `--node-id` of a running node exactly; it was parsed and ignored until graph-node 0.42.1 and has decided ingestion ever since, so a value that was never right only starts mattering when you upgrade across it. Grep every node’s startup log for "Not running block ingestion" and "Block ingestor disabled". If every node prints one of the two, none of them is ingesting.',
+        more: '/dispatches/graph-node-stack-architecture/',
+      },
+      {
+        cause: 'The chain client has stopped and is still answering',
+        check: 'A halted or frozen client keeps serving its last known head, so graph-node has nothing to ingest and every deployment reports synced and healthy against a head that stopped hours or days ago. Compare the head block’s timestamp against the wall clock, or against an independent RPC for the same chain, rather than against your own client, which is the thing under suspicion.',
+        more: '/ecosystem/oracles-and-observability/',
+      },
+      {
+        cause: 'The ingestor is running and its provider is stalled or behind',
+        check: 'Distinguish it from the two above by the logs and the client. One node is not printing either line, so ingestion is running, and an independent RPC shows the chain moving; the stored head simply advances slowly or not at all. Watch `graphman chain list` across a minute and compare the delta against block time.',
+        more: '/indexers/running-the-stack/',
+      },
+    ],
+    worked: [
+      { n: 28, was: 'ingestor set to index-node-0 against a node running as index_node_0, after 0.41.1 to 0.45.0' },
+      { n: 13, was: 'two Celo subgraphs stuck 89h against a chain head frozen 85h earlier' },
+      { n: 25, was: 'a frozen chain client reporting synced while 3.68M blocks went unindexed' },
+      { n: 15, was: 'a halted chain rendering as a perfectly healthy subgraph in every tool' },
+    ],
+  },
 ];
