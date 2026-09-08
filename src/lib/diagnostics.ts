@@ -475,4 +475,31 @@ export const SYMPTOMS: Symptom[] = [
     ],
     worked: [{ n: 11, was: 'open and unresolved, recorded early so nobody migrates blind' }],
   },
+  {
+    id: 'everything-stopped-same-block',
+    symptom: 'Every subgraph stopped at the same block and none of them are failing',
+    who: 'indexer',
+    causes: [
+      {
+        cause: 'No node is running block ingestion',
+        check: 'Rule this out first after any upgrade, because it costs one grep and raises nothing anywhere else. `[chains] ingestor` must equal the `--node-id` of a running node exactly; it was parsed and ignored until graph-node 0.42.1 and has decided ingestion ever since, so a value that was never right only starts mattering when you upgrade across it. Grep every node for "Not running block ingestion". If they all print it, none of them is ingesting.',
+        more: '/indexers/running-the-stack/',
+      },
+      {
+        cause: 'The chain client has stopped and is still answering',
+        check: 'A halted or frozen client keeps serving its last known head, so graph-node has nothing to ingest and every deployment reports synced and healthy against a head that is months old. Compare your stored head against an independent RPC for the same chain rather than against your own client, which is the thing under suspicion.',
+        more: '/indexers/running-the-stack/',
+      },
+      {
+        cause: 'The ingestor is running and its provider is stalled or behind',
+        check: 'Distinguishes from the two above by which node is quiet. Ingestion is happening, so no node prints the line, and the client is alive, so it answers; the head simply advances slowly or not at all. Watch `graphman chain list` across a minute and compare the delta against block time.',
+        more: '/indexers/running-the-stack/',
+      },
+    ],
+    worked: [
+      { n: 28, was: 'ingestor set to index-node-0 against a node running as index_node_0, after 0.41.1 to 0.45.0' },
+      { n: 15, was: 'a halted chain rendering as a perfectly healthy subgraph in every tool' },
+      { n: 13, was: 'two Celo subgraphs stuck 89h against a chain head frozen 85h earlier' },
+    ],
+  },
 ];
