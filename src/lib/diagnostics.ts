@@ -86,6 +86,7 @@ export const SYMPTOMS: Symptom[] = [
       },
     ],
     worked: [
+      { n: 27, was: 'a proxy upgrade changed 11 of 13 event signatures, and the subgraph had been quietly wrong for months' },
       { n: 7, was: 'the source contract migrated, the subgraph was healthy the whole time' },
       { n: 13, was: 'the sole indexer reported 99.98% synced against a chain head frozen 85 hours' },
       { n: 15, was: 'why a halted chain is indistinguishable from health in every tool' },
@@ -194,6 +195,7 @@ export const SYMPTOMS: Symptom[] = [
         more: '/indexers/payments-graphtally/',
       },
     ],
+    worked: [{ n: 30, was: 'the sender’s aggregator was down, so no RAV could be signed and revenue stopped before serving did' }],
   },
   {
     id: 'no-queries-routed',
@@ -303,6 +305,7 @@ export const SYMPTOMS: Symptom[] = [
       { n: 1, was: 'what every reason in that map means, decoded against gateway source' },
       { n: 8, was: 'six indexers, four distinct failures, no healthy candidate anywhere' },
       { n: 4, was: 'the reason inside the map turned out to be the query, not the indexers' },
+      { n: 26, was: 'the sole allocated indexer\u2019s store was down, and there was no second candidate to fall back to' },
     ],
   },
   {
@@ -474,5 +477,33 @@ export const SYMPTOMS: Symptom[] = [
       },
     ],
     worked: [{ n: 11, was: 'open and unresolved, recorded early so nobody migrates blind' }],
+  },
+  {
+    id: 'receipts-refused-denylisted-sender',
+    symptom: 'Every query is refused with "Received a receipt from a denylisted sender"',
+    who: 'indexer',
+    causes: [
+      {
+        cause: 'The sender’s aggregator is unreachable, so no RAV can be signed and your own tap-agent denied them',
+        check: 'indexer-service is not judging the sender, it is reading a row your own tap-agent wrote, so check tap_horizon_denylist (scalar_tap_denylist on the legacy path) before you blame anybody. Then curl the URL mapped to that sender under [tap.sender_aggregator_endpoints]. A proxy erroring in front of the aggregator does not surface as an HTTP failure: tap-agent reports it as an invalid gRPC compression flag, and the flag number is the first byte of the proxy’s error body, 101 for "error code: NNN" and 60 for an HTML page. Ignore the flag and read the HTTP status at the end of the message.',
+        more: '/indexers/payments-graphtally/',
+      },
+      {
+        cause: 'tap-agent is failing to aggregate for some other reason, or is not running',
+        check: 'The ceiling is the same whatever stopped aggregation, so a dead aggregator, a stopped agent and a failing redemption all arrive here looking identical. tap_sender_denied goes to 1 at the moment of denial and tap_sender_fee_tracker_grt_total climbs in a straight line to tap_max_fee_per_sender_grt_total beforehand; whether that line is climbing or flat says whether receipts are still arriving and only aggregation is broken.',
+        more: '/indexers/payments-graphtally/',
+      },
+      {
+        cause: 'The sender’s escrow no longer covers what you are holding',
+        check: 'The other half of the deny condition, and it fires with no aggregation failure at all. Pending RAVs plus unaggregated fees exceeding the sender’s escrow balance denies them just the same, and indexer-service prints the identical error. Compare tap_sender_escrow_balance_grt_total against pending plus unaggregated before assuming the aggregator is at fault.',
+        more: '/indexers/payments-graphtally/',
+      },
+      {
+        cause: 'Invalid receipts have quietly accumulated',
+        check: 'Invalid receipt fees count toward the same ceiling and never go down, so a slow trickle denies a sender eventually with nothing else wrong anywhere. tap_invalid_receipt_fees_grt_total is the one to watch, and it is the only one of these four that will not clear itself.',
+        more: '/indexers/payments-graphtally/',
+      },
+    ],
+    worked: [{ n: 30, was: 'the mainnet aggregator serving a Cloudflare 526, reported as gRPC compression flag 101' }],
   },
 ];
