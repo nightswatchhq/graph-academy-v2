@@ -78,12 +78,6 @@ const CHECKS = [
     read: (v) => Number(v) / 10000,
   },
   {
-    key: 'subgraph_service_issuance_per_block',
-    at: 'RewardsManager', sig: 'issuancePerBlock()(uint256)',
-    selector: '0x6c080f18', word: 0,
-    read: (v) => Number((v * 1000n) / E18) / 1000,
-  },
-  {
     key: 'reo_eligibility_period_days',
     at: 'RewardsEligibilityOracle', sig: 'getEligibilityPeriod()(uint256)',
     selector: '0xd0a5379e', word: 0,
@@ -194,6 +188,18 @@ try {
     0,
   );
   const redirected = total === 0n ? 0 : Number(((total - toRewards) * 10000n) / total) / 100;
+  // The same two reads answer both parameters, so both are recorded here.
+  //
+  // This one used to be read from `RewardsManager.issuancePerBlock()`, which still returns 120.73
+  // and is the manager's own configured rate. What *reaches* it is the allocator's decision, and
+  // that is what the label claims. The check passed for a day against a figure that had stopped
+  // being true, because it was asking the wrong contract.
+  record(
+    'subgraph_service_issuance_per_block',
+    byKey.subgraph_service_issuance_per_block,
+    Number((toRewards * 1000n) / E18) / 1000,
+    'IssuanceAllocator.getTargetAllocation(RewardsManager)',
+  );
   record(
     'innovation_allocation_pct',
     byKey.innovation_allocation_pct,
@@ -201,13 +207,21 @@ try {
     `IssuanceAllocator allocates ${toRewards} of ${total} to the Rewards Manager`,
   );
 } catch (e) {
-  unread.push(`innovation_allocation_pct: IssuanceAllocator did not return (${e.message})`);
+  for (const k of ['innovation_allocation_pct', 'subgraph_service_issuance_per_block']) {
+    unread.push(`${k}: IssuanceAllocator did not return (${e.message})`);
+  }
 }
 
 // Every registry key naming a contract function that this script does not
 // actually read. Named out loud rather than left implicit, because an
 // onchain_ref carries an implication of verification that it has not earned.
-const covered = new Set([...CHECKS.map((c) => c.key), 'innovation_allocation_pct']);
+// The two read from the allocator are recorded outside `CHECKS`, because one pair of eth_calls
+// answers both, so they are named here or they look unverified.
+const covered = new Set([
+  ...CHECKS.map((c) => c.key),
+  'innovation_allocation_pct',
+  'subgraph_service_issuance_per_block',
+]);
 const claimed = paramEntries.filter(([k, p]) => p.onchain_ref && !covered.has(k)).map(([k]) => k);
 const uncovered = paramEntries.length - covered.size;
 

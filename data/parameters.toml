@@ -330,51 +330,47 @@ label = "Issuance redirected to the Innovation Allocation"
 value = 20
 unit = "% of protocol issuance"
 display = "20%"
-status = "disputed"
+status = "current"
 source = "https://forum.thegraph.com/t/the-graph-council-has-approved-gip-0089-the-innovation-allocation/7035"
 quote = "The Graph Council has approved GIP-0089, directing 20% of protocol issuance to the Innovation Allocation."
 onchain_ref = "IssuanceAllocator.getTargetAllocation"
-# The site teaches the 20% governance approved. The contract allocates none of
-# it yet, so that is what the reconciler expects to read. When this goes red the
-# redirect has activated.
-onchain_expect = 0
 note = """
-Approved by Council on 2026-08-26, with an effective date given as 2026-08-31 in one \
-place in the forum post and 2026-09-01 in another. As of Arbitrum One block 500226907 on \
-2026-08-31 the redirect is configured but carries no value: the Issuance Allocator at \
-0xb64f29b2d81140ffc3a135e319561a1bd03b1a7e holds two targets, and getTargetAllocation \
-returns 120.73 GRT per block for the Rewards Manager and zero for the other. The Rewards \
-Manager also still holds the minter role and still reports issuancePerBlock() of 120.73. \
-So the approved figure is 20% and the flowing figure is 0%. Re-read the contract before \
-quoting either: this is expected to change, and the whole point of recording the block \
-number is that a reader can tell how stale this reading is.\
+Approved by Council on 2026-08-26 and now flowing. The gap this entry used to record is \
+closed: at Arbitrum One block 504192623 the Issuance Allocator at \
+0xb64f29b2d81140ffc3a135e319561a1bd03b1a7e allocates 96.584 GRT per block to the Rewards \
+Manager out of a total 120.73, so 20% goes elsewhere. Confirmed by a second read at block \
+504322516 against a public RPC. The date it activated is not established here; what is \
+recorded is the first block at which it was observed, which is the honest claim.\
 """
 note_source = "https://github.com/nightswatchhq/graph-support/issues/23"
-verified = "2026-08-31"
+verified = "2026-09-12"
 
 [subgraph_service_issuance_per_block]
 conflict = true
 label = "Issuance reaching the Rewards Manager"
-value = 120.73
+value = 96.584
 unit = "GRT per block"
-display = "120.73 GRT/block"
-status = "disputed"
+display = "96.584 GRT/block"
+status = "current"
 source = "https://forum.thegraph.com/t/the-graph-council-has-approved-gip-0089-the-innovation-allocation/7035"
 quote = "The SubgraphService Rewards Manager receives 96.584 GRT per block, a reduction of 24.146 GRT per block from 120.73."
-onchain_ref = "RewardsManager.issuancePerBlock"
-onchain_expect = 120.73
+onchain_ref = "IssuanceAllocator.getTargetAllocation(RewardsManager)"
 note = """
-The approved figure is 96.584 GRT per block. The deployed figure is 120.73. Read from \
-Arbitrum One at block 500226907 on 2026-08-31: issuancePerBlock() on the Rewards Manager \
-at 0x971B9d3d0Ae3ECa029CAB5eA1fB0F72c85e6a525 returns 120730000000000000000, and the \
-Issuance Allocator allocates that same 120.73 to it while allocating zero to its other \
-target. Reproduce with cast against any public Arbitrum One RPC; it takes a minute and it \
-beats trusting this file. This entry carries the deployed value because that is what \
-indexers are actually being paid from, and the approved value in the quote above so the \
-gap is visible rather than hidden.\
+The approved figure and the deployed figure are the same figure now. Read from Arbitrum \
+One at block 504322516: the Issuance Allocator at \
+0xb64f29b2d81140ffc3a135e319561a1bd03b1a7e returns 96584000000000000000 for the Rewards \
+Manager at 0x971B9d3d0Ae3ECa029CAB5eA1fB0F72c85e6a525, out of a total of \
+120730000000000000000. Reproduce with cast against any public Arbitrum One RPC; it takes \
+a minute and it beats trusting this file.
+
+This entry used to be reconciled against issuancePerBlock() on the Rewards Manager, which \
+still returns 120.73 and is not the same question. That is the manager's own configured \
+rate; what reaches it is decided by the allocator, and this label says "reaching". The \
+check agreed with a figure that had stopped being true, because it was reading the wrong \
+function.
 """
 note_source = "https://github.com/nightswatchhq/graph-support/issues/23"
-verified = "2026-08-31"
+verified = "2026-09-12"
 
 # --------------------------------------------------------------------------
 # Rewards eligibility (GIP-0079, the Rewards Eligibility Oracle)
@@ -517,10 +513,26 @@ via = "GIP-0089"
 note = "Approved by Council on 2026-08-26, stated effective 2026-08-31. Approval is not activation: at Arbitrum One block 500226907 on 2026-08-31 the Issuance Allocator still allocates the whole 120.73 GRT per block to the Rewards Manager and zero to its other target. This row records the vote. A second row goes here when the contract changes, and not before."
 source = "https://forum.thegraph.com/t/the-graph-council-has-approved-gip-0089-the-innovation-allocation/7035"
 
+[[innovation_allocation_pct.history]]
+date = "2026-09-12"
+from = "20% approved, 0% flowing"
+to = "20% flowing"
+via = "IssuanceAllocator"
+note = "The second row the one above said would go here. First observed at Arbitrum One block 504192623 by the reconciler, which had been red on this parameter since the redirect activated; confirmed at block 504322516. getTargetAllocation now returns 96.584 GRT per block for the Rewards Manager against a total of 120.73. The activation block itself is not established: this records when it was seen, not when it happened."
+source = "https://forum.thegraph.com/t/the-graph-council-has-approved-gip-0089-the-innovation-allocation/7035"
+
 [[subgraph_service_issuance_per_block.history]]
 date = "2026-08-26"
 from = "120.73 GRT/block"
 to = "96.584 GRT/block approved"
 via = "GIP-0089"
 note = "A reduction of 24.146 GRT per block, approved but not yet observed on chain. issuancePerBlock() read 120.73 at block 500226907 on 2026-08-31. When it reads 96.584, add the row and say which block."
+source = "https://forum.thegraph.com/t/the-graph-council-has-approved-gip-0089-the-innovation-allocation/7035"
+
+[[subgraph_service_issuance_per_block.history]]
+date = "2026-09-12"
+from = "120.73 GRT/block"
+to = "96.584 GRT/block"
+via = "IssuanceAllocator"
+note = "The row the one above asked for. The redirect activated: getTargetAllocation returns 96.584 GRT per block for the Rewards Manager. First observed at Arbitrum One block 504192623, confirmed at 504322516. issuancePerBlock() still reads 120.73, which is why the old row was watching the wrong function: that is the manager's configured rate, not what reaches it."
 source = "https://forum.thegraph.com/t/the-graph-council-has-approved-gip-0089-the-innovation-allocation/7035"
