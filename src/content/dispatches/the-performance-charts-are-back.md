@@ -57,12 +57,12 @@ None of this was a fault in Edge & Node's data.
 
 Foghorn's probes sit on the success and latency charts as a dashed line, labelled as probes rather than demand, and add what the oracle cannot: a correctness chart, and p50 and p95 latency.
 
-Its quality routes had been reporting zero probes for every indexer. The fix was deployed today and every stored bucket re-rolled, so figures in earlier drafts are withdrawn. Measured through the fixed endpoints at 17:08 to 17:10 UTC on 14 September, over seven days:
+Its quality routes had been reporting zero probes for every indexer. The fix was deployed on 14 September and every stored bucket re-rolled, so figures in earlier drafts are withdrawn. Measured through the fixed endpoints at 17:08 to 17:10 UTC on 14 September, over seven days:
 
 - Foghorn probed 127 indexer-deployment pairs; the oracle covers 5,177.
 - Of 56 overlapping pairs with at least 20 probes, success rates differ by a median of 1.3 points, and by 10 or more on 9, in both directions. Probes and organic traffic are different samples.
 - On the 42 pairs with at least 20 comparable answers, none served minority data.
-- In the last 24 hours indexers refused 2,315 of our paid probes because they denylist our payer, against 393 served.
+- In the 24 hours to 17:09 UTC, indexers refused 2,315 of our paid probes because they denylist our payer, against 393 served.
 
 ## What we still cannot tell you
 
