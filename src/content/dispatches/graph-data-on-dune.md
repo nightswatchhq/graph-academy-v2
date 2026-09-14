@@ -1,11 +1,20 @@
 ---
-title: "What Graph Data You Can Actually Query on Dune, and the Horizon-Shaped Hole"
+title: "Dune for Lodestar: What Graph Data Is Actually There, and the Horizon-Shaped Hole"
 date: "2026-09-14"
 author: "cargopete"
 tags: ["dune", "sql", "horizon", "data", "reference", "arbitrum"]
 category: "Data Services"
-excerpt: "830 decoded tables of The Graph already live on Dune, which surprises people who assume nobody has done the work. HorizonStaking is among them, decoded under the legacy ABI, so provisions and thaw requests are simply absent. Here is what is queryable today, verified by address on 14 September 2026, with every namespace and contract listed."
+excerpt: "We are wiring Dune into Lodestar as a second data source, alongside the indexing we run ourselves. Nothing is live yet. But the survey done to get there is useful on its own: 830 decoded Graph tables already exist, HorizonStaking is decoded under the legacy ABI so provisions and thaw requests are absent, and seven Horizon contracts are not decoded at all. Verified by address on 14 September 2026."
 ---
+
+Night's Watch indexes The Graph with its own tools, and there is a category of data that will never
+be worth indexing ourselves: token prices, labelled exchange addresses, bridge flows on chains we do
+not follow, the decoded history of contracts somebody else submitted years ago. Dune already has all
+of it, so we are wiring Dune into Lodestar as a second source alongside our own nests.
+
+**To be clear about the status: none of it is live.** No Lodestar tile reads Dune data today,
+nothing is scheduled, and the work sits on a branch. What follows is the survey done to get there,
+which turned out to be worth publishing on its own account.
 
 If you go looking for The Graph on Dune and search for a schema starting with `graph`, you will find
 a Carbon/Bancor project called Graphene and conclude the coverage is thin. If you then search
@@ -208,6 +217,11 @@ normal feed query, and returned hundreds of unrelated projects because contract 
 It is a snapshot of 14 September 2026 and it will go stale in a specific way: the moment anyone
 submits the Horizon ABI, the most useful section here is wrong. That is the good outcome and I hope
 it happens quickly.
+
+It also does not describe a working feature. The Lodestar side is a branch: four Rust crates
+between Dune's API and the dashboard's backend, a credit ledger so a metered third-party API cannot
+run away with a subscription, and a poller that materialises results into Postgres. No tile reads
+any of it yet, and when one does that will be its own dispatch.
 
 It also says nothing about data quality. Decoded means the events are parsed into tables, not that
 they are complete, not that the decoding is current with the latest upgrade, and not that the
