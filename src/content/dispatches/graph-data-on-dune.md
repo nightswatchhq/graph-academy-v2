@@ -29,13 +29,13 @@ GraphTallyCollector, RecurringCollector, the Arbitrum DisputeManager, and EpochM
 
 ## What is decoded, by namespace
 
-| Namespace | Tables | Contracts |
-|---|---|---|
-| `thegraph_ethereum` | 338 | `disputemanager`, `gns`, `graphtokenlockmanager`, `graphtokenlockwallet`, `grt`, `rewardsmanager`, `staking` |
-| `thegraph_arbitrum` | 282 | `billing`, `l2curation`, `l2gns`, `rewardsmanager`, `staking`, `subgraphavailabilitymanager` |
-| `thegraph_multichain` | 146 | `billing`, `rewardsmanager`, `staking` |
-| `graphprotocol_arbitrum` | 43 | `l2graphtoken` |
-| `thegraph_polygon` | 21 | `billing` |
+- **`thegraph_ethereum`**, 338 tables: `disputemanager`, `gns`, `graphtokenlockmanager`,
+  `graphtokenlockwallet`, `grt`, `rewardsmanager`, `staking`
+- **`thegraph_arbitrum`**, 282 tables: `billing`, `l2curation`, `l2gns`, `rewardsmanager`,
+  `staking`, `subgraphavailabilitymanager`
+- **`thegraph_multichain`**, 146 tables: `billing`, `rewardsmanager`, `staking`
+- **`graphprotocol_arbitrum`**, 43 tables: `l2graphtoken`
+- **`thegraph_polygon`**, 21 tables: `billing`
 
 That is a great deal of queryable protocol history, and it is free to read: Dune bills executions,
 not result fetches.
@@ -92,23 +92,43 @@ Arbitrum One (chain `42161`), from the canonical
 
 | Contract | Address | Decoded? |
 |---|---|---|
-| HorizonStaking | `0x00669A4CF01450B64E8A2A20E9b1FCB71E61eF03` | Address yes, Horizon ABI no |
-| SubgraphService | `0xb2Bb92d0DE618878E438b55D5846cfecD9301105` | No |
-| GraphPayments | `0x7Aae8ae011927BC36Cb4d0d3e81f2E6E30daE06D` | No |
-| PaymentsEscrow | `0xf6Fcc27aAf1fcD8B254498c9794451d82afC673E` | No |
-| GraphTallyCollector | `0x8f69F5C07477Ac46FBc491B1E6D91E2bb0111A9e` | No |
-| RecurringCollector | `0xff0dc7310fbfbcc2524dae230cd4f34727eb84ee` | No |
-| DisputeManager | `0x2FE023a575449AcB698648eD21276293Fa176f96` | No |
-| EpochManager | `0x5A843145c43d328B9bB7a4401d94918f131bB281` | No |
-| Controller | `0x0a8491544221dd212964fbb96487467291b2C97e` | No |
-| RewardsManager | `0x971B9d3d0Ae3ECa029CAB5eA1fB0F72c85e6a525` | Yes |
-| L2Curation | `0x22d78fb4bc72e191C765807f8891B5e1785C8014` | Yes |
-| L2GNS | `0xec9A7fb6CbC2E41926127929c2dcE6e9c5D33Bec` | Yes |
-| L2GraphToken | `0x9623063377AD1B27544C965cCd7342f7EA7e88C7` | Yes |
-| L2GraphTokenGateway | `0x65E1a5e8946e7E87d9774f5288f41c30a99fD302` | No |
+| HorizonStaking | `0x00669A4CF0…1eF03` | Legacy ABI only |
+| SubgraphService | `0xb2Bb92d0DE…01105` | No |
+| GraphPayments | `0x7Aae8ae011…aE06D` | No |
+| PaymentsEscrow | `0xf6Fcc27aAf…C673E` | No |
+| GraphTallyCollector | `0x8f69F5C074…11A9e` | No |
+| RecurringCollector | `0xff0dc7310f…b84ee` | No |
+| DisputeManager | `0x2FE023a575…76f96` | No |
+| EpochManager | `0x5A843145c4…bB281` | No |
+| Controller | `0x0a84915442…2C97e` | No |
+| RewardsManager | `0x971B9d3d0A…6a525` | Yes |
+| L2Curation | `0x22d78fb4bc…C8014` | Yes |
+| L2GNS | `0xec9A7fb6Cb…33Bec` | Yes |
+| L2GraphToken | `0x9623063377…e88C7` | Yes |
+| L2GraphTokenGateway | `0x65E1a5e894…fD302` | No |
 
-GRT on Ethereum is `0xc944e90c64b2c07662a292be6244bdf05cda44a7`, decoded as
-`thegraph_ethereum.grt_*`.
+Addresses are abbreviated above so the table fits a phone. In full, copy-pasteable:
+
+```
+HorizonStaking       0x00669A4CF01450B64E8A2A20E9b1FCB71E61eF03
+SubgraphService      0xb2Bb92d0DE618878E438b55D5846cfecD9301105
+GraphPayments        0x7Aae8ae011927BC36Cb4d0d3e81f2E6E30daE06D
+PaymentsEscrow       0xf6Fcc27aAf1fcD8B254498c9794451d82afC673E
+GraphTallyCollector  0x8f69F5C07477Ac46FBc491B1E6D91E2bb0111A9e
+RecurringCollector   0xff0dc7310fbfbcc2524dae230cd4f34727eb84ee
+DisputeManager       0x2FE023a575449AcB698648eD21276293Fa176f96
+EpochManager         0x5A843145c43d328B9bB7a4401d94918f131bB281
+Controller           0x0a8491544221dd212964fbb96487467291b2C97e
+RewardsManager       0x971B9d3d0Ae3ECa029CAB5eA1fB0F72c85e6a525
+L2Curation           0x22d78fb4bc72e191C765807f8891B5e1785C8014
+L2GNS                0xec9A7fb6CbC2E41926127929c2dcE6e9c5D33Bec
+L2GraphToken         0x9623063377AD1B27544C965cCd7342f7EA7e88C7
+L2GraphTokenGateway  0x65E1a5e8946e7E87d9774f5288f41c30a99fD302
+L1GraphTokenGateway  0x36aff7001294dae4c2ed4fdefc478a00de77f090   (Ethereum)
+GRT                  0xc944e90c64b2c07662a292be6244bdf05cda44a7   (Ethereum)
+```
+
+GRT on Ethereum is decoded as `thegraph_ethereum.grt_*`.
 
 ## The L1 bridge escrow, which nobody has labelled
 

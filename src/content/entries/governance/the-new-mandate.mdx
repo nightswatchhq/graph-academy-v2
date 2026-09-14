@@ -9,7 +9,7 @@ time_minutes: 11
 prerequisites: ["Tokenomics: issuance, burns, and where it just moved"]
 summary: "A fifth of protocol issuance is being redirected to fund a change in what the Foundation does. What was published, what was only presented, and how to tell."
 protocol_version_verified: "Graph Horizon (2025-12-11)"
-last_verified: 2026-08-31
+last_verified: 2026-09-02
 verify_before: 2026-11-30
 sources:
   - name: "A New Mandate for The Graph Foundation"
@@ -20,9 +20,12 @@ sources:
     url: "https://forum.thegraph.com/t/the-graph-council-has-approved-gip-0089-the-innovation-allocation/7035"
   - name: "On the Catalyst roadmap"
     url: "https://forum.thegraph.com/t/on-the-catalyst-roadmap/7037"
+  - name: "TL;DR for IOH 272: the Foundation's new mandate, and the thread under it"
+    url: "https://forum.thegraph.com/t/tldr-for-ioh-272-the-foundations-new-mandate/7036"
 parameters_used: ["innovation_allocation_pct", "subgraph_service_issuance_per_block"]
 see_also:
   - "/governance/project-catalyst/"
+  - "/governance/the-labs-decision/"
   - "/governance/tokenomics/"
   - "/governance/council-and-foundation/"
   - "/governance/gips-and-ggps/"
@@ -72,10 +75,13 @@ be looking at both.
 
 Two things to keep straight, because they are routinely merged.
 
-**Approved is not flowing.** The Council approved GIP-0089 on 2026-08-26. At the last
-contract reading the Rewards Manager was still receiving
-<Param name="subgraph_service_issuance_per_block" />, with the second allocator target
-holding nothing. [The tokenomics entry](/governance/tokenomics/) carries the calls.
+**Approval and activation are different events, and here they were six days apart.**
+The Council approved GIP-0089 on 2026-08-26. The Issuance Allocator was not changed until
+Arbitrum One block 500701944 on 2026-09-01, which is when the Rewards Manager's share
+became <Param name="subgraph_service_issuance_per_block" /> and the redirect began
+carrying value. The gap is closed, but the habit that caught it is the point:
+[the tokenomics entry](/governance/tokenomics/) carries the calls, including the one
+contract that still reports the old figure.
 
 **A mandate is not a specification.** GIP-0089 moves money. It does not bind anyone to
 deliver a particular thing with it, and there is no clause in it that returns the
@@ -143,6 +149,17 @@ including whether the situation that produced it was avoidable. That discussion 
 [on the forum](https://forum.thegraph.com/t/on-the-catalyst-roadmap/7037) and is not
 something this entry adjudicates.
 
+## Why the mandate changed at all
+
+The mandate post describes what the Foundation will now do. It does not describe what
+prompted it, and the prompt is a Council vote: the decision not to designate Edge & Node
+as the Labs entity, after which Edge & Node stopped providing dedicated resourcing for
+protocol management and the Foundation stepped into that gap.
+
+[The Labs decision](/governance/the-labs-decision/) covers what that vote settled, what
+it did not, and the awkward fact that the fullest public explanation of it lives in a
+chat client rather than on a page.
+
 Much of that argument turns on decisions whose reasoning was never published, which is
 a property of the process rather than of the parties.
 [What the governance record does and does not show](/governance/what-the-record-shows/)
@@ -150,12 +167,21 @@ covers why, and what would have to change for it to be otherwise.
 
 ## What to watch, concretely
 
-- **Whether the redirect activates**, which is a contract reading rather than an
-  announcement. [Tokenomics](/governance/tokenomics/) carries the calls.
+- **Whether the redirect is still flowing at the rate approved**, which is a contract
+  reading rather than an announcement. It activated on 2026-09-01.
+  [Tokenomics](/governance/tokenomics/) carries the calls, and the reason one of them
+  still answers with the old number.
 - **Whether the eight items get published** under a name and a URL. That is the
   single cheapest improvement available to this programme.
 - **Whether delivery is reported against them**, on a cadence, in a place with a date
   on it.
+- **Who the in-house team turns out to be.** Operational continuity is the priority
+  everything else rests on, and it is a hiring problem rather than a protocol one. As of
+  2026-09-01 the Foundation put the count at five: a Network Infrastructure Lead, a
+  Protocol Team Lead, two Senior Protocol Engineers and a Software Engineer, all
+  described as long-standing contributors. That figure was given in Discord and appears
+  on no Foundation page, which is the same weakness as the roadmap and is discussed in
+  [the Labs decision](/governance/the-labs-decision/).
 
 <Reveal question="Before reading on: why does it matter whether the roadmap is a page rather than a call?">
 Because issuance is now attached to it.
