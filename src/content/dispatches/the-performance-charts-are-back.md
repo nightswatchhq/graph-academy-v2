@@ -17,7 +17,7 @@ excerpt: "Query Performance, the QoS Quality panel and the directory's QoS colum
 
 Edge & Node's gateway aggregates every query it routes into five-minute buckets, pins each bucket to IPFS, and posts the address to a `DataEdge` contract on Gnosis (`0x5b4293b4c0f36cb5d4448950830bc777759b6c4f`). An indexer document is about 1.7 MB and 2,500 rows, on chain about half an hour after its bucket closes.
 
-The old charts read this through a subgraph and a gateway key. `qos-reo-nest` now reads the calldata and the documents straight from Gnosis and IPFS, and only from the oracle's own publisher. Every document is proven against its CID before a row is written: nuthatch re-encodes it as `ipfs add` would and checks the hash, and all 4,025 payloads we measured verify. A failed fetch is retried until it arrives, so a flaky gateway delays a bucket rather than losing it.
+The old charts read this through a subgraph and a gateway key. `qos-reo-nest` now reads the calldata and the documents straight from Gnosis and IPFS, and only from the two addresses Edge & Node has posted from (it changed keys between 1 and 3 July). Every document is proven against its CID before a row is written: nuthatch re-encodes it as `ipfs add` would and checks the hash, and all 4,025 payloads we measured verify. A failed fetch is retried until it arrives, so a flaky gateway delays a bucket rather than losing it.
 
 <!-- TODO(release): backfill span actually covered, nest size on disk, serving latency at 90 days. -->
 
@@ -49,7 +49,7 @@ None of this was a fault in Edge & Node's data.
 
 **Behind Freshest Peer** replaces blocks behind: seconds behind the most current indexer on the deployment, and the share of queries served more than five minutes behind.
 
-**Gaps are gaps.** A day missing some buckets is drawn as partial, and a day with none is not drawn. The publisher was silent for about 38 hours from 29 July and 37 hours or more from 4 August, never backfilled, and skipped two indexer and five deployment buckets between 6 and 12 September. The chart says the publisher was silent rather than implying the indexer was idle.
+**Gaps are gaps.** A day missing some buckets is drawn as partial, and a day with none is not drawn. The publisher was silent for about 59 hours from 1 July while it changed address, about 38 hours from 29 July and 37 hours or more from 4 August, never backfilled, and skipped two indexer and five deployment buckets between 6 and 12 September. The chart says the publisher was silent rather than implying the indexer was idle.
 
 **QoS Quality** keeps its grades and four bars. Served share is an indexer's attempts over every indexer's attempts on the deployment, bounded and summing to 1, and the history covers the whole window. The directory column shows the same score.
 
