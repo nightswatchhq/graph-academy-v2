@@ -1,17 +1,15 @@
 ---
 title: "The Performance Charts Are Back, and Now They Add Up"
-date: "2026-09-15" # TODO(release): the publish date. A placeholder, kept parseable because the schema coerces it to a date.
+date: "2026-09-15"
 author: "cargopete"
 tags: ["lodestar", "nuthatch", "foghorn", "kittiwake", "the-graph", "qos", "indexers", "gnosis", "ipfs", "correction"]
 category: "Infrastructure"
 excerpt: "Query Performance, the QoS Quality panel and the directory's QoS column are back on Lodestar, read from Edge & Node's QoS oracle postings on Gnosis through a nest anyone can run. Rebuilding them showed the old charts averaged averages, hid outages and sat on a subgraph that had dropped whole buckets. Getting the new ones live took three days of faults, most of them silent and several of them ours. This is every figure, every fault, and how we checked."
 ---
 
-<!-- TODO(release): the publish date, here and in the front matter. -->
-
 *On 13 September stake-machine asked in the Night's Watch Discord whether we had taken the performance charts off Lodestar's indexer page. We had, on 5 September, when Lodestar [stopped reading subgraphs](/dispatches/lodestar-reads-no-subgraphs/). [The first post](/dispatches/the-pnl-was-wrong/) brought back Daily Trends and owned up to a wrong P&L panel. This one covers the rest: Query Performance, the QoS Quality panel and the directory's QoS column. It explains what every figure on them means now, how the pipeline behind them is built, and what went wrong in the three days it took. A good deal went wrong. Most of it was silent, and several of the faults were ours.*
 
-<!-- TODO(release): the time lodestar#231 went live, e.g. "They have been live since HH:MM UTC on DD September." -->
+*They have been live on every indexer page since 13:44 UTC on 15 September.*
 
 ---
 
