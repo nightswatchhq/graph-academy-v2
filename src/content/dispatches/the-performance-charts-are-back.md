@@ -19,7 +19,9 @@ Edge & Node's gateway aggregates every query it routes into five-minute buckets,
 
 The old charts read this through a subgraph and a gateway key. `qos-reo-nest` now reads the calldata and the documents straight from Gnosis and IPFS, and only from the two addresses Edge & Node has posted from (it changed keys between 1 and 3 July). Every document is proven against its CID before a row is written: nuthatch re-encodes it as `ipfs add` would and checks the hash, and all 4,025 payloads we measured verify. A failed fetch is retried until it arrives, so a flaky gateway delays a bucket rather than losing it.
 
-<!-- TODO(release): backfill span actually covered, nest size on disk, serving latency at 90 days. -->
+The nest holds every posting from block 46,700,000 (14 June, 23:15 UTC) to the tip: 9,026 sealed segments, 4.3 GB on disk.
+
+<!-- TODO(release): serving latency at 90 days, once the day statements are measured on the idle nest. -->
 
 ## What we checked
 
