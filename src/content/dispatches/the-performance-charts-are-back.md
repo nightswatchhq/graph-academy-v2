@@ -72,14 +72,19 @@ These figures describe traffic through Edge & Node's gateway: most of the networ
 
 The nest is public and reads nothing but Gnosis and IPFS:
 
-<!-- TODO(release): nuthatch version (expected 3.8.0) and the exact run command. -->
+With nuthatch 3.8.1 or later, the same flags our deployment uses:
+
+```sh
+git clone https://github.com/nightswatchhq/qos-reo-nest && cd qos-reo-nest
+nuthatch dev --seal-direct --concurrency 2 --window 2000 --ipfs https://ipfs.network.thegraph.com/ipfs/
+```
+
+Then, once the backfill has passed the day you ask about:
 
 ```sql
 SELECT * FROM qos_indexer_daily WHERE day = DATE '2026-09-07' ORDER BY query_count DESC;
 ```
 
-The work is in qos-reo-nest#1 and #2, kittiwake#141 and #143, lodestar#231 and foghorn#3, on top of nuthatch's IPFS work from #1367 onward.
-
-<!-- TODO(release): confirm the final nuthatch PR list once the stack lands. -->
+The work is in qos-reo-nest#1 and #2, kittiwake#141 and #143, lodestar#231 and foghorn#3, on top of nuthatch #1367, #1373, #1375, #1376, #1377, #1391 and #1397, released as 3.8.0 and 3.8.1.
 
 If your numbers and ours disagree, tell us.
