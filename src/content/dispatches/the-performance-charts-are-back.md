@@ -49,7 +49,7 @@ None of this was a fault in Edge & Node's data.
 
 **Success Rate and Latency** have query-weighted headlines, with bad buckets (at least 50 queries, under 90% success) and the worst five minutes beneath.
 
-**Behind Freshest Peer** replaces blocks behind: seconds behind the most current indexer on the deployment, and the share of queries served more than five minutes behind.
+**Behind Freshest Peer** replaces blocks behind: seconds behind the most current indexer on the deployment, and the share of queries served more than five minutes behind. It needs peers to mean anything, so a deployment with fewer than three indexers serving 100 or more measured queries that day is left out, and the chart says what share of queries it covers. Without that rule, a deployment answering two queries on BSC read as eight years behind.
 
 **Gaps are gaps.** A day missing some buckets is drawn as partial, and a day with none is not drawn. The publisher was silent for about 59 hours from 1 July while it changed address, about 38 hours from 29 July and 37 hours or more from 4 August, never backfilled, and skipped two indexer and five deployment buckets between 6 and 12 September. The chart says the publisher was silent rather than implying the indexer was idle.
 
