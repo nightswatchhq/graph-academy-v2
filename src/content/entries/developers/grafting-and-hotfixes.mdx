@@ -11,6 +11,8 @@ protocol_version_verified: "Graph Horizon (2025-12-11)"
 last_verified: 2026-08-30
 verify_before: 2026-11-30
 sources:
+  - name: "graph-support #41: a grafted hotfix that half the network could not use"
+    url: "https://github.com/nightswatchhq/graph-support/issues/41"
   - name: "The Graph Docs: grafting"
     url: "https://thegraph.com/docs/en/subgraphs/guides/grafting/"
   - name: "The Graph Docs: grafting for a hotfix"
@@ -106,3 +108,26 @@ Work out when the bug started producing wrong data, not when it started failing.
 frequently different blocks, and the gap between them is exactly the data you do not want
 to keep.
 </Warn>
+
+## Who can actually use your grafted hotfix
+
+The base deployment and the block are written into the manifest, so a grafted deployment is
+not a fix that anybody can pick up. It is a fix usable only by a node that already holds
+that exact base, indexed at least as far as the graft block.
+
+For a subgraph you publish, that splits your consumers in two on the day you ship. Whoever
+was already on the version you grafted from is running again in minutes. Whoever was on an
+older version cannot use it at all, and if the schema changed between those versions they
+should not want to, because the graft would carry new code over data the old schema
+produced.
+
+<Model>
+A graft is a fast path for people who already have the data, not a fix for everybody. When
+the audience is other operators rather than your own infrastructure, ship the graft to
+unblock the ones it fits and a fully resynced version behind it for the rest.
+</Model>
+
+Grafting onto your own older version is the way out for the second group, and it is
+ordinary work: check out the commit your version was built from, apply the fix to it,
+build, upload to IPFS and add a graft stanza at the same block. Same schema, so the graft
+is clean.

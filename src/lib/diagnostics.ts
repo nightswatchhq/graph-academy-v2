@@ -389,6 +389,24 @@ export const SYMPTOMS: Symptom[] = [
     worked: [{ n: 6, was: 'both CIDs resolved by hand while one entity stayed null' }],
   },
   {
+    id: 'synced-but-failed-forever',
+    symptom: 'A deployment reads synced: true and health: failed, and restarting does nothing',
+    who: 'developer',
+    causes: [
+      {
+        cause: 'A file data source handler aborted, and graph-node is retrying it forever',
+        check: 'Read `deterministic` on the fatal error. `false` on a fault that is plainly deterministic, such as a parse failure on fixed content, means the handler ran in an offchain data source. graph-node converts a deterministic error there into a non-deterministic one deliberately, so it backs off, fetches the same content again and fails again. Restarting, resyncing and more memory all change nothing. The block number in the error is where that node\u2019s fetch landed rather than where the fault is, so two indexers report different blocks for one cause.',
+        more: '/developers/what-is-a-subgraph/',
+      },
+      {
+        cause: 'The file the handler parses is not shaped the way the code assumes',
+        check: 'Fetch the content and look at its bytes rather than its rendering. Windows line endings are the common case: a parser that splits on newline leaves a carriage return on the last field of every line, and a number that looks correct in the error message fails to parse. `grep -c $\'\\r$\'` on the file settles it in one command.',
+        more: '/developers/build-a-subgraph/',
+      },
+    ],
+    worked: [{ n: 41, was: 'one manifest with Windows line endings, against a parser that split on newline' }],
+  },
+  {
     id: 'receipt-data-service-rejected',
     symptom: 'Every query is rejected with "Invalid data_service: ... is not allowed for this indexer"',
     who: 'indexer',
@@ -505,5 +523,28 @@ export const SYMPTOMS: Symptom[] = [
       },
     ],
     worked: [{ n: 30, was: 'the mainnet aggregator serving a Cloudflare 526, reported as gRPC compression flag 101' }],
+  },
+  {
+    id: 'agent-stopped-allocating',
+    symptom: 'indexer-agent stopped allocating, and the logs say the network subgraph query failed',
+    who: 'indexer',
+    causes: [
+      {
+        cause: 'Your own copy of the network subgraph has failed',
+        check: 'Query /status for the network subgraph deployment before anything else, because every other symptom here is downstream of it. `health: failed` with `synced: true` and `deterministic: false` is the signature. The network subgraph parses every new deployment\u2019s manifest in an offchain data source, so an abort there is reported as non-deterministic and retried forever. Nothing on your side clears it.',
+        more: '/indexers/running-the-stack/',
+      },
+      {
+        cause: 'The version you are pointed at is no longer a valid one',
+        check: 'Compare the deployment your agent is configured against with the current published version in Graph Explorer. A fix to the network subgraph ships as a new deployment and the failed one never recovers, so an older version is not merely behind, it is dead. Changing the deployment in the agent config is enough on its own to make the agent sync the new one.',
+        more: '/indexers/running-the-stack/',
+      },
+      {
+        cause: 'The endpoint is unreachable rather than failed',
+        check: 'indexer-service logs `HTTP request failed` for the deployment in both cases. Query the deployment on your graph-node directly. Data back means the deployment is fine and the fault is between the agent and the node; /status reporting failed means it is the deployment.',
+        more: '/indexers/running-the-stack/',
+      },
+    ],
+    worked: [{ n: 41, was: 'one CRLF manifest failed every published version of the network subgraph at once, and the gateway went with it' }],
   },
 ];
