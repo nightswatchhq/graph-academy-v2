@@ -103,6 +103,10 @@ export const paramGroups: { title: string; keys: string[] }[] = [
     keys: ['curation_tax_pct', 'l2_curation_curve', 'recommended_dev_signal'],
   },
   {
+    title: 'Subgraph Studio',
+    keys: ['studio_dev_query_limit'],
+  },
+  {
     title: 'Tokenomics',
     keys: ['annual_issuance_pct', 'initial_supply', 'query_fee_burn_pct', 'settlement_layer'],
   },

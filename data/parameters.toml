@@ -216,6 +216,16 @@ quote = "The curation bonding curves on L2 are flat, which makes it easier for o
 note = "Signal and unsignal cost the same regardless of who signalled first. The L1 early-mover advantage is gone."
 verified = "2026-08-30"
 
+[studio_dev_query_limit]
+label = "Studio development query URL limit"
+value = 3000
+unit = "queries per day"
+display = "3,000 queries per day"
+status = "current"
+source = "https://thegraph.com/docs/en/subgraphs/developing/deploying-publishing/using-subgraph-studio/"
+quote = "The development query URL is limited to 3,000 queries per day."
+verified = "2026-09-24"
+
 [recommended_dev_signal]
 label = "Suggested self-curation signal"
 value = 3000
