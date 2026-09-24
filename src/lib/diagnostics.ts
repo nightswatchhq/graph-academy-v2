@@ -95,6 +95,50 @@ export const SYMPTOMS: Symptom[] = [
     ],
   },
   {
+    id: 'signalled-but-no-indexers',
+    symptom: 'My subgraph is published and signalled but every query says no indexers found',
+    who: 'consumer',
+    causes: [
+      {
+        cause: 'Nobody has allocated to it',
+        check: 'no indexers found is a different error from bad indexers: zero allocations, so the gateway had nothing to try. Look up allocations on the deployment, not signal. Signal in Explorer looks like progress and is not; only an allocation makes the subgraph queryable.',
+        more: '/developers/moving-off-studio/',
+      },
+      {
+        cause: 'An indexer allocated, hit a deterministic error, and closed again',
+        check: 'The error was bad indexers with no attestation: indexing_error for a while and then went back to no indexers found. Ask an indexer that was allocated for the deployment\u2019s indexing status; a recorded fatal error at a fixed block is the subgraph, not the network.',
+        more: '/developers/moving-off-studio/',
+      },
+      {
+        cause: 'You are querying a deployment hash that was never published',
+        check: 'Deploying to Studio and publishing to the network are different acts, and only the published hash carries signal. Compare the hash in your query URL with the one Explorer shows for the published version.',
+        more: '/developers/build-a-subgraph/',
+      },
+    ],
+  },
+  {
+    id: 'worked-on-studio-fails-on-network',
+    symptom: 'It worked on Studio but fails deterministically on the network, at a block Studio had already passed',
+    who: 'consumer',
+    causes: [
+      {
+        cause: 'The subgraph always had the error, and the upgrade indexer served past it',
+        check: 'Every allocated indexer\u2019s status endpoint reports the same error at the same block. Six for six is the tell. graph-node records a deterministic error, skips it and carries on, and by default refuses queries against a deployment holding one, so a copy that answered on Studio proves only that nobody checked its health. Compare the upgrade indexer\u2019s indexingStatuses for the deployment with two allocated indexers\u2019.',
+        more: '/developers/moving-off-studio/',
+      },
+      {
+        cause: 'One indexer\u2019s chain client disagrees with the others',
+        check: 'The failure is on one indexer only, at a block the others passed, usually a contract call reverting on that node and nowhere else. That is the operator\u2019s archive node, not your mapping. The gateway routes around it; the operator needs telling.',
+        more: '/ecosystem/oracles-and-observability/',
+      },
+    ],
+    worked: [
+      { n: 32, was: 'all six allocated indexers unhealthy at the same block, on a pool whose currency reverts on decimals()' },
+      { n: 37, was: 'a TVL going negative in a handler, deterministic on every indexer that reached the block' },
+      { n: 39, was: 'a 24h lookback walking 1.97M buckets and exhausting wasm memory, again on every indexer' },
+    ],
+  },
+  {
     id: 'nobody-indexes-my-subgraph',
     symptom: 'I published a subgraph and nothing is indexing it',
     who: 'developer',

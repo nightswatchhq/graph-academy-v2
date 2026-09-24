@@ -1,0 +1,160 @@
+---
+title: "Moving off Studio, and the first two hours on the network"
+role: developer
+path: "Developer"
+module: "Subgraphs"
+order: 4
+difficulty: intermediate
+time_minutes: 9
+summary: "Studio's query traffic for BNB Smart Chain and Polygon moves to the network on 8 October 2026. What changes for your endpoint, and how to read the gateway while nobody is serving you yet."
+protocol_version_verified: "Graph Horizon (2025-12-11)"
+last_verified: 2026-09-24
+verify_before: 2026-11-01
+sources:
+  - name: "graph-support #45: the migration tracker, quoting the 24 September announcement in #indexers"
+    url: "https://github.com/nightswatchhq/graph-support/issues/45"
+  - name: "The Graph Docs: publishing a subgraph"
+    url: "https://thegraph.com/docs/en/subgraphs/developing/deploying-publishing/publishing-a-subgraph/"
+  - name: "The Graph Docs: using Subgraph Studio"
+    url: "https://thegraph.com/docs/en/subgraphs/developing/deploying-publishing/using-subgraph-studio/"
+  - name: "The Graph Docs: managing API keys"
+    url: "https://thegraph.com/docs/en/subgraphs/querying/managing-api-keys/"
+  - name: "graph-support: gateway error reference"
+    url: "https://github.com/nightswatchhq/graph-support/blob/main/reference/gateway-errors.md"
+parameters_used: ["studio_dev_query_limit", "recommended_dev_signal"]
+see_also: ["/developers/build-a-subgraph/", "/developers/query-from-an-app/", "/diagnose/"]
+authors: ["@community"]
+license: "CC-BY-4.0"
+---
+
+On 24 September 2026 The Graph Foundation told developers in the `#indexers` channel that
+query traffic from the Subgraph Studio staging environment is moving onto The Graph Network,
+starting with **BNB Smart Chain and Polygon on 8 October 2026**. Studio support for those
+subgraphs is not cut entirely until **31 October 2026**. About 450 subgraphs may be affected,
+and the Foundation expects not all of them to migrate.
+
+Two further points from the same announcement matter to you. The Foundation will **not
+publish the list** of affected subgraphs; a bot detects published BNB and Polygon subgraphs
+and curates on them, and the Foundation posts which ones need indexing as it goes. And that
+curation is guaranteed only through 8 October, from a fixed budget that is meant to skip
+clones and subgraphs nobody queries.
+
+<Note title="Announced, not yet happened">
+Everything above is a plan with dates attached, stated by the Foundation on 24 September.
+This page was written before 8 October. If you are reading it afterwards, the tracker at
+[graph-support #45](https://github.com/nightswatchhq/graph-support/issues/45) holds what
+actually happened, including whether the dates held.
+</Note>
+
+## What you have today, and what you are moving to.
+
+In Studio you deployed with a **deploy key**, and the docs describe what it is for: it
+"allows you to publish your Subgraphs or manage your API keys and billing." Studio then
+gave you a development query URL. That URL is, in the quick start's words, "rate-limited,
+not visible to the public, and meant to be used for development, staging, and testing
+purposes", and the limit is <Param name="studio_dev_query_limit" />. If your application
+is reading it in production, this is the traffic that is moving.
+
+On the network you query a gateway with an **API key**, and the docs give the shape:
+`https://gateway.thegraph.com/api/<YOUR_API_KEY>/subgraphs/id/<SUBGRAPH_ID>`. The key is a
+separate thing from the deploy key, created under API Keys in Studio, and it spends GRT from
+a balance you top up. The [querying entry](/developers/query-from-an-app/) covers what
+sits behind that URL and why the key must never ship in a client.
+
+<Flow steps={["deploy to Studio", "dev URL", "publish", "signal", "allocation", "gateway URL"]} hot={4} />
+
+The step this migration adds nothing to, and everything depends on, is the fifth. A
+published subgraph is served by whichever indexers choose to allocate to it. Signal makes
+that choice attractive. It does not make it. The
+[building and publishing entry](/developers/build-a-subgraph/) explains why the protocol is
+built that way; here the question is only what you do about it in the next two weeks.
+
+## Publishing.
+
+The docs give the two routes. From Studio: "Go to the Subgraph Studio dashboard. Click on
+the **Publish** button. Your Subgraph will now be visible in Graph Explorer." From the CLI:
+"As of version 0.73.0, you can also publish your Subgraph with the graph-cli", by running
+`graph codegen && graph build` and then `graph publish`, which opens a wallet connection to
+sign the transaction. Studio also lets you add signal "in the same transaction it is
+published", and suggests <Param name="recommended_dev_signal" /> as a starting figure.
+
+For BNB and Polygon subgraphs during this migration, the Foundation's bot is meant to add
+signal for you. Do not rely on it. It is budgeted, it is guaranteed only until 8 October,
+and it is meant to skip clones. If your subgraph is a republish of somebody else's
+deployment, or has never been queried, expect nothing from it and signal yourself.
+
+<Warn title="Keep the Studio endpoint alive until the network one has answered">
+Nothing about publishing switches your application over. The Studio URL keeps working
+until the Foundation stops it, and the network URL starts working only once an indexer
+has allocated and synced. Point production at the gateway when you have seen it return
+data, and not before. Between those two moments, keeping both costs you nothing.
+
+The date to hold in mind is 31 October, when Studio stops regardless of whether the
+network is serving you.
+</Warn>
+
+## The first two hours, read off the gateway.
+
+Immediately after publishing, queries through the gateway will fail, and the failures
+change shape as indexers pick the subgraph up. The exact strings are catalogued in the
+[gateway error reference](https://github.com/nightswatchhq/graph-support/blob/main/reference/gateway-errors.md);
+these are the three you will meet.
+
+**`no indexers found`** means nobody is allocated to this deployment. There was nothing
+to try. In the first minutes this is expected. An hour after signal landed it is the
+failure this whole migration is about: curation arrived and no indexer acted on it. Check
+allocations on the deployment, not signal. Signal in Graph Explorer looks like progress
+and is not.
+
+**`bad indexers: {0x…: Unavailable(too far behind)}`** is the good case. An indexer has
+allocated and is syncing, and the gateway is refusing to route to it until it is near chain
+head. On a subgraph with long history this can last hours. Wait.
+
+**`bad indexers: {0x…: BadResponse(no attestation: indexing_error)}`** on every allocated
+indexer means the subgraph itself fails deterministically at some block. Every indexer
+that reaches that block records the same error, and graph-node then refuses to answer
+queries against a deployment holding one. Studio's upgrade indexer may have been serving
+you a copy that looked healthy while carrying exactly that error. Three recent cases with
+the full diagnosis: [#32](https://github.com/nightswatchhq/graph-support/issues/32),
+[#37](https://github.com/nightswatchhq/graph-support/issues/37) and
+[#39](https://github.com/nightswatchhq/graph-support/issues/39).
+
+The distinguishing check between the last two is the same each time: ask two allocated
+indexers for the deployment's indexing status and compare. Both far behind is syncing. Both
+failed at the same block with the same message is your mapping. One failed and one fine is
+that operator's node, not you.
+
+<Model>
+Every one of these is the gateway telling you, in its own vocabulary, which of three
+parties is not ready: no indexer has chosen you, an indexer has chosen you and is not
+there yet, or every indexer has reached the same conclusion about your code. Learn to read
+the map after `bad indexers:` and you do not need anybody to interpret it for you.
+</Model>
+
+## One line about line endings.
+
+On 16 September 2026 a PancakeSwap v3 subgraph on BSC was published with every line of its
+manifest ending in `\r\n`, and a parser in The Graph's own network subgraph fed the
+`\r` to `BigInt.fromString`. That took the network subgraph, and the gateway, down for
+three hours ([#41](https://github.com/nightswatchhq/graph-support/issues/41)). That parser
+has been fixed. A few hundred manifests are nevertheless about to be published from a few
+hundred machines, so before `graph publish`, run `grep -c $'\r$' subgraph.yaml` and expect
+`0`.
+
+<Reveal question="Before reading on: your subgraph was signalled by the Foundation's bot on 9 October, and on 10 October the gateway still says no indexers found. What are the two most likely reasons, and which one can you fix?">
+The first is that no indexer has chosen to allocate. Signal makes a subgraph attractive
+relative to every other signalled subgraph, and a fixed curation budget spread across
+hundreds of migrating subgraphs may not have made yours attractive enough. You can fix this
+by adding your own signal, and by asking in the indexer channels, where operators are
+usually the fastest responders in the ecosystem.
+
+The second is that an indexer did allocate, and closed again, because the subgraph failed
+deterministically the moment it synced to the bad block. Then the error would have been
+`bad indexers` with `no attestation: indexing_error` for a while, before returning to
+`no indexers found` when the allocation closed. You can fix this too, but it is a mapping
+fix and a new version, not a signal.
+
+The thing you cannot fix is the one to rule out first: that the deployment hash you are
+querying is not the one that was published. Deploying to Studio and publishing to the
+network are different acts, and it is the published hash that carries the signal.
+</Reveal>
