@@ -19,6 +19,8 @@ sources:
     url: "https://github.com/graphprotocol/graph-node/blob/master/docs/graphman.md"
   - name: "graph-support #24: graphman copy, and the shard boundary"
     url: "https://github.com/nightswatchhq/graph-support/issues/24"
+  - name: "graph-support #41: the network subgraph outage of 16 September 2026"
+    url: "https://github.com/nightswatchhq/graph-support/issues/41"
 parameters_used: ["max_poi_staleness_days"]
 authors: ["@community"]
 license: "CC-BY-4.0"
@@ -55,6 +57,38 @@ horizontally, and it needs to be reachable and fast.
 
 **indexer-tap-agent** runs as a single instance and turns receipts into redeemable
 vouchers. If it is down, you serve queries for free.
+
+## The dependency that is not on the list.
+
+Nothing above mentions the network subgraph, and no list of components does. indexer-agent
+reads it to decide what to allocate to, and indexer-service reads it to know who is
+allowed to pay you. Both point at a deployment on your own graph-node by default, which
+makes it look like part of your indexing workload. It is part of your control plane.
+
+When that deployment fails, the agent stops opening and closing allocations and the
+service stops serving, and nothing in your monitoring says why. indexer-service logs
+`HTTP request failed` against the deployment URL, which reads as a network fault and is
+not one.
+
+<Warn title="A failed network subgraph does not recover on its own">
+The network subgraph parses every new deployment's manifest in a file data source, and
+graph-node deliberately reports a deterministic error in an offchain handler as
+non-deterministic. So the deployment goes `health: failed` with `deterministic: false`,
+backs off, fetches the same content, and fails again, while reporting `synced: true`
+throughout. Restarting it, resyncing it and giving it more memory all do nothing. The only
+fix is a new deployment with corrected mappings, which means waiting for somebody else to
+publish one.
+
+On 16 September 2026 a single manifest with Windows line endings did this to every
+published version at once and took the public gateway down with it for about three hours
+([graph-support #41](https://github.com/nightswatchhq/graph-support/issues/41)).
+</Warn>
+
+Two things get you moving again while a fixed version syncs. Changing the deployment in
+the agent config to the new hash is enough on its own, because the agent then syncs it
+itself. Failing that, point the agent's network subgraph query URL at a Studio endpoint
+for the network subgraph rather than at your own node, which takes the dependency off your
+infrastructure entirely for as long as you need it off.
 
 ## Operator keys and stake.
 
