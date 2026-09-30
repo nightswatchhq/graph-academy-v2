@@ -1,0 +1,224 @@
+---
+title: "Where the next GRT earns most: how the allocation simulator decides"
+role: indexer
+path: "Indexer"
+module: "The economics"
+order: 3
+difficulty: advanced
+time_minutes: 12
+summary: "Read an allocation plan the way the simulator builds it: by the marginal reward of each GRT, not the average APR, and with a clear view of what the estimate leaves out."
+protocol_version_verified: "Graph Horizon (2025-12-11)"
+last_verified: 2026-09-30
+verify_before: 2026-12-30
+sources:
+  - name: "The Graph Docs: indexing overview"
+    url: "https://thegraph.com/docs/en/indexing/overview/"
+  - name: "Lodestar: the allocation simulator source"
+    url: "https://github.com/nightswatchhq/lodestar/blob/main/src/lib/allocation-simulator.ts"
+  - name: "graphprotocol/allocation-optimizer"
+    url: "https://github.com/graphprotocol/allocation-optimizer"
+parameters_used: ["subgraph_service_issuance_per_block"]
+see_also: ["/indexers/rewards-eligibility/", "/indexers/allocations-and-pois/"]
+authors: ["@community"]
+license: "CC-BY-4.0"
+---
+
+You have stake that is not allocated, and a few hundred deployments you could put it
+on. Each of them pays indexing rewards, and each is already shared with somebody. The
+question is where the stake earns most, and the answer is less obvious than sorting by
+APR.
+
+This lesson explains the reasoning, then how the
+[Lodestar](https://www.lodestar-dashboard.com/indexers) allocation simulator on an
+indexer's Plan tab applies it, and then what its estimate does not know.
+
+## What a deployment pays.
+
+Indexing rewards come from issuance paid to the Rewards Manager, currently
+<Param name="subgraph_service_issuance_per_block" />. That issuance is split across
+deployments by curation signal, and a deployment's share is split across the
+allocations on it by allocated stake. The official docs put it as "rewards are
+distributed proportionally based on curation signal and the amount of GRT allocated to
+each subgraph deployment."
+
+So for one deployment, over a year:
+
+```text
+K = annual issuance × deployment signal ÷ network signal
+your rewards = K × y ÷ (O + y)
+
+  K  the deployment's annual reward pool
+  y  your stake on it
+  O  everyone else's stake on it
+```
+
+Your rewards depend on other people's allocations, which is the fact everything else in
+this lesson follows from.
+
+## The first GRT and the next one.
+
+What you want to know about a deployment is what one more GRT would earn there. The
+formula gives it directly:
+
+```text
+marginal reward = K × O ÷ (O + y)²
+```
+
+With nothing on it yet (`y` = 0), that is `K ÷ O`: the deployment's reward pool over
+the stake already on it. This is why signal over stake is the column worth sorting by.
+Each GRT you add earns less than the one before, because you are increasingly competing
+with yourself for the same pool.
+
+<Model>
+Average APR is the wrong guide. A deployment where you already hold a large share can
+show a handsome APR on your existing stake while the next GRT earns very little there.
+Allocation decisions are made at the margin, and the margin is where the average hides
+the answer.
+</Model>
+
+## Filling the level.
+
+If each deployment's marginal reward falls as you add stake, the best split is the one
+where no GRT could be moved somewhere it earns more. That means every deployment you
+allocate to ends at the same marginal reward, and a deployment whose first GRT earns
+less than that level gets nothing. It is called water-filling, after the picture: pour
+stake in and it finds the lowest level first.
+
+For the smooth case there is a closed form. For some level `λ`, each deployment gets
+`√(K × O ÷ λ) − O`, or nothing if that is negative, and `λ` is chosen so the amounts
+add up to your stake.
+
+Two things break that formula in practice.
+
+**Deployments nobody serves.** With `O` = 0, the first GRT takes the whole pool and
+every GRT after it earns nothing. The curve is not smooth at zero, and the square-root
+formula cannot see it.
+
+**A smallest sensible allocation.** Opening a 3 GRT allocation is technically possible
+and practically silly, so a real plan has a minimum size, and a minimum is a jump.
+
+## How the simulator does it.
+
+The simulator works greedily instead. It hands out the amount you want to place a
+chunk at a time, a chunk being a four-hundredth of the amount, each to the deployment
+where that chunk adds the most yearly reward. A deployment it has not yet used can only
+be opened with at least the minimum allocation, so an opening step may be larger than a
+chunk, and it is judged on what it earns as a whole. That handles both of the cases
+above. On the smooth part it tends towards the equal level the closed form describes,
+which is why, in the example below, two deployments end within a whisker of each other.
+It is a close approximation rather than a guarantee.
+
+The inputs, all shown on the Plan tab:
+
+- **Candidates.** The 200 deployments with the most signal, plus any you are already
+  allocated to. Deployments with rewards denied are left out.
+- **Filters.** A minimum signal, an optional cap per deployment, chains to exclude,
+  deployments to skip, and deployments to pin. The cap stops the plan adding stake; it
+  does not shrink an allocation already above it. Pins are funded first, with the
+  minimum allocation or the cap if that is lower, provided the amount stretches that
+  far. A pinned deployment that is skipped or denied is still left out.
+- **Amount.** By default, your available stake.
+- **Count current allocations.** On, your open allocations stay and the amount goes on
+  top. Off, the plan starts from nothing, with the amount including what is allocated
+  today, and may close things.
+- **Issuance and signal.** The Rewards Manager's current issuance and the network's
+  total signal, refreshed every few minutes.
+
+The output is a table of current against proposed stake per deployment, the estimated
+rewards a day and APR, and the `graph indexer actions queue` lines that move your open
+allocations to the plan. A deployment whose total changes gets its largest allocation
+resized, usually. The lines only queue actions: nothing runs until they are approved,
+as the [indexer CLI documentation](https://thegraph.com/docs/en/indexing/overview/#indexer-management-using-indexer-cli)
+describes.
+
+The plan can place less than you asked for. If every remaining candidate is capped,
+filtered out, or has no room for another valid step, the rest stays unplaced, and the
+Plan tab shows what was actually placed.
+
+## A worked example.
+
+Three deployments, run through the simulator's own code. The figures are illustrative,
+chosen so the pools are round.
+
+| | Pool `K` a year | Others' stake `O` | First GRT earns |
+|---|---|---|---|
+| A | 50,000 GRT | 5,000,000 GRT | 1.0% |
+| B | 10,000 GRT | 200,000 GRT | 5.0% |
+| C | 1,000 GRT | none | the whole pool |
+
+{/* param-lint-allow: 10,000 GRT (the simulator's default minimum allocation, not a protocol parameter) */}
+{/* param-lint-allow: 100,000 GRT (an illustrative budget, not the minimum self-stake) */}
+With 100,000 GRT and a minimum allocation of 10,000 GRT:
+
+| | Proposed | Rewards a year | APR |
+|---|---|---|---|
+| B | 90,000 GRT | 3,103 GRT | 3.45% |
+| C | 10,000 GRT | 1,000 GRT | 10.00% |
+
+A gets nothing. After 90,000 GRT on B, the next GRT there still earns about 2.4%, well
+above the 1.0% that A's first GRT would.
+
+With 400,000 GRT:
+
+| | Proposed | Rewards a year | APR |
+|---|---|---|---|
+| B | 259,000 GRT | 5,643 GRT | 2.18% |
+| A | 131,000 GRT | 1,277 GRT | 0.97% |
+| C | 10,000 GRT | 1,000 GRT | 10.00% |
+
+Now B's marginal reward has fallen far enough that A is worth opening, and the two end
+at the same marginal rate, about 0.95%. Their average APRs differ by more than double,
+which is the Model above in numbers.
+
+<Reveal question="C has the best APR by a distance. Why does it get only the minimum?">
+Because on a deployment nobody else serves, you already take the whole pool with the
+first allocation. Every GRT past the minimum earns nothing more there, so the next chunk
+goes to a deployment where it adds something. The 10.00% is an average over the smallest allocation the plan
+allows, and it lasts exactly until another indexer allocates to C.
+</Reveal>
+
+## What the estimate does not know.
+
+The figures are indexing rewards before anybody's cut, on the assumption that nothing
+else moves. Each of these can make the plan wrong.
+
+- **Other indexers move.** `O` is today's figure. An unserved deployment like C is
+  precisely the one somebody else is likely to join.
+- **Your cut.** Rewards are split between you and your delegators by your reward cut.
+  The APR shown is on the whole allocation, before that split.
+- **Query fees.** Not in the model. A deployment with real query volume is worth more
+  than its rewards alone.
+- **Cost and time to sync.** Rewards need valid POIs, and a deployment you cannot sync
+  or keep synced earns nothing. Chain, size and your hardware do not appear anywhere in
+  the formula.
+- **Eligibility.** Denied deployments are excluded, but whether your indexer qualifies
+  for rewards at all is a separate gate. See
+  [rewards eligibility](/indexers/rewards-eligibility/).
+- **Gas and allocation count.** Executing the plan costs gas. The agent batches
+  compatible actions into multicalls, but the simulator neither estimates that cost
+  against a small gain nor caps how many allocations it opens.
+  [allocation-optimizer](https://github.com/graphprotocol/allocation-optimizer), the
+  optimiser the official docs recommend, does both.
+- **The candidate list.** Only the 200 most signalled deployments and your own are
+  considered.
+
+## Before you paste the commands
+
+- Look at every proposed allocation on a deployment with no other indexer, and decide
+  whether you would still want it once someone joins.
+- Check you can sync each new deployment, on that chain, in reasonable time.
+- Read the close lines. With current allocations not counted, the plan can close
+  allocations you meant to keep.
+- Compare the plan's daily estimate with what your current allocations earn by the same
+  formula. The Plan tab shows both. If the gain is small, the transactions may not be
+  worth it.
+- Remember that the queue still needs approving, and approve it deliberately.
+
+## Where next
+
+- The simulator itself: the Plan tab on any indexer page in
+  [Lodestar](https://www.lodestar-dashboard.com/indexers).
+- The code, which is short and readable:
+  [allocation-simulator.ts](https://github.com/nightswatchhq/lodestar/blob/main/src/lib/allocation-simulator.ts).
+- What happens to an allocation after it is opened:
+  **[allocations and POIs](/indexers/allocations-and-pois/)**.
