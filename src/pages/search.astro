@@ -19,6 +19,17 @@ import Search from 'astro-pagefind/components/Search';
     <div style="max-width: 44rem;">
       <Search id="pagefind-ui" className="pagefind-ui" uiOptions={{ showImages: false, showSubResults: true }} />
     </div>
+    <script is:inline>
+      // The palette and the Ask box both hand a query over as ?q=. The Pagefind
+      // UI has no hook for one on a static page, so type it in on its behalf.
+      document.addEventListener('DOMContentLoaded', function () {
+        var q = new URLSearchParams(location.search).get('q');
+        var input = document.querySelector('#pagefind-ui input');
+        if (!q || !input) return;
+        input.value = q;
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+      });
+    </script>
     <noscript>
       <p class="section-lede" style="margin-top: 1.6rem;">
         Search needs JavaScript. Without it, the <a href="/catalogue/">paths index</a> and

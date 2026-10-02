@@ -82,11 +82,15 @@ const inMenu = (items: { href: string }[]) =>
       <a class="out nav-flat" href={OUTBOUND.docs} rel="external noopener">Docs</a>
     </div>
     <div class="nav-tools">
-      <a class="icon-btn" href="/search/" aria-label="Search the Academy">
+      {/* A link first: without JavaScript it goes to the search page. Palette.astro
+          takes the click over and fills in the shortcut for the reader's platform. */}
+      <a class="icon-btn search-btn" href="/search/" aria-label="Search the Academy" data-palette-open>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
              stroke-linecap="round" aria-hidden="true">
           <circle cx="10.5" cy="10.5" r="6.5" /><path d="m15.5 15.5 4 4" />
         </svg>
+        <span class="search-btn-label" aria-hidden="true">Search</span>
+        <kbd data-palette-hint aria-hidden="true" hidden></kbd>
       </a>
       <button class="icon-btn" id="theme-toggle" type="button"
               aria-label="Switch between the dark and light theme">

@@ -59,6 +59,20 @@ for (const f of pages) {
   }
 }
 
+// The palette builds its links in the browser from /palette.json, so no href in
+// the built HTML carries them and the loop above never sees one.
+const paletteFile = join(dist, 'palette.json');
+if (existsSync(paletteFile)) {
+  for (const item of JSON.parse(readFileSync(paletteFile, 'utf8'))) {
+    const [path, hash] = item.url.split('#');
+    checked += 1;
+    if (!pagePaths.has(path)) broken.push(`palette.json -> ${item.url}`);
+    else if (hash && !anchors.get(path)?.has(hash)) brokenAnchors.push(`palette.json -> ${item.url}`);
+  }
+} else {
+  broken.push('palette.json is missing from the build, so the command palette has no index');
+}
+
 // Outbound links are checked only when asked, because a network round trip per
 // link makes this slow and because a third party being briefly down is not a
 // defect in this repository. Nightly in CI; on demand locally.
