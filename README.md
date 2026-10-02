@@ -67,7 +67,7 @@ scripts/                      the checks above
 
 ## Stack
 
-Astro 5, MDX, Pagefind for search, deployed static on Vercel. Zero third-party
+Astro 5, MDX, Pagefind for search (Cmd+K on any page), deployed static on Vercel. Zero third-party
 requests at runtime: two self-hosted font subsets and one stylesheet, all from
 this origin. No analytics, no cookies, no accounts. Reader progress lives in
 `localStorage` and never leaves the browser.

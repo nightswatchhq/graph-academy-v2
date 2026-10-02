@@ -3,6 +3,7 @@ import '../styles/tokens.css';
 import '../styles/academy.css';
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
+import Palette from '../components/Palette.astro';
 import { SITE } from '../lib/site';
 // The hash of the card's own bytes, written by scripts/make-og.mjs. It rides on
 // the share-image URL so a scraper that cached the previous card fetches this
@@ -77,6 +78,7 @@ const ogImage = new URL(`/og.png?v=${ogRendered.hash}`, SITE.url).href;
       <slot />
     </main>
     <Footer />
+    <Palette />
     <script is:inline>
       (function () {
         var btn = document.getElementById('theme-toggle');

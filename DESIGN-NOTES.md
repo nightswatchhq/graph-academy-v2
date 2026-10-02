@@ -62,6 +62,33 @@ than only by the audit script. The site takes no user input and renders no
 user-supplied content, so the residual injection surface is the repository
 itself. If Astro's CSP hashing matures, move to hashes and drop the exception.
 
+The same directive carries `'wasm-unsafe-eval'`, because Pagefind's search core
+is WebAssembly and a `script-src` without it refuses to compile any. It was
+missing until 2026-10-02, and for as long as it was, the search page in
+production accepted a query and then sat at "Searching for..." for ever. No
+check caught it: `astro preview` does not send the headers in `vercel.json`, so
+the build that Lighthouse and the mobile check audit never had the policy
+applied. The keyword permits compiling WebAssembly and nothing else; it does not
+bring back `eval`.
+
+## Search
+
+Cmd+K or Ctrl+K on any page, or `/` outside a text field, opens the palette in
+`src/components/Palette.astro`. It reads two indexes. `/palette.json`, built
+by `src/lib/palette.ts`, holds every page, entry, glossary term, parameter and
+dispatch by title and answers on the keystroke. Pagefind holds the full text and
+answers a moment later, under "In the text". Both are fetched the first time the
+palette opens, so a reader who never searches pays for 7KB of script and
+nothing else.
+
+It is a native `<dialog>` for the reason the menus are `<details>`: the focus
+trap, Escape and the inert page behind it are the browser's job. With JavaScript
+off the header button is still a plain link to `/search/`.
+
+The palette builds its links in the browser, so no `href` in the built HTML
+carries them. `scripts/check-links.mjs` reads `dist/palette.json` and resolves
+every URL and anchor in it for that reason.
+
 ### 4. Terminal window titles are muted, not faint
 
 The house style lists terminal window titles among the legitimate uses of

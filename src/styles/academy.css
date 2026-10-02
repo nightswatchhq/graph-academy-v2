@@ -147,6 +147,99 @@ header.site {
 .icon-btn:hover { color: var(--text); border-color: var(--border-hi); }
 .icon-btn svg { width: 16px; height: 16px; }
 
+/* The search button says what it is and how to reach it once there is room.
+   Below 1020px it is the bare icon again: the header arithmetic further down
+   has no 90px to spare. */
+.search-btn { text-decoration: none; }
+.search-btn:hover { text-decoration: none; }
+.search-btn-label, .search-btn kbd { display: none; }
+@media (min-width: 1020px) {
+  .search-btn { width: auto; gap: 8px; padding: 0 7px 0 10px; }
+  .search-btn-label { display: inline; font-size: 13.5px; }
+  .search-btn kbd:not([hidden]) { display: inline; font-size: 0.66rem; border-bottom-width: 1px; }
+}
+
+/* --------------------------------------------------------------------------
+   Command palette. A native <dialog>, flat like everything else: a border
+   and a dimmed page, no shadow.
+   -------------------------------------------------------------------------- */
+
+.palette {
+  width: min(40rem, calc(100vw - 24px)); max-width: none;
+  max-height: min(36rem, calc(100dvh - 12vh - 24px));
+  margin: 12vh auto 0; padding: 0; overflow: hidden;
+  background: var(--bg-elev); color: var(--text);
+  border: 1px solid var(--border-hi); border-radius: var(--radius);
+}
+/* Only when open. An unconditional display here would un-hide the closed dialog. */
+.palette[open] { display: flex; flex-direction: column; }
+.palette::backdrop {
+  background: color-mix(in srgb, var(--bg) 70%, transparent);
+  backdrop-filter: blur(3px);
+}
+.palette-head {
+  display: flex; align-items: center; gap: 12px; padding: 4px 12px 4px 16px;
+  border-bottom: 1px solid var(--border); color: var(--text-muted);
+}
+.palette-head svg { width: 17px; height: 17px; flex-shrink: 0; }
+/* 16px and no smaller: below that iOS zooms the page when the field takes focus. */
+.palette-head input {
+  flex: 1; min-width: 0; height: 48px; padding: 0;
+  font: inherit; font-size: 1rem; color: var(--text);
+  background: transparent; border: 0; outline: none;
+}
+.palette-head input::placeholder { color: var(--text-muted); }
+.palette-head:focus-within { border-bottom-color: var(--rust); }
+.palette-close {
+  min-width: 34px; min-height: 26px; padding: 0 7px; cursor: pointer;
+  font-family: var(--mono); font-size: 0.68rem; color: var(--text-muted);
+  background: var(--bg-inset); border: 1px solid var(--border-hi);
+  border-radius: var(--radius-sm);
+}
+.palette-close:hover { color: var(--text); }
+.palette-list { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 4px 6px 6px; }
+.palette-list:empty { display: none; }
+.palette-group {
+  padding: 10px 10px 5px; font-family: var(--mono); font-size: 0.64rem;
+  letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted);
+}
+.palette-row {
+  display: flex; align-items: baseline; gap: 14px; width: 100%;
+  padding: 8px 10px; text-align: left; font: inherit; cursor: pointer;
+  color: var(--text-muted); background: transparent; border: 0;
+  border-radius: var(--radius-sm); scroll-margin-block: 34px 6px;
+}
+.palette-row:hover { text-decoration: none; }
+.palette-row[aria-selected='true'] { background: var(--bg-inset); box-shadow: inset 2px 0 0 var(--rust); }
+.palette-main { display: grid; gap: 1px; flex: 1; min-width: 0; }
+.palette-title { font-size: 14.5px; color: var(--text); }
+.palette-note {
+  font-size: 12.5px; line-height: 1.45; color: var(--text-muted);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+/* A full-text excerpt is the evidence for the match, so it gets a second line. */
+.palette-note--text {
+  white-space: normal; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2;
+}
+.palette-note mark { background: var(--pale-rust-bg); color: var(--text); border-radius: 2px; padding-inline: 1px; }
+.palette-tag {
+  flex-shrink: 0; max-width: 40%; font-family: var(--mono); font-size: 0.66rem;
+  letter-spacing: 0.04em; color: var(--text-muted); text-align: right;
+}
+.palette-status { padding: 14px 16px; font-size: 0.9rem; color: var(--text-muted); }
+.palette-foot {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding: 7px 14px; border-top: 1px solid var(--border);
+  font-family: var(--mono); font-size: 0.68rem; color: var(--text-muted);
+}
+.palette-keys { display: flex; gap: 14px; }
+.palette-keys kbd { margin-right: 3px; border-bottom-width: 1px; }
+.palette-foot a { display: inline-flex; align-items: center; min-height: 24px; margin-left: auto; }
+@media (max-width: 620px) {
+  .palette { margin-top: 8px; max-height: calc(100dvh - 16px); }
+  .palette-keys { display: none; }
+}
+
 /* the outbound marker. every link that leaves the Academy carries it. */
 .out::after {
   content: '\00a0\2197';

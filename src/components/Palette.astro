@@ -1,0 +1,404 @@
+---
+// The command palette: Cmd+K or Ctrl+K anywhere, or "/" outside a text field.
+//
+// Two indexes behind one box. /palette.json holds every title, glossary term
+// and parameter and answers on the keystroke; Pagefind holds the full text and
+// answers a moment later. Both are fetched on first open, never on page load.
+//
+// Without JavaScript none of this exists and the header button is still a
+// link to /search/. A native <dialog>, so the focus trap, Escape and the inert
+// page behind are the browser's job.
+---
+<dialog class="palette" id="palette" aria-label="Search the Academy" data-pagefind-ignore>
+  <div class="palette-head">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
+         stroke-linecap="round" aria-hidden="true">
+      <circle cx="10.5" cy="10.5" r="6.5" /><path d="m15.5 15.5 4 4" />
+    </svg>
+    <input
+      id="palette-input"
+      type="text"
+      role="combobox"
+      aria-label="Search the Academy"
+      aria-expanded="true"
+      aria-controls="palette-list"
+      aria-autocomplete="list"
+      autocomplete="off"
+      autocapitalize="off"
+      spellcheck="false"
+      enterkeyhint="go"
+      placeholder="Entries, terms, parameters, or any phrase"
+    />
+    <button class="palette-close" id="palette-close" type="button" aria-label="Close search">esc</button>
+  </div>
+  <div class="palette-list" id="palette-list" role="listbox" aria-label="Results"></div>
+  <p class="palette-status" id="palette-status" role="status"></p>
+  <div class="palette-foot">
+    <span class="palette-keys" aria-hidden="true">
+      <span><kbd>&uarr;</kbd><kbd>&darr;</kbd> move</span>
+      <span><kbd>&crarr;</kbd> open</span>
+    </span>
+    <a id="palette-all" href="/search/">Open the search page</a>
+  </div>
+</dialog>
+
+<script>
+  import type { PaletteItem, PaletteKind } from '../lib/palette';
+
+  interface Hit {
+    title: string;
+    url: string;
+    note: string;
+    /** Set for a full-text hit: Pagefind's excerpt, which carries <mark>. */
+    excerpt?: string;
+    tag?: string;
+    action?: 'theme';
+  }
+  /** `t` is the lowercased title. The rest are word lists, each a superset of the one before. */
+  interface Indexed extends PaletteItem { t: string; tw: string; aw: string; nw: string }
+  interface PagefindPage { url: string; excerpt: string; meta: { title?: string } }
+  interface Pagefind {
+    options(o: Record<string, unknown>): Promise<void>;
+    init(): Promise<void>;
+    debouncedSearch(q: string, o?: object, ms?: number): Promise<{ results: { data(): Promise<PagefindPage> }[] } | null>;
+  }
+
+  const GROUPS: { kind: PaletteKind; title: string; cap: number }[] = [
+    { kind: 'page', title: 'Pages', cap: 4 },
+    { kind: 'entry', title: 'Entries', cap: 5 },
+    { kind: 'term', title: 'Glossary', cap: 4 },
+    { kind: 'param', title: 'Parameters', cap: 4 },
+    { kind: 'dispatch', title: 'Dispatches', cap: 4 },
+  ];
+  const TEXT_CAP = 6;
+
+  function setup(
+    dialog: HTMLDialogElement,
+    input: HTMLInputElement,
+    list: HTMLElement,
+    status: HTMLElement,
+    all: HTMLAnchorElement,
+  ) {
+    let index: Indexed[] | null = null;
+    let indexFailed = false;
+    // undefined until tried, null once it has failed.
+    let pagefind: Pagefind | null | undefined;
+    let loading = false;
+    let textHits: Hit[] = [];
+    let textPending = false;
+    let seq = 0;
+    let active = 0;
+
+    const query = () => input.value.trim();
+    const options = () => Array.from(list.querySelectorAll<HTMLElement>('[role="option"]'));
+    const pathOf = (url: string) => url.split('#')[0];
+
+    const words = (s: string) => ` ${s.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim()}`;
+
+    // Outside the title a token has to begin a word, and in the note a short
+    // one has to be the whole word. As a bare substring "poi" finds every
+    // sentence with "point" in it, and as a prefix every "pointer".
+    function score(it: Indexed, q: string, tokens: string[]): number {
+      if (it.t === q) return 100;
+      if (it.t.startsWith(q)) return 80;
+      if (tokens.length === 0) return 0;
+      // TAP is GraphTally, and should beat a title that merely contains "tap".
+      if (`${it.aw} `.includes(` ${tokens.join(' ')} `) && !it.tw.includes(` ${tokens[0]}`)) return 70;
+      if (` ${it.t}`.includes(` ${q}`)) return 60;
+      if (q.length > 2 && it.t.includes(q)) return 50;
+      if (tokens.every((w) => it.tw.includes(` ${w}`))) return 40;
+      if (tokens.every((w) => it.aw.includes(` ${w}`))) return 30;
+      if (q.length > 2 && tokens.every((w) => `${it.nw} `.includes(w.length < 4 ? ` ${w} ` : ` ${w}`))) return 10;
+      return 0;
+    }
+
+    /** Groups ordered by their best match, so Enter on the first row is the best answer. */
+    function instant(q: string): { title: string; hits: Hit[] }[] {
+      const items = index;
+      if (!items) return [];
+      if (q.length === 0) {
+        const pages = items.filter((it) => it.kind === 'page');
+        return [
+          { title: 'Go to', hits: pages },
+          { title: 'Actions', hits: [themeAction()] },
+        ];
+      }
+      if (q.length < 2) return [];
+      const lower = q.toLowerCase();
+      const tokens = words(lower).split(' ').filter(Boolean);
+      const groups = GROUPS.map((g, order) => {
+        const scored = items
+          .filter((it) => it.kind === g.kind)
+          .map((it) => ({ it, s: score(it, lower, tokens) }))
+          .filter((x) => x.s > 0)
+          .sort((a, b) => b.s - a.s);
+        return { title: g.title, hits: scored.slice(0, g.cap).map((x) => x.it as Hit), best: scored[0]?.s ?? 0, order };
+      })
+        .filter((g) => g.hits.length > 0)
+        .sort((a, b) => b.best - a.best || a.order - b.order);
+      if ('switch theme dark light'.includes(lower)) groups.push({ title: 'Actions', hits: [themeAction()], best: 0, order: 99 });
+      return groups;
+    }
+
+    function themeAction(): Hit {
+      const light = document.documentElement.getAttribute('data-theme') === 'light';
+      return { title: `Switch to the ${light ? 'dark' : 'light'} theme`, url: '', note: '', action: 'theme' };
+    }
+
+    function row(hit: Hit, i: number): HTMLElement {
+      const el = document.createElement(hit.action ? 'button' : 'a');
+      el.className = 'palette-row';
+      el.id = `palette-opt-${i}`;
+      el.setAttribute('role', 'option');
+      el.tabIndex = -1;
+      if (el instanceof HTMLAnchorElement) el.href = hit.url;
+      else { el.type = 'button'; el.dataset.action = hit.action; }
+
+      const main = document.createElement('span');
+      main.className = 'palette-main';
+      const title = document.createElement('span');
+      title.className = 'palette-title';
+      title.textContent = hit.title;
+      main.append(title);
+      if (hit.excerpt || hit.note) {
+        const note = document.createElement('span');
+        note.className = 'palette-note';
+        // Pagefind escapes the page text and adds only <mark>.
+        if (hit.excerpt) { note.innerHTML = hit.excerpt; note.classList.add('palette-note--text'); }
+        else note.textContent = hit.note;
+        main.append(note);
+      }
+      el.append(main);
+      if (hit.tag) {
+        const tag = document.createElement('span');
+        tag.className = 'palette-tag';
+        tag.textContent = hit.tag;
+        el.append(tag);
+      }
+      return el;
+    }
+
+    function render() {
+      const q = query();
+      const groups = instant(q);
+      const shown = new Set(groups.flatMap((g) => g.hits.map((h) => pathOf(h.url))));
+      const text = textHits.filter((h) => !shown.has(pathOf(h.url)));
+      if (text.length) groups.push({ title: 'In the text', hits: text });
+
+      list.replaceChildren();
+      let i = 0;
+      groups.forEach((g, n) => {
+        const box = document.createElement('div');
+        box.setAttribute('role', 'group');
+        box.setAttribute('aria-labelledby', `palette-group-${n}`);
+        const label = document.createElement('p');
+        label.className = 'palette-group';
+        label.id = `palette-group-${n}`;
+        label.textContent = g.title;
+        box.append(label, ...g.hits.map((h) => row(h, i++)));
+        list.append(box);
+      });
+
+      const none = i === 0;
+      let msg = '';
+      if (indexFailed && pagefind === null) msg = 'Search could not be loaded. Reload the page, or browse the catalogue.';
+      else if (!index && !indexFailed) msg = 'Loading the index.';
+      else if (q.length === 1) msg = 'Keep typing.';
+      else if (q.length >= 2 && textPending && none) msg = 'Searching the text.';
+      else if (q.length >= 2 && pagefind === null) {
+        msg = none
+          ? `No title, term or parameter matches "${q}", and the full text could not be searched.`
+          : 'The full text could not be searched, so these are titles, terms and parameters only.';
+      } else if (q.length >= 2 && none) msg = `Nothing here matches "${q}".`;
+      status.textContent = msg;
+      status.hidden = msg === '';
+
+      all.href = q.length >= 2 ? `/search/?q=${encodeURIComponent(q)}` : '/search/';
+      all.textContent = q.length >= 2 ? 'All results on the search page' : 'Open the search page';
+      setActive(Math.min(active, Math.max(i - 1, 0)), false);
+    }
+
+    function setActive(n: number, scroll = true) {
+      const opts = options();
+      active = n;
+      opts.forEach((o, k) => o.setAttribute('aria-selected', String(k === n)));
+      const cur = opts[n];
+      if (cur) input.setAttribute('aria-activedescendant', cur.id);
+      else input.removeAttribute('aria-activedescendant');
+      if (cur && scroll) cur.scrollIntoView({ block: 'nearest' });
+    }
+
+    async function searchText() {
+      const q = query();
+      const mine = ++seq;
+      textHits = [];
+      textPending = Boolean(pagefind) && q.length >= 2;
+      if (!textPending || !pagefind) return;
+      try {
+        const res = await pagefind.debouncedSearch(q, {}, 160);
+        // null means a later keystroke superseded this one.
+        if (res === null || mine !== seq) return;
+        const pages = await Promise.all(res.results.slice(0, TEXT_CAP).map((r) => r.data()));
+        if (mine !== seq) return;
+        textHits = pages.map((p) => ({
+          title: p.meta.title ?? p.url,
+          url: p.url,
+          note: '',
+          excerpt: p.excerpt,
+          tag: p.url.split('/')[1] || undefined,
+        }));
+      } catch {
+        if (mine !== seq) return;
+        pagefind = null;
+      }
+      textPending = false;
+      render();
+    }
+
+    async function loadIndex() {
+      try {
+        const res = await fetch('/palette.json');
+        if (!res.ok) throw new Error(String(res.status));
+        const items: PaletteItem[] = await res.json();
+        index = items.map((it) => {
+          const tw = words(it.title);
+          const aw = tw + words(it.also ?? '');
+          return { ...it, t: it.title.toLowerCase(), tw, aw, nw: aw + words(it.note) };
+        });
+      } catch {
+        indexFailed = true;
+      }
+      render();
+    }
+
+    async function loadPagefind() {
+      try {
+        // A variable, so the bundler leaves a file that only exists after the build alone.
+        const path = '/pagefind/pagefind.js';
+        const mod: Pagefind = await import(/* @vite-ignore */ path);
+        await mod.options({ excerptLength: 18 });
+        // Pagefind reports a failed WebAssembly load on its worker, not on this
+        // promise, which then never settles. Hence the clock.
+        await Promise.race([
+          mod.init(),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 8000)),
+        ]);
+        pagefind = mod;
+      } catch {
+        pagefind = null;
+      }
+      await searchText();
+      render();
+    }
+
+    function open() {
+      if (dialog.open) return;
+      document.querySelectorAll<HTMLDetailsElement>('[data-menu]').forEach((m) => { m.open = false; });
+      dialog.showModal();
+      input.select();
+      if (!loading) {
+        loading = true;
+        loadIndex();
+        loadPagefind();
+      }
+      active = 0;
+      render();
+    }
+
+    function activate(el: HTMLElement, newTab: boolean) {
+      if (el.dataset.action === 'theme') {
+        document.getElementById('theme-toggle')?.click();
+        render();
+        return;
+      }
+      const href = (el as HTMLAnchorElement).href;
+      if (newTab) { window.open(href, '_blank', 'noopener'); return; }
+      dialog.close();
+      location.assign(href);
+    }
+
+    input.addEventListener('input', () => {
+      active = 0;
+      searchText();
+      render();
+    });
+
+    input.addEventListener('keydown', (e) => {
+      const opts = options();
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (opts.length === 0) return;
+        const step = e.key === 'ArrowDown' ? 1 : -1;
+        setActive((active + step + opts.length) % opts.length);
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        const cur = opts[active];
+        if (cur) activate(cur, e.metaKey || e.ctrlKey);
+      }
+    });
+
+    list.addEventListener('mousemove', (e) => {
+      const el = (e.target as HTMLElement).closest<HTMLElement>('[role="option"]');
+      if (!el) return;
+      const n = options().indexOf(el);
+      if (n !== active) setActive(n, false);
+    });
+
+    list.addEventListener('click', (e) => {
+      const el = (e.target as HTMLElement).closest<HTMLElement>('[role="option"]');
+      if (!el) return;
+      if (el.dataset.action) { activate(el, false); input.focus(); return; }
+      // A plain click on a link navigates by itself. Closing covers the case
+      // where the target is an anchor on the page already open.
+      if (!e.metaKey && !e.ctrlKey && !e.shiftKey) dialog.close();
+    });
+
+    all.addEventListener('click', (e) => {
+      if (!e.metaKey && !e.ctrlKey && !e.shiftKey) dialog.close();
+    });
+
+    // The dialog box has no padding, so a click whose target is the dialog
+    // itself landed on the backdrop.
+    dialog.addEventListener('click', (e) => { if (e.target === dialog) dialog.close(); });
+    document.getElementById('palette-close')?.addEventListener('click', () => dialog.close());
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key.toLowerCase() === 'k' && (e.metaKey || e.ctrlKey) && !e.altKey && !e.shiftKey) {
+        e.preventDefault();
+        if (dialog.open) dialog.close();
+        else open();
+        return;
+      }
+      const t = e.target as HTMLElement | null;
+      const typing = t?.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(t?.tagName ?? '');
+      if (e.key === '/' && !typing && !dialog.open && !e.metaKey && !e.ctrlKey && !e.altKey) {
+        e.preventDefault();
+        open();
+      }
+    });
+
+    const mac = /Mac|iPhone|iPad/.test(navigator.userAgent);
+    document.querySelectorAll<HTMLAnchorElement>('[data-palette-open]').forEach((a) => {
+      a.setAttribute('aria-haspopup', 'dialog');
+      a.setAttribute('aria-keyshortcuts', mac ? 'Meta+K' : 'Control+K');
+      a.addEventListener('click', (e) => {
+        if (e.metaKey || e.ctrlKey || e.shiftKey) return;
+        e.preventDefault();
+        open();
+      });
+    });
+    document.querySelectorAll<HTMLElement>('[data-palette-hint]').forEach((k) => {
+      k.textContent = mac ? '⌘K' : 'Ctrl K';
+      k.hidden = false;
+    });
+  }
+
+  const dialog = document.getElementById('palette') as HTMLDialogElement | null;
+  const input = document.getElementById('palette-input') as HTMLInputElement | null;
+  const list = document.getElementById('palette-list');
+  const status = document.getElementById('palette-status');
+  const all = document.getElementById('palette-all') as HTMLAnchorElement | null;
+  if (dialog && input && list && status && all && typeof dialog.showModal === 'function') {
+    setup(dialog, input, list, status, all);
+  }
+</script>
