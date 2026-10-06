@@ -7,6 +7,10 @@ tags: ["the-graph", "subgraphs", "studio", "bnb", "polygon", "nuthatch", "indexi
 excerpt: "Studio traffic for BNB Chain and Polygon moves to the network on 8 October, and the upgrade indexer stops serving those subgraphs by 31 October. We counted which ones have nobody else, found exactly one that is both stranded and still paid for, and rebuilt it as a nuthatch nest that answers its own client's queries exactly. The automatic route answered nothing at all, which is in here too."
 ---
 
+> **Update, 6 October 2026, 10:51 UTC.** The backfill reached the chain head in about 16 minutes: 109.3 million blocks, 403,107 events, 160,802 bets across 10 tokens. The public endpoint is live at `https://betswirl-bnb.89.167.109.4.sslip.io/subgraphs/id/Qmd5oqyojVx5wWSFuWfKz3YVLPHdE3KU5458Qqq3SVeGEB`. Running the full history also found one defect the test ranges could not: the token metadata decoder read the string "ETH" as an offset. It is fixed in [`41a6ee0`](https://github.com/nightswatchhq/betswirl-bnb-nest/commit/41a6ee0) without re-indexing. One more fact the history turned up: the last BetSwirl bet on BNB Chain was placed on 20 March 2026, so the queries that earned September's fees were reading history, not recording new bets. A cold query over the whole history takes about 11 seconds.
+
+---
+
 *On 24 September the Foundation announced that Subgraph Studio query traffic for BNB Smart Chain and Polygon moves to The Graph Network on 8 October, and that the upgrade indexer will stop serving those subgraphs by 31 October. Some of them will not have another indexer by then. This is what we built for those, and an account of how much of it worked.*
 
 ---
