@@ -440,12 +440,12 @@ export const SYMPTOMS: Symptom[] = [
       {
         cause: 'A file data source handler aborted, and graph-node is retrying it forever',
         check: 'Read `deterministic` on the fatal error. `false` on a fault that is plainly deterministic, such as a parse failure on fixed content, means the handler ran in an offchain data source. graph-node converts a deterministic error there into a non-deterministic one deliberately, so it backs off, fetches the same content again and fails again. Restarting, resyncing and more memory all change nothing. The block number in the error is where that node\u2019s fetch landed rather than where the fault is, so two indexers report different blocks for one cause.',
-        more: '/developers/what-is-a-subgraph/',
+        more: '/indexers/running-the-stack/',
       },
       {
         cause: 'The file the handler parses is not shaped the way the code assumes',
         check: 'Fetch the content and look at its bytes rather than its rendering. Windows line endings are the common case: a parser that splits on newline leaves a carriage return on the last field of every line, and a number that looks correct in the error message fails to parse. `grep -c $\'\\r$\'` on the file settles it in one command.',
-        more: '/developers/build-a-subgraph/',
+        more: '/developers/moving-off-studio/',
       },
     ],
     worked: [{ n: 41, was: 'one manifest with Windows line endings, against a parser that split on newline' }],
