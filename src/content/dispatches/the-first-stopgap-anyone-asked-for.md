@@ -82,10 +82,10 @@ We sampled **60 cards at random and compared the nest's owner with `ownerOf`: 60
 check on one entity's most-read field, not on all of them, and it is the strongest one the chain offers.
 
 The endpoint takes the same requests a graph-node does: `where` filters, `orderBy`, `first` and `skip`,
-`_meta`, and introspection. Opened in a browser, it shows a page with the sync status, a playground, and the
-snippets to point an app at it:
-
-**https://nuthatch-indexer.com/subgraphs/QmXsbGm5Mbm9H5HWrt11uwWSf58MyaxjspF4TNYx166Xgz**
+`_meta`, and introspection, at
+`https://subgraphs.nuthatch-indexer.com/subgraphs/id/QmXsbGm5Mbm9H5HWrt11uwWSf58MyaxjspF4TNYx166Xgz`.
+While it was listed, opening that address in a browser showed a page with the sync status, a playground and
+the snippets to point an app at it.
 
 We sent the developer that page's link, and only afterwards noticed that we had sent the page rather than the
 GraphQL endpoint. An app pointed at a static page would have failed exactly as it did that morning. The page's
@@ -111,6 +111,14 @@ for the tip at the chain's block time, every 2 to 12 seconds, whether or not any
 - **Not yet confirmed by its user.** As we write this, the developer has the endpoint but has not told us
   whether his app works on it. We have asked for the queries it sends and will run them.
 
+## It ended the way a stopgap should, nearly
+
+The same afternoon, an indexer allocated to the deployment: Ellipfra, at Arbitrum block 512,912,920. That is
+the outcome a stopgap exists for, and the moment it starts to end. Its node reported the deployment as
+`synced` while about 48 million BNB Chain blocks behind the head, so the gateway cannot yet route to it, and
+the nest keeps answering until it can. When the gateway serves the deployment, the developer points the app
+back at it and we stop the nest, with a dated note on the record.
+
 ## If your subgraph is the next one
 
 The upgrade indexer stops serving BNB Chain and Polygon Studio subgraphs by 31 October, and some of them will
@@ -118,6 +126,5 @@ have nobody by then. If yours is one, open an issue at
 [nightswatchhq/graph-support](https://github.com/nightswatchhq/graph-support/issues/new) with the deployment ID.
 We will check whether any indexer serves it and, if none does, stand up a nest for it. There is no account, no
 key and no charge. The nests we serve are listed at
-[nuthatch-indexer.com/subgraphs](https://nuthatch-indexer.com/subgraphs), and every one of them is public, with
-the commands to run it yourself:
-[openloom-bsc-nest](https://github.com/nightswatchhq/openloom-bsc-nest).
+[nuthatch-indexer.com/subgraphs](https://nuthatch-indexer.com/subgraphs), and each one is public, with the
+commands to run it yourself, as [openloom-bsc-nest](https://github.com/nightswatchhq/openloom-bsc-nest) is.
