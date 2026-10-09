@@ -238,8 +238,16 @@ export const SYMPTOMS: Symptom[] = [
         check: 'The receipts you hold are backed by nothing.',
         more: '/indexers/payments-graphtally/',
       },
+      {
+        cause: 'A new sender is paying you and tap-agent does not know it',
+        check: 'indexer-service accepts a receipt on escrow alone and never reads [tap.sender_aggregator_endpoints], so serving carries on. tap-agent reads that map once at startup and refuses any sender missing from it, so nothing from that sender is ever aggregated or redeemed. Grep the tap-agent log for "is not on your" and compare the map against the senders the Foundation currently announces; keep the old sender in it until its escrow drains.',
+        more: '/indexers/payments-graphtally/',
+      },
     ],
-    worked: [{ n: 30, was: 'the sender’s aggregator was down, so no RAV could be signed and revenue stopped before serving did' }],
+    worked: [
+      { n: 30, was: 'the sender’s aggregator was down, so no RAV could be signed and revenue stopped before serving did' },
+      { n: 44, was: 'the September 2026 sender rotation: served as normal, refused by tap-agent for anyone who missed the config change' },
+    ],
   },
   {
     id: 'no-queries-routed',
@@ -431,6 +439,37 @@ export const SYMPTOMS: Symptom[] = [
       },
     ],
     worked: [{ n: 6, was: 'both CIDs resolved by hand while one entity stayed null' }],
+  },
+  {
+    id: 'network-not-supported',
+    symptom: 'Deploy fails with "network not supported by registrar: no network ... found on chain ethereum"',
+    who: 'developer',
+    causes: [
+      {
+        cause: 'The chain is not supported for subgraphs on that host, even if it is in the networks registry',
+        check: '"chain ethereum" is the protocol family, which covers every EVM chain, not Ethereum mainnet: the graph-node you deployed to has no chain configured under that name. Look the network up in the networks registry and read its services. An empty subgraphs list means subgraphs are not offered there (it may be Substreams-only), and no change to your manifest will fix it.',
+        more: '/developers/build-a-subgraph/',
+      },
+      {
+        cause: 'The network name in the manifest is wrong',
+        check: 'Compare the network: value with the registry id and aliases. If the name matches an entry that does list subgraph support, it is the host, not you.',
+        more: '/developers/build-a-subgraph/',
+      },
+    ],
+    worked: [{ n: 38, was: 'Robinhood Chain, in the registry under the right name and supported for Substreams only' }],
+  },
+  {
+    id: 'cannot-close-allocation',
+    symptom: 'closeAllocation reverts with ProvisionManagerInvalidValue(message: 0x746f6b656e73, value: 0, ...) while my stake thaws',
+    who: 'indexer',
+    causes: [
+      {
+        cause: 'The whole provision is thawing, so the collect step inside closeAllocation fails its minimum-tokens check',
+        check: '0x746f6b656e73 is ASCII "tokens" and value: 0 is tokens minus tokensThawing. closeAllocation collects rewards first, and collecting requires the provision above its minimum. stopService on the SubgraphService closes the allocation without collecting and is not gated on the provision, so a sunsetting indexer can close everything in one multicall, forgoing the rewards.',
+        more: '/indexers/horizon-provisions/',
+      },
+    ],
+    worked: [{ n: 42, was: 'an indexer sunset with all self-stake thawing and 105 allocations open, later closed as stale on-chain' }],
   },
   {
     id: 'receipt-data-service-rejected',
