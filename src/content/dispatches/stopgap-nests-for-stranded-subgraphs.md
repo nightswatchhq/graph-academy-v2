@@ -9,13 +9,13 @@ excerpt: "Studio traffic for BNB Chain and Polygon moves to the network on 8 Oct
 
 > **Retired, 7 October 2026.** The hosted BetSwirl endpoint is stopped. In the day it ran it served nobody
 > but us: BetSwirl's last bet on BNB Chain was on 20 March, and no one got in touch. The nest, its
-> [handback](https://github.com/nightswatchhq/nuthatch/blob/main/docs/stopgap/betswirl-bnb.md) and its
+> [handback](https://github.com/nuthatch-org/nuthatch/blob/main/docs/stopgap/betswirl-bnb.md) and its
 > public mirror still work for anyone who wants to run it, and the alert that watches BNB and Polygon for
 > subgraphs losing their last indexer keeps running. The rest of this post is kept as written.
 
 ---
 
-> **Update, 6 October 2026, 10:51 UTC.** The backfill reached the chain head in about 16 minutes: 109.3 million blocks, 403,107 events, 160,802 bets across 10 tokens. The public endpoint is live at `https://betswirl-bnb.89.167.109.4.sslip.io/subgraphs/id/Qmd5oqyojVx5wWSFuWfKz3YVLPHdE3KU5458Qqq3SVeGEB`. Running the full history also found one defect the test ranges could not: the token metadata decoder read the string "ETH" as an offset. It is fixed in [`41a6ee0`](https://github.com/nightswatchhq/betswirl-bnb-nest/commit/41a6ee0) without re-indexing. One more fact the history turned up: the last BetSwirl bet on BNB Chain was placed on 20 March 2026, so the queries that earned September's fees were reading history, not recording new bets. A cold query over the whole history takes about 11 seconds.
+> **Update, 6 October 2026, 10:51 UTC.** The backfill reached the chain head in about 16 minutes: 109.3 million blocks, 403,107 events, 160,802 bets across 10 tokens. The public endpoint is live at `https://betswirl-bnb.89.167.109.4.sslip.io/subgraphs/id/Qmd5oqyojVx5wWSFuWfKz3YVLPHdE3KU5458Qqq3SVeGEB`. Running the full history also found one defect the test ranges could not: the token metadata decoder read the string "ETH" as an offset. It is fixed in [`41a6ee0`](https://github.com/nuthatch-org/betswirl-bnb-nest/commit/41a6ee0) without re-indexing. One more fact the history turned up: the last BetSwirl bet on BNB Chain was placed on 20 March 2026, so the queries that earned September's fees were reading history, not recording new bets. A cold query over the whole history takes about 11 seconds.
 
 ---
 
@@ -42,7 +42,7 @@ So the problem today is small. Whether it stays small depends on what the migrat
 
 ## What a stopgap nest is, and what it is not
 
-A [nuthatch](https://github.com/nightswatchhq/nuthatch) nest indexes a contract set straight from chain logs and serves it. For a subgraph, the useful version serves a **GraphQL endpoint shaped like the subgraph**: same schema, same filters, same ordering and pagination, values in graph-node's own wire types.
+A [nuthatch](https://github.com/nuthatch-org/nuthatch) nest indexes a contract set straight from chain logs and serves it. For a subgraph, the useful version serves a **GraphQL endpoint shaped like the subgraph**: same schema, same filters, same ordering and pagination, values in graph-node's own wire types.
 
 It is not a second graph-node. It does not run the subgraph's AssemblyScript, so it reproduces what can be derived from decoded events and contract reads, and **refuses by name** anything it cannot reproduce exactly. There is no third behaviour: no default, no empty list where a value should be. GraphQL fails a whole query for one refused field, so this only helps a client whose queries stay inside the answered set. That is the reason to start from the client's queries rather than from the schema.
 
@@ -52,7 +52,7 @@ It is also not a network service. There is no proof of indexing, no allocation a
 
 The plan was to point `nuthatch init --from-subgraph` at a deployment ID and let the porting tool work out which fields it could answer. Before building anything for BetSwirl we tried that on **21 deployments** from the list, a mix of event-shaped, factory and DeFi subgraphs.
 
-**It answered no fields on any of the 21.** The scaffold built every time. The classification found nothing, because it reads the subgraph's mapping source, and what a deployment publishes to IPFS is compiled WASM. Worse, the coverage line still printed 100%, which is the sort of number that ought to make anyone suspicious and on this occasion was simply wrong. That is filed as [nuthatch#1947](https://github.com/nightswatchhq/nuthatch/issues/1947), alongside [#1948](https://github.com/nightswatchhq/nuthatch/issues/1948) and ten smaller defects the run turned up. Adding public source by hand where it existed lifted the best of them to 45% of fields. The full results are in [the S0 report](https://github.com/nightswatchhq/nuthatch/blob/main/docs/subgraph-stopgap-s0.md).
+**It answered no fields on any of the 21.** The scaffold built every time. The classification found nothing, because it reads the subgraph's mapping source, and what a deployment publishes to IPFS is compiled WASM. Worse, the coverage line still printed 100%, which is the sort of number that ought to make anyone suspicious and on this occasion was simply wrong. That is filed as [nuthatch#1947](https://github.com/nuthatch-org/nuthatch/issues/1947), alongside [#1948](https://github.com/nuthatch-org/nuthatch/issues/1948) and ten smaller defects the run turned up. Adding public source by hand where it existed lifted the best of them to 45% of fields. The full results are in [the S0 report](https://github.com/nuthatch-org/nuthatch/blob/main/docs/subgraph-stopgap-s0.md).
 
 So for now a stopgap nest is written by hand. That is fine for one subgraph and would not be for fifty.
 
@@ -82,7 +82,7 @@ The check is a reference implementation that shares no code with nuthatch. It fe
 
 **32,257 bets, no differences.** Only the first range starts at deployment. The other three check the logic over identical inputs on both sides, not the deployment's real accumulated history, and the full backfill is what closes that gap.
 
-The run also found five defects in nuthatch's GraphQL surface that BetSwirl's queries hit and our earlier test subgraphs did not, nested to-one relations and unsent nullable variables among them. They are fixed in [nuthatch#1949](https://github.com/nightswatchhq/nuthatch/pull/1949).
+The run also found five defects in nuthatch's GraphQL surface that BetSwirl's queries hit and our earlier test subgraphs did not, nested to-one relations and unsent nullable variables among them. They are fixed in [nuthatch#1949](https://github.com/nuthatch-org/nuthatch/pull/1949).
 
 ## Where it runs, and how much to rely on it
 
@@ -92,8 +92,8 @@ Be clear about what that machine is. It is one box on a residential line, run by
 
 ## Try it, or tell us about yours
 
-- **The nest:** [nightswatchhq/betswirl-bnb-nest](https://github.com/nightswatchhq/betswirl-bnb-nest). The README has the field-by-field table and every rule's source handler; `tests/run.sh` reruns the comparison.
+- **The nest:** [nuthatch-org/betswirl-bnb-nest](https://github.com/nuthatch-org/betswirl-bnb-nest). The README has the field-by-field table and every rule's source handler; `tests/run.sh` reruns the comparison.
 - **The list:** [lodestar-dashboard.com/subgraphs/migration](https://www.lodestar-dashboard.com/subgraphs/migration), live, filterable by chain and signal.
-- **The tracker:** [docs/subgraph-stopgap.md](https://github.com/nightswatchhq/nuthatch/blob/main/docs/subgraph-stopgap.md).
+- **The tracker:** [docs/subgraph-stopgap.md](https://github.com/nuthatch-org/nuthatch/blob/main/docs/subgraph-stopgap.md).
 
 If your BNB or Polygon subgraph loses its last indexer after the 8th, send us the deployment ID and the GraphQL queries your app actually sends. We will tell you which fields a nest can answer exactly before anyone builds anything, and if that is enough for your app we will build it and serve it until the network picks your subgraph up again.

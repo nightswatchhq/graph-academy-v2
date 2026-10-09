@@ -12,13 +12,13 @@ last_verified: 2026-08-30
 verify_before: 2026-11-30
 sources:
   - name: "graph-support #17: how the gateway actually routes queries"
-    url: "https://github.com/nightswatchhq/graph-support/issues/17"
+    url: "https://github.com/nuthatch-org/graph-support/issues/17"
   - name: "edgeandnode/gateway"
     url: "https://github.com/edgeandnode/gateway"
   - name: "gib, Gateway-in-a-Box"
-    url: "https://github.com/nightswatchhq/gib"
+    url: "https://github.com/nuthatch-org/gib"
   - name: "lodestar-gateway"
-    url: "https://github.com/nightswatchhq/gateway"
+    url: "https://github.com/nuthatch-org/gateway"
 parameters_used: []
 authors: ["@community"]
 license: "CC-BY-4.0"
@@ -58,17 +58,17 @@ trustworthy, it is whether the arrangement requires them to be.
 most traffic goes through today, Rust, and the source of the indexer-selection logic
 everything else compares itself against.
 
-[gib](https://github.com/nightswatchhq/gib), Gateway-in-a-Box, is a self-hostable gateway
+[gib](https://github.com/nuthatch-org/gib), Gateway-in-a-Box, is a self-hostable gateway
 for Horizon on Arbitrum One. The point of it is redistribution: a Docker Compose
 arrangement that lets somebody else stand one up without reconstructing the whole payment
 and selection stack from first principles. There is a
 [dispatch on it](/dispatches/gib-graph-gateway-in-a-box/).
 
-[lodestar-gateway](https://github.com/nightswatchhq/gateway) is a fork of Edge & Node's,
+[lodestar-gateway](https://github.com/nuthatch-org/gateway) is a fork of Edge & Node's,
 run as an independent, self-funded gateway on Arbitrum One. Not a replacement, a second
 one, which is the entire argument.
 
-[candidate-selection](https://github.com/nightswatchhq/candidate-selection) is a fork of
+[candidate-selection](https://github.com/nuthatch-org/candidate-selection) is a fork of
 the selection library with runtime-configurable weights. Worth knowing about because it
 makes explicit something the reference implementation keeps implicit: *how* a gateway
 ranks indexers is a policy, and policies can differ.

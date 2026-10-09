@@ -12,11 +12,11 @@ last_verified: 2026-08-30
 verify_before: 2026-11-30
 sources:
   - name: "graphite, a Rust SDK for subgraphs"
-    url: "https://github.com/nightswatchhq/graphite"
+    url: "https://github.com/nuthatch-org/graphite"
   - name: "redstart"
-    url: "https://github.com/nightswatchhq/redstart"
+    url: "https://github.com/nuthatch-org/redstart"
   - name: "liminal"
-    url: "https://github.com/nightswatchhq/liminal"
+    url: "https://github.com/nuthatch-org/liminal"
 parameters_used: []
 authors: ["@community"]
 license: "CC-BY-4.0"
@@ -31,7 +31,7 @@ one way to produce it, and three projects take the constraint at its word.
 
 ## graphite
 
-[graphite](https://github.com/nightswatchhq/graphite) is a Rust SDK for authoring
+[graphite](https://github.com/nuthatch-org/graphite) is a Rust SDK for authoring
 subgraphs, producing WASM that is ABI-compatible with what graph-node already expects.
 No change to indexers, no change to the protocol: the output is a subgraph like any other.
 
@@ -42,7 +42,7 @@ remembering. Against that, your team has to write Rust, which is the same staffi
 
 ## redstart
 
-[redstart](https://github.com/nightswatchhq/redstart) goes further and questions the file
+[redstart](https://github.com/nuthatch-org/redstart) goes further and questions the file
 layout rather than the language. One source file describes the schema, the manifest and
 the handlers together, and transpiles out to the three files graph-node wants.
 
@@ -57,7 +57,7 @@ which is worth reading for the argument rather than the announcement.
 
 ## liminal
 
-[liminal](https://github.com/nightswatchhq/liminal) is the most speculative of the three: a
+[liminal](https://github.com/nuthatch-org/liminal) is the most speculative of the three: a
 polyglot, capability-isolated WASIp2 component runtime for streaming indexing pipelines.
 
 The idea is that if the real requirement is deterministic WebAssembly components, then the

@@ -16,8 +16,8 @@ that a number is still true.
 
 ## The other half of this, in graph-support
 
-[graph-support](https://github.com/nightswatchhq/graph-support) is where people
-turn up with something broken and the Night's Watch works out why, in public,
+[graph-support](https://github.com/nuthatch-org/graph-support) is where people
+turn up with something broken and Nuthatch works out why, in public,
 closing every issue with a stated outcome. This site and that repository are one
 loop, and each is worth less without the other.
 
@@ -30,10 +30,10 @@ The loop runs both ways.
 
 - **Coming from an issue.** When a graph-support issue closes on a failure mode
   `src/lib/diagnostics.ts` does not carry, add it, and cite the issue in
-  `worked`. [Their TRIAGE.md](https://github.com/nightswatchhq/graph-support/blob/main/TRIAGE.md)
+  `worked`. [Their TRIAGE.md](https://github.com/nuthatch-org/graph-support/blob/main/TRIAGE.md)
   makes this part of closing rather than a favour.
 - **Coming from here.** If you hit something the symptom index misses, file it
-  [there](https://github.com/nightswatchhq/graph-support/issues/new?template=06-symptom.yml)
+  [there](https://github.com/nuthatch-org/graph-support/issues/new?template=06-symptom.yml)
   rather than here. You get triaged, and if the diagnosis holds the symptom lands
   in the index with your issue attached.
 

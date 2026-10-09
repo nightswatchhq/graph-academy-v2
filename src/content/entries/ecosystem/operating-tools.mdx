@@ -12,9 +12,9 @@ last_verified: 2026-08-30
 verify_before: 2026-11-30
 sources:
   - name: "horizon-doctor"
-    url: "https://github.com/nightswatchhq/horizon-doctor"
+    url: "https://github.com/nuthatch-org/horizon-doctor"
   - name: "swissindexingknife"
-    url: "https://github.com/nightswatchhq/swissindexingknife"
+    url: "https://github.com/nuthatch-org/swissindexingknife"
   - name: "graphix, indexer cross-checking"
     url: "https://github.com/edgeandnode/graphix"
 parameters_used: ["max_poi_staleness_days", "fisherman_dispute_deposit"]
@@ -30,12 +30,12 @@ is the most reliable indicator that a tool is worth having.
 
 ## Before you start: preflight
 
-[horizon-doctor](https://github.com/nightswatchhq/horizon-doctor) is a read-only validation
+[horizon-doctor](https://github.com/nuthatch-org/horizon-doctor) is a read-only validation
 CLI for the indexer stack under Horizon. Its stated purpose is to turn a Horizon-era
 startup panic into a controlled, explained gate: rather than the stack falling over with a
 stack trace, you get told which precondition is not met.
 
-[reo-doctor](https://github.com/nightswatchhq/reo-doctor) does the same for the Rewards
+[reo-doctor](https://github.com/nuthatch-org/reo-doctor) does the same for the Rewards
 Eligibility Oracle under GIP-0088. If your rewards eligibility is not what you expected,
 this tells you why before you go reading contracts.
 
@@ -44,12 +44,12 @@ while worried.
 
 ## Day to day: the API quirks
 
-[swissindexingknife](https://github.com/nightswatchhq/swissindexingknife) is a CLI wrapping
+[swissindexingknife](https://github.com/nuthatch-org/swissindexingknife) is a CLI wrapping
 indexer operations, written explicitly to encapsulate every known API quirk so nobody has
 to remember them. That is an unglamorous thing to build and a very good sign about whoever
 built it.
 
-[indexer-gateway-auth](https://github.com/nightswatchhq/indexer-gateway-auth) is an
+[indexer-gateway-auth](https://github.com/nuthatch-org/indexer-gateway-auth) is an
 authenticating reverse proxy for the Indexer Management API. That API is powerful and was
 not designed to be exposed; this puts a door on it.
 
@@ -63,12 +63,12 @@ posts a <Param name="fisherman_dispute_deposit" /> deposit.
 and the tool for exactly that: it compares POIs across indexers on the same deployment and
 surfaces divergence.
 
-[foghorn](https://github.com/nightswatchhq/foghorn) approaches quality from the other end.
+[foghorn](https://github.com/nuthatch-org/foghorn) approaches quality from the other end.
 It runs block-pinned GraphQL probes and hashes the responses, so an indexer that is fast,
 returns clean 200s and serves wrong data is visible as wrong. Counting status codes cannot
 see that by construction.
 
-[tattler](https://github.com/nightswatchhq/tattler) produces signed, replayable receipts
+[tattler](https://github.com/nuthatch-org/tattler) produces signed, replayable receipts
 for indexed data: an answer you can hand to somebody who has no reason to trust you,
 pinned to a block so they can reproduce it.
 
@@ -81,13 +81,13 @@ dispute mechanism, which only fires after the fact.
 
 ## Payments
 
-[weaver](https://github.com/nightswatchhq/weaver) builds, signs and checks Direct Indexer
+[weaver](https://github.com/nuthatch-org/weaver) builds, signs and checks Direct Indexer
 Payment agreements, with the EIP-712 hashing verified against the deployed
 `RecurringCollector` rather than against a reading of the specification. That distinction
 is the entire value of the tool: a signature that matches the spec and not the contract is
 a signature that reverts.
 
-[tap-query](https://github.com/nightswatchhq/tap-query) queries indexers directly with TAP
+[tap-query](https://github.com/nuthatch-org/tap-query) queries indexers directly with TAP
 receipts and no gateway in the path, which is a useful thing to have when you are trying to
 work out whether a problem is yours or the gateway's.
 

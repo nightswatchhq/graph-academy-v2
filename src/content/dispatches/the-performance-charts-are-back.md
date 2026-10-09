@@ -209,7 +209,7 @@ What is not:
 The nest is public and reads nothing but Gnosis and IPFS. With nuthatch 3.8.1 or later:
 
 ```sh
-git clone https://github.com/nightswatchhq/qos-reo-nest && cd qos-reo-nest
+git clone https://github.com/nuthatch-org/qos-reo-nest && cd qos-reo-nest
 nuthatch dev --seal-direct --concurrency 2 --window 2000 \
   --rpc https://rpc.gnosischain.com \
   --rpc https://rpc.gnosis.gateway.fm \
@@ -268,6 +268,6 @@ To get a window's figure from daily rows, add up `num_200` and `query_count` acr
 - kittiwake: #141 (the score), #143 (the routes and stored days), #147 (the day job's timeout); #148 open.
 - foghorn: #3.
 - lodestar: #231.
-- Release 1: graph-allocations-nest#23, kittiwake #140, #142, #144 and #145, lodestar #229, #230, #233 and #235, as [v7.1.0](https://github.com/nightswatchhq/lodestar/releases/tag/v7.1.0).
+- Release 1: graph-allocations-nest#23, kittiwake #140, #142, #144 and #145, lodestar #229, #230, #233 and #235, as [v7.1.0](https://github.com/nuthatch-org/lodestar/releases/tag/v7.1.0).
 
 If your numbers and ours disagree, tell us. Three days of this have taught us that the fault is as likely to be ours as yours.

@@ -5,18 +5,18 @@
 # inert: GitHub requests review from nobody. So every line below currently
 # points at the account that actually has write access.
 #
-# When the org creates @nightswatchhq/maintainers and the SME teams, swap the
+# When the org creates @nuthatch-org/maintainers and the SME teams, swap the
 # handles in and delete this note. The intended mapping is kept beside each
 # line so the structure is not lost in the meantime.
 
 *                                   @cargopete
 
-/src/content/entries/indexers/      @cargopete   # intended: @nightswatchhq/indexer-sme
-/src/content/entries/delegators/    @cargopete   # intended: @nightswatchhq/delegation-sme
-/src/content/entries/curators/      @cargopete   # intended: @nightswatchhq/curation-sme
-/src/content/entries/developers/    @cargopete   # intended: @nightswatchhq/devtooling-sme
-/src/content/entries/consumers/     @cargopete   # intended: @nightswatchhq/devtooling-sme
-/src/content/entries/governance/    @cargopete   # intended: @nightswatchhq/governance-sme
+/src/content/entries/indexers/      @cargopete   # intended: @nuthatch-org/indexer-sme
+/src/content/entries/delegators/    @cargopete   # intended: @nuthatch-org/delegation-sme
+/src/content/entries/curators/      @cargopete   # intended: @nuthatch-org/curation-sme
+/src/content/entries/developers/    @cargopete   # intended: @nuthatch-org/devtooling-sme
+/src/content/entries/consumers/     @cargopete   # intended: @nuthatch-org/devtooling-sme
+/src/content/entries/governance/    @cargopete   # intended: @nuthatch-org/governance-sme
 
 # The registry is the single source of every number on the site. A change here
 # moves every page at once.

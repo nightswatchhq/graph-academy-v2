@@ -352,7 +352,7 @@ Manager out of a total 120.73, so 20% goes elsewhere. Confirmed by a second read
 504322516 against a public RPC. The date it activated is not established here; what is \
 recorded is the first block at which it was observed, which is the honest claim.\
 """
-note_source = "https://github.com/nightswatchhq/graph-support/issues/23"
+note_source = "https://github.com/nuthatch-org/graph-support/issues/23"
 verified = "2026-09-12"
 
 [subgraph_service_issuance_per_block]
@@ -379,7 +379,7 @@ rate; what reaches it is decided by the allocator, and this label says "reaching
 check agreed with a figure that had stopped being true, because it was reading the wrong \
 function.
 """
-note_source = "https://github.com/nightswatchhq/graph-support/issues/23"
+note_source = "https://github.com/nuthatch-org/graph-support/issues/23"
 verified = "2026-09-12"
 
 # --------------------------------------------------------------------------
