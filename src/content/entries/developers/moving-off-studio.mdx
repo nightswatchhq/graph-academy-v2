@@ -12,7 +12,7 @@ last_verified: 2026-09-24
 verify_before: 2026-11-01
 sources:
   - name: "graph-support #45: the migration tracker, quoting the 24 September announcement in #indexers"
-    url: "https://github.com/nightswatchhq/graph-support/issues/45"
+    url: "https://github.com/nuthatch-org/graph-support/issues/45"
   - name: "The Graph Docs: publishing a subgraph"
     url: "https://thegraph.com/docs/en/subgraphs/developing/deploying-publishing/publishing-a-subgraph/"
   - name: "The Graph Docs: using Subgraph Studio"
@@ -20,7 +20,7 @@ sources:
   - name: "The Graph Docs: managing API keys"
     url: "https://thegraph.com/docs/en/subgraphs/querying/managing-api-keys/"
   - name: "graph-support: gateway error reference"
-    url: "https://github.com/nightswatchhq/graph-support/blob/main/reference/gateway-errors.md"
+    url: "https://github.com/nuthatch-org/graph-support/blob/main/reference/gateway-errors.md"
 parameters_used: ["studio_dev_query_limit", "recommended_dev_signal"]
 see_also: ["/developers/build-a-subgraph/", "/developers/query-from-an-app/", "/diagnose/"]
 authors: ["@community"]
@@ -42,7 +42,7 @@ clones and subgraphs nobody queries.
 <Note title="Announced, not yet happened">
 Everything above is a plan with dates attached, stated by the Foundation on 24 September.
 This page was written before 8 October. If you are reading it afterwards, the tracker at
-[graph-support #45](https://github.com/nightswatchhq/graph-support/issues/45) holds what
+[graph-support #45](https://github.com/nuthatch-org/graph-support/issues/45) holds what
 actually happened, including whether the dates held.
 </Note>
 
@@ -97,7 +97,7 @@ network is serving you.
 
 Immediately after publishing, queries through the gateway will fail, and the failures
 change shape as indexers pick the subgraph up. The exact strings are catalogued in the
-[gateway error reference](https://github.com/nightswatchhq/graph-support/blob/main/reference/gateway-errors.md);
+[gateway error reference](https://github.com/nuthatch-org/graph-support/blob/main/reference/gateway-errors.md);
 these are the three you will meet.
 
 **`no indexers found`** means nobody is allocated to this deployment. There was nothing
@@ -115,9 +115,9 @@ indexer means the subgraph itself fails deterministically at some block. Every i
 that reaches that block records the same error, and graph-node then refuses to answer
 queries against a deployment holding one. Studio's upgrade indexer may have been serving
 you a copy that looked healthy while carrying exactly that error. Three recent cases with
-the full diagnosis: [#32](https://github.com/nightswatchhq/graph-support/issues/32),
-[#37](https://github.com/nightswatchhq/graph-support/issues/37) and
-[#39](https://github.com/nightswatchhq/graph-support/issues/39).
+the full diagnosis: [#32](https://github.com/nuthatch-org/graph-support/issues/32),
+[#37](https://github.com/nuthatch-org/graph-support/issues/37) and
+[#39](https://github.com/nuthatch-org/graph-support/issues/39).
 
 The distinguishing check between the last two is the same each time: ask two allocated
 indexers for the deployment's indexing status and compare. Both far behind is syncing. Both
@@ -136,7 +136,7 @@ the map after `bad indexers:` and you do not need anybody to interpret it for yo
 On 16 September 2026 a PancakeSwap v3 subgraph on BSC was published with every line of its
 manifest ending in `\r\n`, and a parser in The Graph's own network subgraph fed the
 `\r` to `BigInt.fromString`. That took the network subgraph, and the gateway, down for
-three hours ([#41](https://github.com/nightswatchhq/graph-support/issues/41)). That parser
+three hours ([#41](https://github.com/nuthatch-org/graph-support/issues/41)). That parser
 has been fixed. A few hundred manifests are nevertheless about to be published from a few
 hundred machines, so before `graph publish`, run `grep -c $'\r$' subgraph.yaml` and expect
 `0`.

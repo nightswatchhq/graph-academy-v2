@@ -16,7 +16,7 @@ sources:
   - name: "GIP-0054: Timeline Aggregation Protocol"
     url: "https://github.com/graphprotocol/graph-improvement-proposals/blob/main/gips/0054-timeline-aggregation-protocol.md"
   - name: "graph-support #30: the mainnet aggregator serving a Cloudflare 526"
-    url: "https://github.com/nightswatchhq/graph-support/issues/30"
+    url: "https://github.com/nuthatch-org/graph-support/issues/30"
 parameters_used: []
 authors: ["@community"]
 license: "CC-BY-4.0"
@@ -165,7 +165,7 @@ does not reach tap-agent as an HTTP failure. It arrives as an invalid gRPC compr
 flag, and the flag number is simply the first byte of whatever the proxy served: 101 for
 `error code: NNN`, 60 for an HTML page. Ignore the flag and read the HTTP status at the
 end of the message. The worked case is
-[graph-support #30](https://github.com/nightswatchhq/graph-support/issues/30).
+[graph-support #30](https://github.com/nuthatch-org/graph-support/issues/30).
 
 Monitor unaggregated receipt value and the age of your oldest unredeemed RAV. Both
 are early warnings, and both are invisible in the metrics you would naturally watch,

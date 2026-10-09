@@ -12,11 +12,11 @@ last_verified: 2026-08-30
 verify_before: 2026-11-30
 sources:
   - name: "nuthatch"
-    url: "https://github.com/nightswatchhq/nuthatch"
+    url: "https://github.com/nuthatch-org/nuthatch"
   - name: "camp-node"
-    url: "https://github.com/nightswatchhq/camp-node"
+    url: "https://github.com/nuthatch-org/camp-node"
   - name: "nests, the prebuilt index"
-    url: "https://github.com/nightswatchhq/nests"
+    url: "https://github.com/nuthatch-org/nests"
 parameters_used: []
 authors: ["@community"]
 license: "CC-BY-4.0"
@@ -31,7 +31,7 @@ exactly inverted from the ones in the [developer collection](/developers/).
 
 ## nuthatch
 
-[nuthatch](https://github.com/nightswatchhq/nuthatch) is a single Rust binary that takes a
+[nuthatch](https://github.com/nuthatch-org/nuthatch) is a single Rust binary that takes a
 contract address and gives you a live indexed API. No graph-node, no Postgres to operate
 separately, no subgraph to author, no signal to post, no indexer to wait for.
 
@@ -56,7 +56,7 @@ authored.
 
 There are 43 of them published, covering Uniswap V2 through V4, Aave, Lido, ENS, GMX,
 Seaport, EigenLayer, Velodrome, PancakeSwap and a good deal of The Graph's own on-chain
-activity. The [index of them](https://github.com/nightswatchhq/nests) is the place to look
+activity. The [index of them](https://github.com/nuthatch-org/nests) is the place to look
 before writing anything yourself.
 
 Several exist for a specific and revealing reason: they were ported from subgraphs that
@@ -66,9 +66,9 @@ data source, whatever its signal says.
 
 ## camp
 
-[camp-node](https://github.com/nightswatchhq/camp-node) is a different shape again: a
+[camp-node](https://github.com/nuthatch-org/camp-node) is a different shape again: a
 source-built ETL engine taking EVM RPC through DataFusion SQL to Parquet and out over
-Arrow Flight or JSONL. It powers [camp](https://github.com/nightswatchhq/camp), a free
+Arrow Flight or JSONL. It powers [camp](https://github.com/nuthatch-org/camp), a free
 decoded Arbitrum API.
 
 Where nuthatch optimises for one command and one binary, camp optimises for arbitrary SQL

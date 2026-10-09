@@ -104,7 +104,7 @@ All 43 read "never renewed." On the 15 September call the Foundation gave the sa
 
 Subgraph Studio's staging endpoint was meant for development. Production traffic settled there anyway, served by the upgrade indexer, which the Foundation now operates. The Q3 review states the consequence without softening it: the traffic that most needed redundancy was the traffic least likely to have it.
 
-What is confirmed, from the [announcement](https://forum.thegraph.com/t/bringing-subgraph-studio-traffic-to-the-graph-network/7084) and from the Foundation's messages in `#indexers` on 24 September, which we recorded in [graph-support #45](https://github.com/nightswatchhq/graph-support/issues/45):
+What is confirmed, from the [announcement](https://forum.thegraph.com/t/bringing-subgraph-studio-traffic-to-the-graph-network/7084) and from the Foundation's messages in `#indexers` on 24 September, which we recorded in [graph-support #45](https://github.com/nuthatch-org/graph-support/issues/45):
 
 - Staging queries for BNB Smart Chain and Polygon end on **8 October**. Subgraphs already published are unaffected. The rest must be published, with billing and an API key set up, and pointed at a gateway endpoint.
 - The Foundation unallocates sooner from subgraphs other indexers already serve, and ends Studio support for the remainder on **31 October**.
@@ -131,9 +131,9 @@ The design choice deserves to be stated as plainly as the Foundation states it. 
 
 ## Reliability: 16 September
 
-At Arbitrum One block 505750187, 12:00:37 UTC on 16 September, somebody published a PancakeSwap v3 subgraph for BSC whose manifest had CRLF line endings. The network subgraph's manifest handler tried to parse a number with a trailing carriage return, failed deterministically, and took every published version of the network subgraph with it, the analytics subgraph too. The gateway and every indexer-agent depend on that subgraph. An indexer reported it in Discord 34 minutes later. The fix was committed at 14:03 UTC. The gateway was down about three hours. The mechanism, timeline and fix are in [graph-support #41](https://github.com/nightswatchhq/graph-support/issues/41).
+At Arbitrum One block 505750187, 12:00:37 UTC on 16 September, somebody published a PancakeSwap v3 subgraph for BSC whose manifest had CRLF line endings. The network subgraph's manifest handler tried to parse a number with a trailing carriage return, failed deterministically, and took every published version of the network subgraph with it, the analytics subgraph too. The gateway and every indexer-agent depend on that subgraph. An indexer reported it in Discord 34 minutes later. The fix was committed at 14:03 UTC. The gateway was down about three hours. The mechanism, timeline and fix are in [graph-support #41](https://github.com/nuthatch-org/graph-support/issues/41).
 
-The tail was longer than the outage. Five days later an indexer's receipts were being refused on 49 of 303 allocations because its indexer-service was still reading a local network subgraph frozen at the failure block ([graph-support #43](https://github.com/nightswatchhq/graph-support/issues/43)).
+The tail was longer than the outage. Five days later an indexer's receipts were being refused on 49 of 303 allocations because its indexer-service was still reading a local network subgraph frozen at the failure block ([graph-support #43](https://github.com/nuthatch-org/graph-support/issues/43)).
 
 The Foundation's Q3 review does not mention the incident. It should have, because it is the most useful thing that happened to the network's architecture all quarter: a demonstration that one subgraph is a single point of failure for the gateway and for allocation management, found at the cost of three hours instead of thirty. It is also why the Night's Watch now offers a free public network subgraph endpoint for indexer-agent and indexer-service, with no key and no quota.
 

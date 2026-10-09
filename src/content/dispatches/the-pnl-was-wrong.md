@@ -48,7 +48,7 @@ Query Performance and the QoS Quality panel are not back yet. They are rebuilt, 
 Both panels read `graph-allocations-nest`, which is public, and anyone can run it and derive the same numbers:
 
 ```sh
-nuthatch init --from https://github.com/nightswatchhq/graph-allocations-nest
+nuthatch init --from https://github.com/nuthatch-org/graph-allocations-nest
 ```
 
 An indexer's daily figures are `lodestar_indexer_daily`, and the same figures per deployment are `lodestar_indexer_deployment_daily`, whose sum is the daily view:

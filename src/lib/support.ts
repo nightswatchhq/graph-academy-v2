@@ -11,7 +11,7 @@
  * of threads that happen to be searchable.
  */
 export const SUPPORT = {
-  repo: 'https://github.com/nightswatchhq/graph-support',
+  repo: 'https://github.com/nuthatch-org/graph-support',
   discord: 'https://discord.gg/CQewvyJ69Y',
 } as const;
 

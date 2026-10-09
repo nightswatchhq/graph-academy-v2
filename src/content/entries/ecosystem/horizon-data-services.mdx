@@ -12,9 +12,9 @@ last_verified: 2026-08-30
 verify_before: 2026-11-30
 sources:
   - name: "horizon-core"
-    url: "https://github.com/nightswatchhq/horizon-core"
+    url: "https://github.com/nuthatch-org/horizon-core"
   - name: "hello-data-service, the reference implementation"
-    url: "https://github.com/nightswatchhq/hello-data-service"
+    url: "https://github.com/nuthatch-org/hello-data-service"
   - name: "The Graph Docs: Graph Horizon"
     url: "https://thegraph.com/docs/en/graph-horizon/"
 parameters_used: []
@@ -37,14 +37,14 @@ Building a data service means implementing the same things every time: TAP v2 re
 validation, RAV aggregation, on-chain collection, persistence, and a payment gate in front
 of whatever you actually serve.
 
-[horizon-core](https://github.com/nightswatchhq/horizon-core) factors that out into
+[horizon-core](https://github.com/nuthatch-org/horizon-core) factors that out into
 reusable building blocks, including a generic TAP-gated reverse proxy. If you are building
 one, start there rather than reimplementing receipt handling, which is the part with the
 sharp edges.
 
-[hello-data-service](https://github.com/nightswatchhq/hello-data-service) is the minimal
+[hello-data-service](https://github.com/nuthatch-org/hello-data-service) is the minimal
 reference implementation, and
-[horizon-skills](https://github.com/nightswatchhq/horizon-skills) generates a complete
+[horizon-skills](https://github.com/nuthatch-org/horizon-skills) generates a complete
 service from a short specification. There is
 [a guide dispatch](/dispatches/how-to-build-a-horizon-data-service/) that walks the whole
 thing.
@@ -54,23 +54,23 @@ thing.
 ## What is being built
 
 **Query and RPC services.**
-[Dispatch](https://github.com/nightswatchhq/dispatch) is a decentralised JSON-RPC service:
+[Dispatch](https://github.com/nuthatch-org/dispatch) is a decentralised JSON-RPC service:
 the thing an application uses before it ever reaches indexed data.
-[compass](https://github.com/nightswatchhq/compass) turns every subgraph into a pay-per-call
+[compass](https://github.com/nuthatch-org/compass) turns every subgraph into a pay-per-call
 MCP tool, which is a bet that the consumer of chain data is increasingly an agent rather
 than a front end.
 
 **Alternative data shapes.**
-[seahorn](https://github.com/nightswatchhq/seahorn) indexes Solana program activity into
+[seahorn](https://github.com/nuthatch-org/seahorn) indexes Solana program activity into
 typed, fork-correct entities over REST, which subgraphs do not cover.
-[SDSCE](https://github.com/nightswatchhq/SDSCE) brings Substreams onto Horizon as a paid
-service. [wsaas](https://github.com/nightswatchhq/wsaas) streams pre-parsed transfers and
+[SDSCE](https://github.com/nuthatch-org/SDSCE) brings Substreams onto Horizon as a paid
+service. [wsaas](https://github.com/nuthatch-org/wsaas) streams pre-parsed transfers and
 swaps over one WebSocket connection, gated by TAP.
 
 **Things that are not query serving at all.**
-[FHSCE](https://github.com/nightswatchhq/FHSCE) is trust-minimised chunked file sharing.
-[nutcracker](https://github.com/nightswatchhq/nutcracker) is end-to-end encrypted agent
-memory. [chain-integration-ds](https://github.com/nightswatchhq/chain-integration-ds)
+[FHSCE](https://github.com/nuthatch-org/FHSCE) is trust-minimised chunked file sharing.
+[nutcracker](https://github.com/nuthatch-org/nutcracker) is end-to-end encrypted agent
+memory. [chain-integration-ds](https://github.com/nuthatch-org/chain-integration-ds)
 meters per-chain integration revenue and settles through RecurringCollector rather than
 per-query receipts.
 

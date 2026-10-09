@@ -5,7 +5,7 @@ export const SITE = {
   tagline: 'Learn The Graph, by role, from first principles.',
   description:
     'A community-owned learning site for The Graph. Role-based paths, worked economic examples and exercises, checked against the Horizon-era protocol and stamped with the date somebody checked.',
-  repo: 'https://github.com/nightswatchhq/graph-academy-v2',
+  repo: 'https://github.com/nuthatch-org/graph-academy-v2',
   contentLicense: 'CC-BY-4.0',
   codeLicense: 'MIT',
 } as const;

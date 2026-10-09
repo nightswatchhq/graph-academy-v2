@@ -16,9 +16,9 @@ sources:
   - name: "GIP-0079: Indexer Rewards Eligibility Oracle"
     url: "https://github.com/graphprotocol/graph-improvement-proposals/blob/main/gips/0079.md"
   - name: "Rewards Eligibility Oracle nest"
-    url: "https://github.com/nightswatchhq/rewards-eligibility-oracle"
+    url: "https://github.com/nuthatch-org/rewards-eligibility-oracle"
   - name: "Subgraph Availability Oracle nest"
-    url: "https://github.com/nightswatchhq/subgraph-availability-oracle"
+    url: "https://github.com/nuthatch-org/subgraph-availability-oracle"
 parameters_used: []
 authors: ["@community"]
 license: "CC-BY-4.0"
@@ -53,8 +53,8 @@ in 2025, which is the problem this class of oracle exists to address.
 
 The criterion, what it does not measure, and why a healthy local dashboard is not evidence
 of eligibility are all in [rewards eligibility](/indexers/rewards-eligibility/).
-[reo-doctor](https://github.com/nightswatchhq/reo-doctor) checks your own status, and
-there is a [nest indexing its data](https://github.com/nightswatchhq/rewards-eligibility-oracle)
+[reo-doctor](https://github.com/nuthatch-org/reo-doctor) checks your own status, and
+there is a [nest indexing its data](https://github.com/nuthatch-org/rewards-eligibility-oracle)
 if you want the history rather than the current answer.
 
 ## The Epoch Block Oracle
@@ -69,7 +69,7 @@ Query performance is measured, and by whom is a live question.
 
 Gateway telemetry is the largest source, and it is measured by whoever runs the gateway:
 it can see routing and real user latency, and it cannot see whether the returned data was
-correct. [foghorn](https://github.com/nightswatchhq/foghorn) measures the other half, by
+correct. [foghorn](https://github.com/nuthatch-org/foghorn) measures the other half, by
 probing with block-pinned queries and hashing responses, so an indexer serving confident
 wrong answers is visible.
 
